@@ -435,7 +435,7 @@ void World2_Test2::loop()
 						processGoToDots++;
 						process_times = 0;
 					}
-                    // if (Time % 6 == 0)
+                    // if (Time % 10 == 0)
                     // {
 		            //     autoSearch(0);
                     // }
@@ -2255,9 +2255,9 @@ void World2_Test2::Dijkstra(void)
 				{
 					continue;
 				}
-				if (xj == 0 || xj == kDotWidth || yi == 0 || yi == kDotHeight)
+				if (xj == 0 || xj == kDotWidth - 1 || yi == 0 || yi == kDotHeight - 1)
 				{
-					continue;
+					cospaceMap.setMapCost(xj, yi, INT_MAX);
 				}
 				if (investigating_dot_x == -1 || cospaceMap.getMapCost(xj, yi) < cospaceMap.getMapCost(investigating_dot_x, investigating_dot_y))
 				{
