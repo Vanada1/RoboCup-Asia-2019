@@ -7,6 +7,8 @@
 #include <random>
 #include <ctime>
 
+//#define WALL   2
+
 // World2
 class Game1_Test2 : public UserGame1
 {
@@ -49,13 +51,21 @@ class CospaceMap
         {
             MAP_FAILURE = -1000,
             MAP_SUCCESS = -1001,
-            MAP_YELLOW = 0,    // Determined by the value of the color sensor
-            MAP_SWAMPLAND = 1, // Determined by the value of the color sensor
-            MAP_UNKNOWN = 2, // If unknown
-            MAP_WALL = 3,
-            MAP_WHITE = 4,      // Determined by the value of the color sensor
-            MAP_DEPOSIT = 5,    // Determined by the value of the color sensor
-            MAP_SUPER_AREA = 6, // Determined by the value of the color sensor
+            MAP_YELLOW = 1,    // Determined by the value of the color sensor
+            MAP_SWAMPLAND = 3, // Determined by the value of the color sensor
+            MAP_UNKNOWN = 6, // If unknown
+            MAP_WALL = 2,
+            MAP_WHITE = 0,      // Determined by the value of the color sensor
+            MAP_DEPOSIT = 4,    // Determined by the value of the color sensor
+            MAP_SUPER_AREA = 5, // Determined by the value of the color sensor
+        //             #define POINT_UNKNOWN 3
+        // #define POINT_SUPERAREA 2
+        // #define POINT_WHITE 1
+        // #define POINT_DEPOSIT 0
+        // #define POINT_SWAMPLAND -1
+        // #define MAP_WALL  -2
+        // #define POINT_YELLOW -3
+        // #define POINT_MAY_SWAMPLAND -4
         };
         inline int setMapInfo(int x, int y, MapInfo info)
         {
@@ -73,7 +83,7 @@ class CospaceMap
             }
             if (info == MAP_WALL)
             {
-                map[map_wall_index][y][x] = times;
+                map[0][y][x] = MAP_WALL  ;
             }
             else if (info == MAP_WHITE && (map[0][y][x] != MAP_UNKNOWN && map[0][y][x] != MAP_SWAMPLAND))
             {
@@ -111,7 +121,7 @@ class CospaceMap
             }
             if (info == MAP_WALL)
             {
-                map[map_wall_index][y][x] = times;
+                map[0][y][x] = MAP_WALL  ;
             }
             else
             {
@@ -135,7 +145,7 @@ class CospaceMap
             }
             if (info == MAP_WALL)
             {
-                map[map_wall_index][y][x] += times;
+                map[0][y][x] = MAP_WALL  ;
             }
             else
             {
@@ -163,7 +173,7 @@ class CospaceMap
                 }
                 return MAP_FAILURE;
             }
-            if (map[map_wall_index][y][x] > 0)
+            if (map[0][y][x] == 2)
             {
                 return MAP_WALL;
             }
@@ -407,8 +417,8 @@ class CospaceMap
 
     private:
         const static int map_wall_index = 4;
-        // 0:Floor information 1:red 2:cyan 3:black 4:Wall information
-        int map[5][kDotHeightNum][kDotWidthNum];
+        // 0:Floor and MAP_WALL   information 1:red 2:cyan 3:black 
+        int map[4][kDotHeightNum][kDotWidthNum];
         int map_arrived_times[kDotHeightNum][kDotWidthNum];
         int map_from[kDotHeightNum][kDotWidthNum][2];
         int map_cost[kDotHeightNum][kDotWidthNum];
@@ -417,12 +427,18 @@ class CospaceMap
         int map_curved_times[kDotHeightNum][kDotWidthNum];
 		//int map_secure[7][kSecureAreaHeight][kSecureAreaWidth];
     };
+
     CospaceMap cospaceMap;
     int dotsForInvestegation[5][2] = {{15, 15}, {345, 15}, {180, 135}, {60, 180}, {290, 190}};
     int processForInvestigation = 0;
     const static int kSuccess = -1;
     const static int kFailure = INT_MIN;
     const static int kGuessedMapSize = 10;
+    const static int kCM2AreaScale = 30;
+     const static int kDot2AreaScale = kCM2AreaScale / kSize;
+    const static int kAreaWidth = kCospaceWidth / kCM2AreaScale;
+    const static int kAreaHeight = kCospaceHeight / kCM2AreaScale;
+    long robot_dot_positions[3][2];
 
 	int dot_x[3], dot_y[3];
 
@@ -435,7 +451,7 @@ class CospaceMap
 	{
 		int x, y;  //dotのx(0<=x<36), y(0<=y<27)座標
 		int wide;  //Length of one side
-		int point; //Dot type(-3:yellow -2:wall etc.)
+		int point; //Dot type(-3:yellow -2:MAP_WALL   etc.)
 		int done;  //Dijkstra()
 		long id;   //y * 36 + x
 		int from;  //Dijkstra()
@@ -481,8 +497,27 @@ class CospaceMap
 	int HowManyCurved(int id);
 	int IsNearYellow(int num, int x, int y);
 	int goInArea(int x, int y, int wide_decide_x, int wide_decide_y, int times);
+////////////////////////////////////////////
+    void AddMapInformation(void);
 	void saveColorInfo(void);
 	void calculateWallPosition(void);
+    void autoSearch(float parameter);
+    inline double sigmoid(double gain, double value, double scale)
+    {
+        return (1.0 / (1.0 + exp(-gain * value))) * scale;
+    }
+    inline double sigmoid(double value, double scale)
+    {
+        return sigmoid(1, value, scale);
+    }
+    inline int i_sigmoid(double gain, double value, double scale)
+    {
+        return static_cast<int>(sigmoid(gain, value, scale));
+    }
+    inline int i_sigmoid(double value, double scale)
+    {
+        return i_sigmoid(1, value, scale);
+    }
 };
 
 #endif // !HIKARU

@@ -25,6 +25,14 @@ todo : 回転するときに、カラーセンサが沼地に入ってしまう�
 #define POINT_YELLOW -3
 #define POINT_MAY_SWAMPLAND -4
 
+// MAP_YELLOW = 0,    // Determined by the value of the color sensor
+//             MAP_SWAMPLAND = 1, // Determined by the value of the color sensor
+//             MAP_UNKNOWN = 2, // If unknown
+//             MAP_WALL = 3,
+//             MAP_WHITE = 4,      // Determined by the value of the color sensor
+//             MAP_DEPOSIT = 5,    // Determined by the value of the color sensor
+//             MAP_SUPER_AREA = 6, // Determined by the value of the color sensor
+
 #define SECURE_YELLOW 0
 #define SECURE_SWAMPLAND 1
 #define SECURE_WALL 3
@@ -170,6 +178,20 @@ void Game1_Test2::loop()
 			}
 		}
 	}
+
+	// Save color data
+	saveColorInfo();
+	LOG_MESSAGE(FUNCNAME + "(): start calculate wall position " + to_string(pt.end()) + " ms", MODE_NORMAL);
+
+	// Calculate wall position
+	if (processForInvestigation <= 5)
+	{
+		calculateWallPosition();
+		LOG_MESSAGE(FUNCNAME + "(): start beautifying map data " + to_string(pt.end()) + " ms", MODE_NORMAL);
+	}
+	AddMapInformation();
+	InputDotInformation();
+	InputColorInformation();
 
 	/*saveColorInfo();
 	calculateWallPos1ition();*/
@@ -317,6 +339,7 @@ void Game1_Test2::loop()
 		}
 	}
     //Change true on some condition
+	//To DO: this poop
     else if(processForInvestigation <= 5)
     {
 			if (processForInvestigation < 5)
@@ -713,7 +736,7 @@ void Game1_Test2::CheckNowDot(void)
 			}
 			if (min_position[0] < 0)
 			{
-				// y * kDotWidth + x -> -1
+				// y * kDotWidthNum + x -> -1
 				ERROR_MESSAGE(FUNCNAME + "(): i = " + to_string(i) + " there is no not wall dot near " + to_string(x[i]) + " " + to_string(y[i]), MODE_NORMAL);
 
 				y[i] = static_cast<int>(emergency_now_dot_id / kDotWidthNum);
@@ -882,7 +905,7 @@ void Game1_Test2::InputDotInformation(void)
 	{
 		for (int j = 0; j < kDotHeightNum; j++)
 		{
-			switch (map_output_data[kDotHeightNum - j - 1][i])
+			switch (map_output_data[j][i])
 			{
 			case 0: //white
 				//map_position_color_data[i][j] = POINT_UNKNOWN;
@@ -993,9 +1016,9 @@ void Game1_Test2::InputDotInformation(void)
 		// 	dot[i].cyan = 1;
 		// 	dot[i].black = 1;
 		// }
-		dot[i].red = red_data[kDotHeightNum - y - 1][x];
-		dot[i].cyan = cyan_data[kDotHeightNum - y - 1][x];
-		dot[i].black = black_data[kDotHeightNum - y - 1][x];
+		dot[i].red = red_data[y][x];
+		dot[i].cyan = cyan_data[y][x];
+		dot[i].black = black_data[y][x];
 
 		//these are for dijkstra
 		// dot[i].done = -1;
@@ -1771,13 +1794,13 @@ int Game1_Test2::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, in
 
 				if (option)
 				{
-					// 移動しないとき
+					// When not moving
 					int k = 30;
 					costs += static_cast<int>(sqrt(pow(abs(i * kSize - log_x) - k, 2) + pow(abs(j * kSize - log_y) - k, 2)));
 				}
 				else
 				{
-					// 移動するとき
+					// When moving
 					costs -= static_cast<int>(pow(i * kSize - log_x, 2) / 100 - pow(j * kSize - log_y, 2) / 100);
 				}
 				if (color == POINT_DEPOSIT)
@@ -2464,454 +2487,6 @@ void Game1_Test2::GoToAngle(int angle, int distance)
 	}
 }
 
-void Game1_Test2::saveColorInfo(void)
-{
-	/*
-	最上位
-	POINT_DEPOSIT
-	POINT_YELLOW
-	POINT_SWAMPLAND
-
-	中位
-	POINT_SUPERAREA
-	POINT_WHITE
-
-	下位
-	POINT_MAY_SWAMPLAND
-	POINT_UNKNWON
-
-	その他
-	POINT_WALL
-	 */
-	if (ColorJudgeLeft(object_box2))
-	{
-		if (map_secure[SECURE_DEPOSIT][dot_y[0] * kDotWidthNum + dot_x[0]] == 1)
-		{
-			dot[dot_y[0] * kDotWidthNum + dot_x[0]].point = POINT_DEPOSIT;
-		}
-	}
-	else if (ColorJudgeLeft(trap_line))
-	{
-		int range = 1;
-		if (PositionX == -1)
-		{
-			range = 2;
-		}
-		int left = 0, right = 0, up = 0, down = 0;
-		if (Compass < 180)
-		{
-			left += range;
-		}
-		else
-		{
-			right += range;
-		}
-		if (90 <= Compass && Compass < 270)
-		{
-			down += range;
-		}
-		else
-		{
-			up += range;
-		}
-		for (int yi = dot_y[0] - down; yi <= dot_y[0] + up; ++yi)
-		{
-			if (yi < 0 || yi >= kDotHeightNum)
-			{
-				continue;
-			}
-			for (int xj = dot_x[0] - left; xj <= dot_x[0] + right; ++xj)
-			{
-				if (xj < 0 || xj >= kDotWidthNum)
-				{
-					continue;
-				}
-
-				if (PositionX == -1)
-				{
-					dot[yi * kDotWidthNum + xj].point = POINT_MAY_SWAMPLAND;
-				}
-				else
-				{
-					if (yi != dot_y[0] && xj != dot_x[0])
-					{
-						continue;
-					}
-					if (map_secure[SECURE_YELLOW][yi * kDotWidthNum + xj] == 1)
-					{
-						dot[yi * kDotWidthNum + xj].point = POINT_YELLOW;
-					}
-				}
-			}
-		}
-		if (map_secure[SECURE_YELLOW][dot_y[0] * kDotWidthNum + dot_x[0]] == 1)
-		{
-			dot[dot_y[0] * kDotWidthNum + dot_x[0]].point = POINT_YELLOW;
-		}
-	}
-	else if (ColorJudgeLeft(gray_zone))
-	{
-		for (int yi = dot_y[0] - 1; yi <= dot_y[0] + 1; ++yi)
-		{
-			if (yi < 0 || yi >= kDotHeightNum)
-			{
-				continue;
-			}
-			for (int xj = dot_x[0] - 1; xj <= dot_x[0] + 1; ++xj)
-			{
-				if (xj < 0 || xj >= kDotWidthNum)
-				{
-					continue;
-				}
-				if (dot[yi * kDotWidthNum + xj].point == POINT_UNKNOWN)
-				{
-					if (map_secure[SECURE_SWAMPLAND][yi * kDotWidthNum + xj] == 1)
-					{
-						dot[yi * kDotWidthNum + xj].point = POINT_MAY_SWAMPLAND;
-					}
-				}
-			}
-		}
-		if (map_secure[SECURE_SWAMPLAND][dot_y[0] * kDotWidthNum + dot_x[0]] == 1)
-		{
-			dot[dot_y[0] * kDotWidthNum + dot_x[0]].point = POINT_SWAMPLAND;
-		}
-	}
-	else if (ColorJudgeLeft(blue_zone))
-	{
-		if (dot[dot_y[0] * kDotWidthNum + dot_x[0]].point != POINT_DEPOSIT && dot[dot_y[0] * kDotWidthNum + dot_x[0]].point != POINT_YELLOW && dot[dot_y[0] * kDotWidthNum + dot_x[0]].point != POINT_SWAMPLAND)
-		{
-			if (map_secure[SECURE_SUPERAREA][dot_y[0] * kDotWidthNum + dot_x[0]] == 1)
-			{
-				dot[dot_y[0] * kDotWidthNum + dot_x[0]].point = POINT_SUPERAREA;
-			}
-		}
-	}
-	else
-	{
-		if (PositionX >= 180 || (dot[dot_y[0] * kDotWidthNum + dot_x[0]].point != POINT_DEPOSIT && map_position_color_data[dot_x[0]][dot_y[0]] != POINT_SWAMPLAND))
-		{
-			if (map_secure[SECURE_WHITE][dot_y[0] * kDotWidthNum + dot_x[0]] == 1)
-			{
-				dot[dot_y[0] * kDotWidthNum + dot_x[0]].point = POINT_WHITE;
-			}
-		}
-	}
-
-	if (ColorJudgeRight(object_box2))
-	{
-		if (map_secure[SECURE_DEPOSIT][dot_y[2] * kDotWidthNum + dot_x[2]] == 1)
-		{
-			dot[dot_y[2] * kDotWidthNum + dot_x[2]].point = POINT_DEPOSIT;
-		}
-	}
-	else if (ColorJudgeRight(trap_line))
-	{
-		int range = 1;
-		int left = 0, right = 0, up = 0, down = 0;
-		if (PositionX == -1)
-		{
-			range = 2;
-		}
-		if (Compass < 180)
-		{
-			left += range;
-		}
-		else
-		{
-			right += range;
-		}
-		if (90 <= Compass && Compass < 270)
-		{
-			down += range;
-		}
-		else
-		{
-			up += range;
-		}
-		for (int yi = dot_y[0] - down; yi <= dot_y[0] + up; ++yi)
-		{
-			if (yi < 0 || yi >= kDotHeightNum)
-			{
-				continue;
-			}
-			for (int xj = dot_x[0] - left; xj <= dot_x[0] + right; ++xj)
-			{
-				if (xj < 0 || xj >= kDotWidthNum)
-				{
-					continue;
-				}
-
-				if (PositionX == -1)
-				{
-					dot[yi * kDotWidthNum + xj].point = POINT_MAY_SWAMPLAND;
-				}
-				else
-				{
-					if (yi != dot_y[2] && xj != dot_x[2])
-					{
-						continue;
-					}
-					if (map_secure[SECURE_YELLOW][yi * kDotWidthNum + xj] == 1)
-					{
-						dot[yi * kDotWidthNum + xj].point = POINT_YELLOW;
-					}
-				}
-			}
-		}
-		if (map_secure[SECURE_YELLOW][dot_y[2] * kDotWidthNum + dot_x[2]] == 1)
-		{
-			dot[dot_y[2] * kDotWidthNum + dot_x[2]].point = POINT_YELLOW;
-		}
-	}
-	else if (ColorJudgeRight(gray_zone))
-	{
-		for (int yi = dot_y[2] - 1; yi <= dot_y[2] + 1; ++yi)
-		{
-			if (yi < 0 || yi >= kDotHeightNum)
-			{
-				continue;
-			}
-			for (int xj = dot_x[2] - 1; xj <= dot_x[2] + 1; ++xj)
-			{
-				if (xj < 0 || xj >= kDotWidthNum)
-				{
-					continue;
-				}
-				if (dot[yi * kDotWidthNum + xj].point == POINT_UNKNOWN)
-				{
-					if (map_secure[SECURE_SWAMPLAND][yi * kDotWidthNum + xj] == 1)
-					{
-						dot[yi * kDotWidthNum + xj].point = POINT_MAY_SWAMPLAND;
-					}
-				}
-			}
-		}
-		if (map_secure[SECURE_SWAMPLAND][dot_y[2] * kDotWidthNum + dot_x[2]] == 1)
-		{
-			dot[dot_y[2] * kDotWidthNum + dot_x[2]].point = POINT_SWAMPLAND;
-		}
-	}
-	else if (ColorJudgeRight(blue_zone))
-	{
-		if (dot[dot_y[2] * kDotWidthNum + dot_x[2]].point != POINT_DEPOSIT && dot[dot_y[2] * kDotWidthNum + dot_x[2]].point != POINT_YELLOW && dot[dot_y[2] * kDotWidthNum + dot_x[2]].point != POINT_SWAMPLAND)
-		{
-			if (map_secure[SECURE_SUPERAREA][dot_y[2] * kDotWidthNum + dot_x[2]] == 1)
-			{
-				dot[dot_y[2] * kDotWidthNum + dot_x[2]].point = POINT_SUPERAREA;
-			}
-		}
-	}
-	else
-	{
-		if (PositionX >= 180 || (dot[dot_y[2] * kDotWidthNum + dot_x[2]].point != POINT_DEPOSIT && map_position_color_data[dot_x[2]][dot_y[2]] != POINT_SWAMPLAND))
-		{
-			if (map_secure[SECURE_WHITE][dot_y[2] * kDotWidthNum + dot_x[2]] == 1)
-			{
-				dot[dot_y[2] * kDotWidthNum + dot_x[2]].point = POINT_WHITE;
-			}
-		}
-	}
-}
-
-void Game1_Test2::calculateWallPosition(void)
-{
-	if (PositionX != -1)
-	{
-		LOG_MESSAGE(FUNCNAME + "():" + "壁の位置の計算を開始", MODE_DEBUG);
-
-		// 0: left & right 1: front
-		int difference_us_position[2] = { 9, 9 };
-		int us_sensors[3] = { US_Left, US_Front, US_Right };
-		LOG_MESSAGE(FUNCNAME + "(): " + "US " + to_string(US_Left) + " " + to_string(US_Front) + " " + to_string(US_Right) + " Compass: " + to_string(Compass), MODE_DEBUG);
-		string us_names[3] = { "Left", "Front", "Right" };
-		int angles[3] = { 40, 0, -40 };
-		int calculated_relative_coordinate[3][2];
-		int calculated_absolute_dot_position[3][2];
-		for (int i = 0; i < 3; ++i)
-		{
-
-			angles[i] += Compass + 90;
-			angles[i] %= 360;
-			if (us_sensors[i] > kUSLimit - 1)
-			{
-				us_sensors[i] = kUSLimit;
-			}
-			us_sensors[i] += difference_us_position[i % 2];
-			// 壁の位置とロボットの相対座標
-			calculated_relative_coordinate[i][0] = static_cast<int>(cos(angles[i] * M_PI / 180) * us_sensors[i]);
-			calculated_relative_coordinate[i][1] = static_cast<int>(sin(angles[i] * M_PI / 180) * us_sensors[i]);
-
-			// ドット上での壁の絶対座標
-			calculated_absolute_dot_position[i][0] = static_cast<int>((log_x + calculated_relative_coordinate[i][0] + kSize / 2) / kSize);
-			calculated_absolute_dot_position[i][1] = static_cast<int>((log_y + calculated_relative_coordinate[i][1] + kSize / 2) / kSize);
-			if (0 <= calculated_absolute_dot_position[i][0] && calculated_absolute_dot_position[i][0] < kDotWidthNum && 0 <= calculated_absolute_dot_position[i][1] && calculated_absolute_dot_position[i][1] < kDotHeightNum)
-			{
-				// 壁はないときは、MAP_WALLを登録する必要がない
-				if (us_sensors[i] < kUSLimit + difference_us_position[i % 2])
-				{
-					// if (map[0][calculated_absolute_dot_position[i][1]][calculated_absolute_dot_position[i][0]] == cospaceMap.MAP_UNKNOWN || map[0][calculated_absolute_dot_position[i][1]][calculated_absolute_dot_position[i][0]] == MAP_UNKNOWN_NOT_WALL)
-					{
-						if (map_secure[SECURE_WALL][calculated_absolute_dot_position[i][1] * kDotWidthNum + calculated_absolute_dot_position[i][0]] == 1)
-						{
-							dot[calculated_absolute_dot_position[i][1] * kDotWidthNum + calculated_absolute_dot_position[i][0]].point = POINT_WALL;
-						}
-					}
-				}
-			}
-
-			// x[0], y[0] -> x[1], y[1]までMAP_WALLをcospaceMap.MAP_WHITEに変更する
-			// 壁の位置(壁から多少離れた位置)とロボットそれぞれの絶対座標
-			// 基本的に、実際の壁との距離から0.7倍程度にするが、kSizeが最低2つはあけないといけない
-			// 1cm先に壁がある場合、cospaceMap.MAP_WHITEは登録しない
-			const int kRange4Wall = 20;
-
-			if (us_sensors[i] < kRange4Wall + difference_us_position[i % 2])
-			{
-				// cospaceMap.MAP_WHITEは登録しない
-				LOG_MESSAGE(FUNCNAME + "(): cospaceMap.MAP_WHITEは、壁との距離が非常に近いため設定しません", MODE_VERBOSE)
-					continue;
-			}
-			if (us_sensors[i] * 0.3 < kRange4Wall)
-			{
-				LOG_MESSAGE(FUNCNAME + "(): us_sensors[i](" + to_string(us_sensors[i]) + ") * 0.3 < kRange4Wall(" + to_string(kRange4Wall) + ")", MODE_VERBOSE);
-				calculated_relative_coordinate[i][0] = static_cast<int>(cos(angles[i] * M_PI / 180) * (us_sensors[i] - kRange4Wall));
-				calculated_relative_coordinate[i][1] = static_cast<int>(sin(angles[i] * M_PI / 180) * (us_sensors[i] - kRange4Wall));
-			}
-			else
-			{
-				LOG_MESSAGE(FUNCNAME + "(): us_sensors[i](" + to_string(us_sensors[i]) + ") * 0.3 >= kRange4Wall(" + to_string(kRange4Wall) + ")", MODE_VERBOSE);
-				calculated_relative_coordinate[i][0] = static_cast<int>(cos(angles[i] * M_PI / 180) * us_sensors[i] * 0.7);
-				calculated_relative_coordinate[i][1] = static_cast<int>(sin(angles[i] * M_PI / 180) * us_sensors[i] * 0.7);
-			}
-
-			const int x[2] = { static_cast<int>(log_x / kSize), static_cast<int>((log_x + calculated_relative_coordinate[i][0] + kSize / 2) / kSize) };
-			const int y[2] = { static_cast<int>(log_y / kSize), static_cast<int>((log_y + calculated_relative_coordinate[i][1] + kSize / 2) / kSize) };
-
-			LOG_MESSAGE(FUNCNAME + "(): Set MAP_UNKNOWN (" + to_string(x[0]) + ", " + to_string(y[0]) + ") -> (" + to_string(x[1]) + ", " + to_string(y[1]) + ")", MODE_VERBOSE);
-
-			// (x[0], y[0]) -> (x[1], y[1])まで、MAP_WALLをMAP_UNKNOWN_NOT_WALLに変更する
-			if (x[0] == x[1]) // 縦方向の直線の場合
-			{
-				if (0 <= x[0] && x[0] < kDotWidthNum)
-				{
-					int y_start = y[0], y_end = y[1];
-					if (y_end == calculated_absolute_dot_position[i][1])
-					{
-						if (y_start < y_end)
-						{
-							--y_end;
-						}
-						else if (y_start > y_end)
-						{
-							++y_end;
-						}
-						else
-						{
-							LOG_MESSAGE(FUNCNAME + "(): 壁近くのドットを保護した結果、MAP_WHITEは設定できません", MODE_VERBOSE);
-							continue;
-						}
-					}
-					// 上から変更しようと、下から変更しようと変わらない
-					if (y[0] > y[1])
-					{
-						int temp = y_start;
-						y_start = y_end;
-						y_end = temp;
-					}
-					for (int yi = y_start; yi <= y_end; ++yi)
-					{
-						if (yi < 0)
-						{
-							yi = -1;
-							continue;
-						}
-						if (yi >= kDotHeightNum)
-						{
-							break;
-						}
-						if (dot[yi * kDotWidthNum + x[0]].point == POINT_WALL && map_position_color_data[x[0]][yi] != POINT_WALL)
-						{
-							dot[yi * kDotWidthNum + x[0]].point = map_position_color_data[x[0]][yi];
-						}
-					}
-				}
-			}
-			else
-			{
-				double tilt = static_cast<double>(y[1] - y[0]) / static_cast<double>(x[1] - x[0]);
-				int x_start = x[0], x_end = x[1];
-				if (x_end == calculated_absolute_dot_position[i][0])
-				{
-					if (x_start < x_end)
-					{
-						--x_end;
-					}
-					else if (x_start > x_end)
-					{
-						++x_end;
-					}
-					else
-					{
-						LOG_MESSAGE(FUNCNAME + "(): 壁近くのドットを保護した結果、MAP_WHITEは設定できません", MODE_VERBOSE);
-						continue;
-					}
-				}
-				if (x_start > x_end)
-				{
-					int temp = x_start;
-					x_start = x_end;
-					x_end = temp;
-					tilt = -tilt;
-				}
-				LOG_MESSAGE(FUNCNAME + "(): tilt is " + to_string(tilt), MODE_VERBOSE);
-				for (int xi = x_start; xi < x_end; ++xi)
-				{
-					if (xi < 0)
-					{
-						xi = -1;
-						continue;
-					}
-					if (xi >= kDotWidthNum)
-					{
-						break;
-					}
-					int y_start = y[0] + static_cast<int>(tilt * static_cast<double>(xi - x_start));
-					int y_end = y[0] + static_cast<int>(floor(tilt * (static_cast<double>(xi + 1 - x_start))));
-					if ((y_start - calculated_absolute_dot_position[i][1]) * (y_end - calculated_absolute_dot_position[i][1]) <= 0)
-					{
-						LOG_MESSAGE(FUNCNAME + "(): 壁近くのドットを保護した結果、MAP_WHITEは設定できません", MODE_VERBOSE);
-						continue;
-					}
-					if (y_start > y_end)
-					{
-						int temp = y_start;
-						y_start = y_end;
-						y_end = temp;
-					}
-					for (int yj = y_start; yj <= y_end; ++yj)
-					{
-						if (yj < 0)
-						{
-							yj = -1;
-							continue;
-						}
-						if (yj >= kDotHeightNum)
-						{
-							break;
-						}
-						if (dot[yj * kDotWidthNum + xi].point == POINT_WALL && map_position_color_data[xi][yj] != POINT_WALL)
-						{
-							dot[yj * kDotWidthNum + xi].point = map_position_color_data[xi][yj];
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-
 int Game1_Test2::goInArea(int x, int y, int wide_decide_x, int wide_decide_y, int times) {
 	static int prev_x = -1, prev_y = -1, prev_wide_x = -1, prev_wide_y = -1;
 	static int arrived_times = 0;
@@ -2972,4 +2547,682 @@ int Game1_Test2::goInArea(int x, int y, int wide_decide_x, int wide_decide_y, in
 	}
 	return 0;
 
+}
+
+void Game1_Test2::autoSearch(float parameter)
+{
+	// 0: Normal search 1: Direct to Desposit area (confirmed) 2: Searching for Deposit area
+	static int status = 0;
+	static int is_changed = 1;
+	static int target_x = -1, target_y = -1;
+	LOG_MESSAGE(FUNCNAME + "(" + to_string(parameter) + "): start; status = " + to_string(status), MODE_DEBUG);
+	if (LoadedObjects >= 6 && (status != 1 && status != 2))
+	{
+
+		LOG_MESSAGE(FUNCNAME + "(): fully loaded; is_changed = true", MODE_VERBOSE);
+		is_changed = 1;
+	}
+	if (LoadedObjects < 6 && (status == 1 || status == 2))
+	{
+		LOG_MESSAGE(FUNCNAME + "(): not loaded objects; is_changed = true", MODE_VERBOSE);
+		is_changed = 1;
+		status = 0;
+	}
+	if (0 <= target_x && target_x < kAreaWidth && 0 <= target_y && target_y < kAreaHeight)
+	{
+		if (cospaceMap.getMapInfo(target_x * kDot2AreaScale, target_y * kDot2AreaScale) == cospaceMap.MAP_YELLOW || cospaceMap.getMapInfo(target_x * kDot2AreaScale, target_y * kDot2AreaScale) == cospaceMap.MAP_WALL)
+		{
+			is_changed = 1;
+		}
+	}
+
+	if (is_changed)
+	{
+		LOG_MESSAGE(FUNCNAME + "(): is_changed true!", MODE_VERBOSE);
+		is_changed = 0;
+		if (LoadedObjects >= 6)
+		{
+			int min_cost = INT_MAX;
+			target_x = -1;
+			target_y = -1;
+			//Search near deposit area
+			rep(yi, kDotHeightNum)
+			{
+				rep(xj, kDotWidthNum)
+				{
+					if (cospaceMap.getMapInfo(xj, yi) == cospaceMap.MAP_DEPOSIT)
+					{
+						if (abs(yi - robot_dot_positions[1][1]) + abs(xj - robot_dot_positions[1][0]) < min_cost)
+						{
+							target_x = xj;
+							target_y = yi;
+							min_cost = abs(yi - robot_dot_positions[1][1]) + abs(xj - robot_dot_positions[1][0]);
+						}
+					}
+				}
+			}
+			if (target_x == -1)
+			{
+				LOG_MESSAGE(FUNCNAME + "(): there is no deposit area. status = 2", MODE_VERBOSE);
+				status = 2;
+			}
+			else
+			{
+				LOG_MESSAGE(FUNCNAME + "(): I go to deposit area (" + to_string(target_x * kSize) + ", " + to_string(target_y * kSize) + ")", MODE_VERBOSE);
+				status = 1;
+			}
+		}
+		//If not founed
+		if (status != 1)
+		{
+			int score_area_map[kAreaHeight][kAreaWidth];
+			rep(ayi, kAreaHeight)
+			{
+				rep(axj, kAreaWidth)
+				{
+					score_area_map[ayi][axj] = 0;
+				}
+			}
+			int score = 0;
+			int max_score = INT_MIN;
+			int max_score_x = -1;
+			int max_score_y = -1;
+			/*cout << "Arrived Times" << endl;
+			rep(yi, kDotHeightNum) {
+				rep(xj, kDotWidthNum) {
+					printf("%3d", cospaceMap.getMapArrivedTimes(xj, yi));
+				}
+				printf("\n");
+			}
+			printf("\n");*/
+			// Select a candidate area
+			rep(yi, kDotHeightNum)
+			{
+				rep(xj, kDotWidthNum)
+				{
+					if (cospaceMap.getMapInfo(xj, yi) == cospaceMap.MAP_WALL || cospaceMap.getMapInfo(xj, yi) == cospaceMap.MAP_YELLOW)
+					{
+						continue;
+					}
+
+					score = kCM2AreaScale;
+					switch (status)
+					{
+					case 0:
+						if (cospaceMap.getMapInfo(xj, yi) == cospaceMap.MAP_UNKNOWN)
+						{
+							score *= 2;
+						}
+						if (cospaceMap.getMapArrivedTimes(xj, yi) > 0)
+						{
+							score -= cospaceMap.getMapArrivedTimes(xj, yi);
+						}
+						if (score < 0)
+						{
+							score = 0;
+						}
+						break;
+					case 1:
+						ERROR_MESSAGE(FUNCNAME + "(): switch status value is " + to_string(status), MODE_NORMAL);
+						break;
+					case 2:
+						if (cospaceMap.getMapInfo(xj, yi) == cospaceMap.MAP_UNKNOWN)
+						{
+							score *= 10;
+						}
+						break;
+					default:
+						ERROR_MESSAGE(FUNCNAME + "(): switch status value is " + to_string(status), MODE_NORMAL);
+						break;
+					}
+					score_area_map[TO_INT(yi / kDot2AreaScale)][TO_INT(xj / kDot2AreaScale)] += score;
+				}
+			}
+
+			int max_value = INT_MIN;
+			int base_lengh = 80;
+			if (status == 2)
+			{
+				base_lengh = kCM2AreaScale;
+			}
+			rep(ayi, kAreaHeight)
+			{
+				rep(axj, kAreaWidth)
+				{
+					int value = TO_INT(sqrt(pow(abs(ayi * kCM2AreaScale - log_y) - base_lengh, 2) + pow(abs(axj * kCM2AreaScale - log_x) - base_lengh, 2)));
+					if (value > max_value)
+					{
+						max_value = value;
+					}
+				}
+			}
+			rep(ayi, kAreaHeight)
+			{
+				rep(axj, kAreaWidth)
+				{
+					double distance = TO_INT(sqrt(pow(abs(ayi * kCM2AreaScale - log_y) - base_lengh, 2) + pow(abs(axj * kCM2AreaScale - log_x) - base_lengh, 2)));
+					//cout << axj * kCM2AreaScale << " " << ayi * kCM2AreaScale << " score = " << score_area_map[ayi][axj] << " sigmoid " << i_sigmoid(distance / static_cast<double>(max_value) * 20.0 - 10.0, static_cast<double>(max_value)) << endl;
+					// if (status == 2)
+					// {
+					score_area_map[ayi][axj] += i_sigmoid(10.0 - distance / static_cast<double>(max_value) * 20.0, static_cast<double>(max_value)) / 10;
+					// }
+					// else
+					// {
+					// score_area_map[ayi][axj] += i_sigmoid(distance / static_cast<double>(max_value) * 20.0 - 10.0, static_cast<double>(max_value)) + rnd() % 20;
+					// }
+					if (max_score < score_area_map[ayi][axj])
+					{
+						max_score = score_area_map[ayi][axj];
+						max_score_x = axj;
+						max_score_y = ayi;
+					}
+				}
+			}
+			//cout << "best " << max_score_x << " " << max_score_y << endl;
+			target_x = max_score_x;
+			target_y = max_score_y;
+			LOG_MESSAGE(FUNCNAME + "(): calculated best area (" + to_string(max_score_x * kCM2AreaScale + TO_INT(kCM2AreaScale / 2)) + ", " + to_string(max_score_y * kCM2AreaScale + TO_INT(kCM2AreaScale / 2)) + ")", MODE_DEBUG);
+			//GoToDots(max_score_x * kCM2AreaScale + TO_INT(kCM2AreaScale / 2), max_score_y * kCM2AreaScale + TO_INT(kCM2AreaScale / 2), TO_INT(kCM2AreaScale / 2), TO_INT(kCM2AreaScale / 2));
+		}
+	}
+
+	//cout << "target " << target_x * kCM2AreaScale << " " << target_y * kCM2AreaScale << endl;
+	// if (GoToDots(target_x * kCM2AreaScale + TO_INT(kCM2AreaScale / 2), target_y * kCM2AreaScale + TO_INT(kCM2AreaScale / 2), TO_INT(kCM2AreaScale / 2), TO_INT(kCM2AreaScale / 2)))
+	// {
+	// 	is_changed = 1;
+	// 	LOG_MESSAGE(FUNCNAME + "(): is_changed true", MODE_VERBOSE);
+	// }
+}
+
+void Game1_Test2::saveColorInfo(void)
+{
+	if (ColorJudgeLeft(object_box2))
+	{
+		cospaceMap.setMapInfo(robot_dot_positions[0][0], robot_dot_positions[0][1], cospaceMap.MAP_DEPOSIT);
+		LOG_MESSAGE("deposit " + to_string(robot_dot_positions[0][0] * kSize) + " " + to_string(robot_dot_positions[0][1] * kSize), MODE_VERBOSE);
+	}
+	else if (ColorJudgeLeft(trap_line))
+	{
+		cospaceMap.setMapInfo(robot_dot_positions[0][0], robot_dot_positions[0][1], cospaceMap.MAP_YELLOW);
+		LOG_MESSAGE("yellow " + to_string(robot_dot_positions[0][0] * kSize) + " " + to_string(robot_dot_positions[0][1] * kSize), MODE_VERBOSE);
+	}
+	else if (ColorJudgeLeft(gray_zone))
+	{
+		cospaceMap.setMapInfoForce(robot_dot_positions[0][0], robot_dot_positions[0][1], cospaceMap.MAP_SWAMPLAND);
+		for (int yi = robot_dot_positions[0][1] - TO_INT(cospaceMap.kGuessedMapSize / kSize); yi <= robot_dot_positions[0][1] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++yi)
+		{
+			if (yi < 0 || yi >= kDotHeightNum)
+			{
+				continue;
+			}
+			for (int xj = robot_dot_positions[0][0] - TO_INT(cospaceMap.kGuessedMapSize / kSize); xj <= robot_dot_positions[0][0] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++xj)
+			{
+				if (xj < 0 || xj >= kDotWidthNum)
+				{
+					continue;
+				}
+				if (cospaceMap.getMapInfo(xj, yi) == cospaceMap.MAP_UNKNOWN)
+				{
+					cospaceMap.setMapInfo(xj, yi, cospaceMap.MAP_SWAMPLAND);
+					LOG_MESSAGE("swampland " + to_string(xj) + " " + to_string(yi), MODE_VERBOSE);
+				}
+			}
+		}
+	}
+	else if (ColorJudgeLeft(blue_zone))
+	{
+		cospaceMap.setMapInfo(robot_dot_positions[0][0], robot_dot_positions[0][1], cospaceMap.MAP_SUPER_AREA);
+		LOG_MESSAGE("blue floor " + to_string(robot_dot_positions[0][0]) + " " + to_string(robot_dot_positions[0][1]), MODE_VERBOSE);
+	}
+	else if (ColorJudgeLeft(black_obj))
+	{
+		for (int yi = robot_dot_positions[0][1] - TO_INT(cospaceMap.kGuessedMapSize / kSize); yi <= robot_dot_positions[0][1] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++yi)
+		{
+			if (yi < 0 || yi >= kDotHeightNum)
+			{
+				continue;
+			}
+			for (int xj = robot_dot_positions[0][0] - TO_INT(cospaceMap.kGuessedMapSize / kSize); xj <= robot_dot_positions[0][0] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++xj)
+			{
+				if (xj < 0 || xj >= kDotWidthNum)
+				{
+					continue;
+				}
+				cospaceMap.setMapObjInfo(robot_dot_positions[0][0], robot_dot_positions[0][1], BLACK_LOADED_ID);
+				LOG_MESSAGE("black obj " + to_string(robot_dot_positions[0][0]) + " " + to_string(robot_dot_positions[0][1]), MODE_VERBOSE);
+			}
+		}
+	}
+	else if (ColorJudgeLeft(cyan_obj))
+	{
+		for (int yi = robot_dot_positions[0][1] - TO_INT(cospaceMap.kGuessedMapSize / kSize); yi <= robot_dot_positions[0][1] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++yi)
+		{
+			if (yi < 0 || yi >= kDotHeightNum)
+			{
+				continue;
+			}
+			for (int xj = robot_dot_positions[0][0] - TO_INT(cospaceMap.kGuessedMapSize / kSize); xj <= robot_dot_positions[0][0] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++xj)
+			{
+				if (xj < 0 || xj >= kDotWidthNum)
+				{
+					continue;
+				}
+				cospaceMap.setMapObjInfo(robot_dot_positions[2][0], robot_dot_positions[2][1], CYAN_LOADED_ID);
+				LOG_MESSAGE("cyan obj " + to_string(robot_dot_positions[2][0]) + " " + to_string(robot_dot_positions[2][1]), MODE_VERBOSE);
+			}
+		}
+	}
+	else if (ColorJudgeLeft(red_obj))
+	{
+		for (int yi = robot_dot_positions[0][1] - TO_INT(cospaceMap.kGuessedMapSize / kSize); yi <= robot_dot_positions[0][1] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++yi)
+		{
+			if (yi < 0 || yi >= kDotHeightNum)
+			{
+				continue;
+			}
+			for (int xj = robot_dot_positions[0][0] - TO_INT(cospaceMap.kGuessedMapSize / kSize); xj <= robot_dot_positions[0][0] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++xj)
+			{
+				if (xj < 0 || xj >= kDotWidthNum)
+				{
+					continue;
+				}
+				cospaceMap.setMapObjInfo(robot_dot_positions[2][0], robot_dot_positions[2][1], RED_LOADED_ID);
+				LOG_MESSAGE("red obj " + to_string(robot_dot_positions[2][0]) + " " + to_string(robot_dot_positions[2][1]), MODE_VERBOSE);
+			}
+		}
+	}
+	else if (ColorJudgeLeft(white_zone))
+	{
+		cospaceMap.setMapInfo(robot_dot_positions[0][0], robot_dot_positions[0][1], cospaceMap.MAP_WHITE);
+		LOG_MESSAGE("white area " + to_string(robot_dot_positions[0][0]) + " " + to_string(robot_dot_positions[0][1]), MODE_VERBOSE);
+	}
+	else
+	{
+		cospaceMap.setMapInfo(robot_dot_positions[0][0], robot_dot_positions[0][1], cospaceMap.MAP_WHITE);
+		LOG_MESSAGE("white area(maye be) " + to_string(robot_dot_positions[0][0]) + " " + to_string(robot_dot_positions[0][1]), MODE_VERBOSE);
+	}
+
+	if (ColorJudgeRight(object_box2))
+	{
+		cospaceMap.setMapInfo(robot_dot_positions[2][0], robot_dot_positions[2][1], cospaceMap.MAP_DEPOSIT);
+		LOG_MESSAGE("deposit " + to_string(robot_dot_positions[2][0]) + " " + to_string(robot_dot_positions[2][1]), MODE_VERBOSE);
+	}
+	else if (ColorJudgeRight(trap_line))
+	{
+		cospaceMap.setMapInfo(robot_dot_positions[2][0], robot_dot_positions[2][1], cospaceMap.MAP_YELLOW);
+		LOG_MESSAGE(to_string(robot_dot_positions[2][0]) + " " + to_string(robot_dot_positions[2][1]), MODE_VERBOSE);
+	}
+	else if (ColorJudgeRight(gray_zone))
+	{
+		for (int yi = robot_dot_positions[2][1] - TO_INT(cospaceMap.kGuessedMapSize / kSize); yi <= robot_dot_positions[2][1] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++yi)
+		{
+			if (yi < 0 || yi >= kDotHeightNum)
+			{
+				continue;
+			}
+			for (int xj = robot_dot_positions[2][0] - TO_INT(cospaceMap.kGuessedMapSize / kSize); xj <= robot_dot_positions[2][0] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++xj)
+			{
+				if (xj < 0 || xj >= kDotWidthNum)
+				{
+					continue;
+				}
+				if (cospaceMap.getMapInfo(xj, yi) == cospaceMap.MAP_UNKNOWN)
+				{
+					cospaceMap.setMapInfoForce(xj, yi, cospaceMap.MAP_SWAMPLAND);
+					LOG_MESSAGE("swampland " + to_string(xj) + " " + to_string(yi), MODE_VERBOSE);
+				}
+			}
+		}
+	}
+	else if (ColorJudgeRight(blue_zone))
+	{
+		cospaceMap.setMapInfo(robot_dot_positions[2][0], robot_dot_positions[2][1], cospaceMap.MAP_SUPER_AREA);
+		LOG_MESSAGE("blue floor " + to_string(robot_dot_positions[2][0]) + " " + to_string(robot_dot_positions[2][1]), MODE_VERBOSE);
+	}
+	else if (ColorJudgeRight(black_obj))
+	{
+		for (int yi = robot_dot_positions[2][1] - TO_INT(cospaceMap.kGuessedMapSize / kSize); yi <= robot_dot_positions[2][1] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++yi)
+		{
+			if (yi < 0 || yi >= kDotHeightNum)
+			{
+				continue;
+			}
+			for (int xj = robot_dot_positions[2][0] - TO_INT(cospaceMap.kGuessedMapSize / kSize); xj <= robot_dot_positions[2][0] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++xj)
+			{
+				if (xj < 0 || xj >= kDotWidthNum)
+				{
+					continue;
+				}
+				cospaceMap.setMapObjInfo(robot_dot_positions[2][0], robot_dot_positions[2][1], BLACK_LOADED_ID);
+				LOG_MESSAGE("black obj " + to_string(robot_dot_positions[2][0]) + " " + to_string(robot_dot_positions[2][1]), MODE_VERBOSE);
+			}
+		}
+	}
+	else if (ColorJudgeRight(cyan_obj))
+	{
+		for (int yi = robot_dot_positions[2][1] - TO_INT(cospaceMap.kGuessedMapSize / kSize); yi <= robot_dot_positions[2][1] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++yi)
+		{
+			if (yi < 0 || yi >= kDotHeightNum)
+			{
+				continue;
+			}
+			for (int xj = robot_dot_positions[2][0] - TO_INT(cospaceMap.kGuessedMapSize / kSize); xj <= robot_dot_positions[2][0] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++xj)
+			{
+				if (xj < 0 || xj >= kDotWidthNum)
+				{
+					continue;
+				}
+				cospaceMap.setMapObjInfo(robot_dot_positions[2][0], robot_dot_positions[2][1], CYAN_LOADED_ID);
+				LOG_MESSAGE("cyan obj " + to_string(robot_dot_positions[2][0]) + " " + to_string(robot_dot_positions[2][1]), MODE_VERBOSE);
+			}
+		}
+	}
+	else if (ColorJudgeRight(red_obj))
+	{
+		for (int yi = robot_dot_positions[2][1] - TO_INT(cospaceMap.kGuessedMapSize / kSize); yi <= robot_dot_positions[2][1] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++yi)
+		{
+			if (yi < 0 || yi >= kDotHeightNum)
+			{
+				continue;
+			}
+			for (int xj = robot_dot_positions[2][0] - TO_INT(cospaceMap.kGuessedMapSize / kSize); xj <= robot_dot_positions[2][0] + TO_INT(cospaceMap.kGuessedMapSize / kSize); ++xj)
+			{
+				if (xj < 0 || xj >= kDotWidthNum)
+				{
+					continue;
+				}
+				cospaceMap.setMapObjInfo(robot_dot_positions[2][0], robot_dot_positions[2][1], RED_LOADED_ID);
+				LOG_MESSAGE("red obj " + to_string(robot_dot_positions[2][0]) + " " + to_string(robot_dot_positions[2][1]), MODE_VERBOSE);
+			}
+		}
+	}
+	else if (ColorJudgeRight(white_zone))
+	{
+		cospaceMap.setMapInfo(robot_dot_positions[2][0], robot_dot_positions[2][1], cospaceMap.MAP_WHITE);
+		LOG_MESSAGE("white area " + to_string(robot_dot_positions[2][0]) + " " + to_string(robot_dot_positions[2][1]), MODE_VERBOSE);
+	}
+	else
+	{
+		cospaceMap.setMapInfo(robot_dot_positions[2][0], robot_dot_positions[2][1], cospaceMap.MAP_WHITE);
+		LOG_MESSAGE("white area(may be) " + to_string(robot_dot_positions[2][0]) + " " + to_string(robot_dot_positions[2][1]), MODE_VERBOSE);
+	}
+}
+
+void Game1_Test2:: AddMapInformation(void)
+{
+	rep(i, kDotWidthNum)
+	{
+		rep(j, kDotHeightNum)
+		{
+			map_output_data[j][i] = cospaceMap.getMapInfo(i, j);
+			red_data[j][i] = cospaceMap.getMapObjInfo(i, j, RED_LOADED_ID);
+			cyan_data[j][i] =  cospaceMap.getMapObjInfo(i, j, CYAN_LOADED_ID);
+			black_data[j][i] =  cospaceMap.getMapObjInfo(i, j, BLACK_LOADED_ID);
+		}
+	}
+}
+
+void Game1_Test2::calculateWallPosition(void)
+{
+
+	if (PositionX != -1)
+	{
+		LOG_MESSAGE(FUNCNAME + "():" + "Start calculating wall position", MODE_DEBUG);
+
+		// 0: left & right 1: front
+		int difference_us_position[2] = {9, 9};
+		int us_sensors[3] = {US_Left, US_Front, US_Right};
+		LOG_MESSAGE(FUNCNAME + "(): " + "US " + to_string(US_Left) + " " + to_string(US_Front) + " " + to_string(US_Right) + " Compass: " + to_string(Compass), MODE_DEBUG);
+		string us_names[3] = {"Left", "Front", "Right"};
+		int angles[3] = {40, 0, -40};
+		int calculated_relative_coordinate[3][2];
+		int calculated_absolute_dot_position[3][2];
+		for (int i = 0; i < 3; ++i)
+		{
+
+			angles[i] += Compass + 90;
+			angles[i] %= 360;
+			LOG_MESSAGE(FUNCNAME + "(): US(" + us_names[i] + "): " + to_string(us_sensors[i]) + " Compass: " + to_string(angles[i]), MODE_VERBOSE);
+			if (us_sensors[i] > kUSLimit - 1)
+			{
+				us_sensors[i] = kUSLimit;
+			}
+			us_sensors[i] += difference_us_position[i % 2];
+			// Wall position and robot relative coordinates
+			calculated_relative_coordinate[i][0] = TO_INT(cos(angles[i] * M_PI / 180) * us_sensors[i]);
+			calculated_relative_coordinate[i][1] = TO_INT(sin(angles[i] * M_PI / 180) * us_sensors[i]);
+			LOG_MESSAGE(FUNCNAME + "(): calculated relative coordinate (" + to_string(calculated_relative_coordinate[i][0]) + ", " + to_string(calculated_relative_coordinate[i][1]) + ")", MODE_VERBOSE);
+
+			// Absolute coordinates of the wall on the dot
+			calculated_absolute_dot_position[i][0] = TO_INT((log_x + calculated_relative_coordinate[i][0] + kSize / 2) / kSize);
+			calculated_absolute_dot_position[i][1] = TO_INT((log_y + calculated_relative_coordinate[i][1] + kSize / 2) / kSize);
+			LOG_MESSAGE(FUNCNAME + "(): calculated wall position us: " + us_names[i] + " pos: " + to_string(log_x + calculated_relative_coordinate[i][0]) + "," + to_string(log_y + calculated_relative_coordinate[i][1]) + " registered pos:" + to_string(calculated_absolute_dot_position[i][0] * kSize) + "," + to_string(calculated_absolute_dot_position[i][1] * kSize), MODE_VERBOSE);
+			LOG_MESSAGE(FUNCNAME + "(): calculated positions (" + to_string(robot_dot_positions[1][0]) + ", " + to_string(robot_dot_positions[1][1]) + ") -> (" + to_string(calculated_absolute_dot_position[i][0]) + ", " + to_string(calculated_absolute_dot_position[i][1]) + ")", MODE_VERBOSE);
+			if (0 <= calculated_absolute_dot_position[i][0] && calculated_absolute_dot_position[i][0] < kDotWidthNum && 0 <= calculated_absolute_dot_position[i][1] && calculated_absolute_dot_position[i][1] < kDotHeightNum)
+			{
+				// MAP_WALL does not need to be registered when there is no wall
+				if (us_sensors[i] < kUSLimit + difference_us_position[i % 2])
+				{
+					// if (map[0][calculated_absolute_dot_position[i][1]][calculated_absolute_dot_position[i][0]] == cospaceMap.MAP_UNKNOWN || map[0][calculated_absolute_dot_position[i][1]][calculated_absolute_dot_position[i][0]] == MAP_UNKNOWN_NOT_WALL)
+					{
+						cospaceMap.addMapInfo(calculated_absolute_dot_position[i][0], calculated_absolute_dot_position[i][1], cospaceMap.MAP_WALL, 2);
+						LOG_MESSAGE(FUNCNAME + "(): set here as Wall; pos: " + to_string(calculated_absolute_dot_position[i][0] * kSize) + "," + to_string(calculated_absolute_dot_position[i][1] * kSize), MODE_VERBOSE);
+					}
+				}
+			}
+
+			// Change MAP_WALL to cospaceMap.MAP_WHITE up to x [0], y [0]-> x [1], y [1]
+			// Wall position (slightly away from the wall) and absolute coordinates of each robot
+			// Basically, it will be about 0.7 times the distance from the actual wall, but at least 2 kSize must be opened
+			// If there is a wall 1cm ahead, do not register cospaceMap.MAP_WHITE
+			const int kRange4Wall = 20;
+
+			if (us_sensors[i] < kRange4Wall + difference_us_position[i % 2])
+			{
+				// Do not register cospaceMap.MAP_WHITE
+				LOG_MESSAGE(FUNCNAME + "(): cospaceMap.MAP_WHITE Does not set because the distance to the wall is very close", MODE_VERBOSE)
+				continue;
+			}
+			if (us_sensors[i] * 0.3 < kRange4Wall)
+			{
+				LOG_MESSAGE(FUNCNAME + "(): us_sensors[i](" + to_string(us_sensors[i]) + ") * 0.3 < kRange4Wall(" + to_string(kRange4Wall) + ")", MODE_VERBOSE);
+				calculated_relative_coordinate[i][0] = TO_INT(cos(angles[i] * M_PI / 180) * (us_sensors[i] - kRange4Wall));
+				calculated_relative_coordinate[i][1] = TO_INT(sin(angles[i] * M_PI / 180) * (us_sensors[i] - kRange4Wall));
+			}
+			else
+			{
+				LOG_MESSAGE(FUNCNAME + "(): us_sensors[i](" + to_string(us_sensors[i]) + ") * 0.3 >= kRange4Wall(" + to_string(kRange4Wall) + ")", MODE_VERBOSE);
+				calculated_relative_coordinate[i][0] = TO_INT(cos(angles[i] * M_PI / 180) * us_sensors[i] * 0.7);
+				calculated_relative_coordinate[i][1] = TO_INT(sin(angles[i] * M_PI / 180) * us_sensors[i] * 0.7);
+			}
+
+			const int x[2] = {robot_dot_positions[1][0], TO_INT((log_x + calculated_relative_coordinate[i][0] + kSize / 2) / kSize)};
+			const int y[2] = {robot_dot_positions[1][1], TO_INT((log_y + calculated_relative_coordinate[i][1] + kSize / 2) / kSize)};
+
+			LOG_MESSAGE(FUNCNAME + "(): Set MAP_UNKNOWN (" + to_string(x[0]) + ", " + to_string(y[0]) + ") -> (" + to_string(x[1]) + ", " + to_string(y[1]) + ")", MODE_VERBOSE);
+
+			// Change MAP_WALL to MAP_UNKNOWN_NOT_WALL until (x [0], y [0])-> (x [1], y [1])
+			if (x[0] == x[1]) // For a vertical line
+			{
+				if (0 <= x[0] && x[0] < kDotWidthNum)
+				{
+					int y_start = y[0], y_end = y[1];
+					if (y_end == calculated_absolute_dot_position[i][1])
+					{
+						if (y_start < y_end)
+						{
+							--y_end;
+						}
+						else if (y_start > y_end)
+						{
+							++y_end;
+						}
+						else
+						{
+							LOG_MESSAGE(FUNCNAME + "(): MAP_WHITE cannot be set as a result of protecting dots near the wall", MODE_VERBOSE);
+							continue;
+						}
+					}
+					// Try to change from the top, change from the bottom
+					if (y[0] > y[1])
+					{
+						int temp = y_start;
+						y_start = y_end;
+						y_end = temp;
+					}
+					for (int yi = y_start; yi <= y_end; ++yi)
+					{
+						if (yi < 0)
+						{
+							yi = -1;
+							continue;
+						}
+						if (yi >= kDotHeightNum)
+						{
+							break;
+						}
+						if (cospaceMap.getMapInfo(x[0], yi) == cospaceMap.MAP_WALL)
+						{
+							cospaceMap.addMapInfo(x[0], yi, cospaceMap.MAP_WALL, -1);
+							LOG_MESSAGE(FUNCNAME + "(): decrease the possibility of wall pos (" + to_string(x[0] * kSize) + ", " + to_string(yi * kSize), MODE_VERBOSE);
+						}
+						LOG_MESSAGE(FUNCNAME + "(): (" + to_string(x[0] * kSize) + ", " + to_string(yi * kSize) + "): here is not wall; wall(" + to_string(calculated_absolute_dot_position[i][0]) + ", " + to_string(calculated_absolute_dot_position[i][1]) + ")", MODE_VERBOSE);
+					}
+				}
+			}
+			else
+			{
+				double tilt = static_cast<double>(y[1] - y[0]) / static_cast<double>(x[1] - x[0]);
+				int x_start = x[0], x_end = x[1];
+				if (x_end == calculated_absolute_dot_position[i][0])
+				{
+					if (x_start < x_end)
+					{
+						--x_end;
+					}
+					else if (x_start > x_end)
+					{
+						++x_end;
+					}
+					else
+					{
+						LOG_MESSAGE(FUNCNAME + "(): 壁近くのドットを保護した結果、MAP_WHITEは設定できません", MODE_VERBOSE);
+						continue;
+					}
+				}
+				if (x_start > x_end)
+				{
+					int temp = x_start;
+					x_start = x_end;
+					x_end = temp;
+					tilt = -tilt;
+				}
+				LOG_MESSAGE(FUNCNAME + "(): tilt is " + to_string(tilt), MODE_VERBOSE);
+				for (int xi = x_start; xi < x_end; ++xi)
+				{
+					if (xi < 0)
+					{
+						xi = -1;
+						continue;
+					}
+					if (xi >= kDotWidthNum)
+					{
+						break;
+					}
+					int y_start = y[0] + TO_INT(tilt * static_cast<double>(xi - x_start));
+					int y_end = y[0] + TO_INT(floor(tilt * (static_cast<double>(xi + 1 - x_start))));
+					if ((y_start - calculated_absolute_dot_position[i][1]) * (y_end - calculated_absolute_dot_position[i][1]) <= 0)
+					{
+						LOG_MESSAGE(FUNCNAME + "(): MAP_WHITE cannot be set as a result of protecting dots near the wall", MODE_VERBOSE);
+						continue;
+					}
+					if (y_start > y_end)
+					{
+						int temp = y_start;
+						y_start = y_end;
+						y_end = temp;
+					}
+					for (int yj = y_start; yj <= y_end; ++yj)
+					{
+						if (yj < 0)
+						{
+							yj = -1;
+							continue;
+						}
+						if (yj >= kDotHeightNum)
+						{
+							break;
+						}
+						if (cospaceMap.getMapInfo(xi, yj) == cospaceMap.MAP_WALL)
+						{
+							cospaceMap.addMapInfo(xi, yj, cospaceMap.MAP_WALL, -1);
+							LOG_MESSAGE(FUNCNAME + "(): decrease the possibility of wall pos (" + to_string(xi * kSize) + ", " + to_string(yj * kSize), MODE_VERBOSE);
+						}
+						LOG_MESSAGE(FUNCNAME + "(): (" + to_string(xi * kSize) + ", " + to_string(yj * kSize) + "): here is not wall; wall(" + to_string(calculated_absolute_dot_position[i][0]) + ", " + to_string(calculated_absolute_dot_position[i][1]) + ")", MODE_VERBOSE);
+					}
+				}
+			}
+		}
+		// // 0 < 1にする
+		// if (x[0] > x[1])
+		// {
+		//     // x[0]とx[1]を入れ替え
+		//     int temp = x[0];
+		//     x[0] = x[1];
+		//     x[1] = temp;
+		// }
+		// if (y[0] > y[1])
+		// {
+		//     // y[0]とy[1]を入れ替え
+		//     int temp = y[0];
+		//     y[0] = y[1];
+		//     y[1] = temp;
+		// }
+
+		// // 傾き
+		// float tilt;
+		// if (calculated_relative_coordinate[i][0] == 0)
+		// {
+		//     tilt = 1000000000;
+		// }
+		// else
+		// {
+		//     tilt = fabs(static_cast<float>(calculated_relative_coordinate[i][1] / calculated_relative_coordinate[i][0]));
+		// }
+
+		// // x[0] -> x[1]まで、順番にyの値を調べ、それぞれのドットにcospaceMap.MAP_WHITEを代入していく
+		// // ただし、x[0]とx[1]はcospaceMap.MAP_WHITEを代入しない
+		// // x[0]かx[1]のうちどちらかは壁である
+		// // map[0][y][x] = cospaceMap.MAP_WALLできるのは、map[0][y][x] == MAP_UNKNOWNのときだけ
+		// for (int xi = x[0] + 1; xi < x[1]; ++xi)
+		// {
+		//     // LOG_MESSAGE(FUNCNAME + "()")
+		//     if (xi < 0)
+		//     {
+		//         continue;
+		//     }
+		//     if (xi >= kDotWidthNum)
+		//     {
+		//         break;
+		//     }
+		//     for (int yj = TO_INT(static_cast<float>(xi - x[0]) * tilt) + y[0]; static_cast<float>(yj - y[0]) <= static_cast<float>(xi - x[0] + 1) * tilt; ++yj)
+		//     {
+		//         if (yj < 0)
+		//         {
+		//             continue;
+		//         }
+		//         if (yj >= kDotHeightNum)
+		//         {
+		//             break;
+		//         }
+		//         if (map[0][yj][xi] == cospaceMap.MAP_WALL)
+		//         {
+		//             map[0][yj][xi] = MAP_UNKNOWN_NOT_WALL;
+		//             LOG_MESSAGE(FUNCNAME + "(): set here as unknow space; pos:" + to_string(xi * kSize) + "," + to_string(yj * kSize), MODE_VERBOSE);
+		//         }
+		//     }
+		// }
+
+		// }
+	}
 }

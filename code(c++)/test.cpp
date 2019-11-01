@@ -33,7 +33,7 @@ using std::to_string;
 #define SECURE_DEPOSIT 5
 #define SECURE_SUPERAREA 6
 
-void AutoStrategy::loop()
+void World2_Test1::loop()
 {
 	pt.start();
 	UserGame1::loop();
@@ -457,13 +457,13 @@ void AutoStrategy::loop()
 			same_time++;
 		}
 	}
-	// else if (Time % 15 == 0)
-	// {
-	// 	autoSearch(0);
-	// 	// GoToDot(17, 22);
-	// 	// GoToAngle(345, 30);
-	// 	// motor(0, 0);
-	// }
+	else if (Time % 5 == 0)
+	{
+		autoSearch(0);
+		// GoToDot(17, 22);
+		// GoToAngle(345, 30);
+		// motor(0, 0);
+	}
 	else //if (pt.end() < 30)
 	{
 		// if (large_process != 1 || next_allowed_go_time[processGoToDots] > Time)
@@ -608,7 +608,7 @@ void AutoStrategy::loop()
 	//pt.print("AS time :");
 }
 
-int AutoStrategy::GoToDot(int x, int y)
+int World2_Test1::GoToDot(int x, int y)
 {
 	static int prev_x = -1, prev_y = -1, prev_now_dot_id = -1;
 	// static int saved_x = -1, saved_y = -1;
@@ -684,8 +684,8 @@ int AutoStrategy::GoToDot(int x, int y)
 
 	if (prev_now_dot_id != now_dot_id || prev_x != x || prev_y != y)
 	{
-		// Dijkstra();
-		Astar(x, y);
+		Dijkstra();
+		//Astar(x, y);
 	}
 	prev_now_dot_id = now_dot_id;
 	prev_x = x;
@@ -858,7 +858,7 @@ int AutoStrategy::GoToDot(int x, int y)
 	return 0;
 }
 
-// int AutoStrategy::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
+// int World2_Test1::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 // {
 // 	LOG_MESSAGE(FUNCNAME + "(" + to_string(x) + "," + to_string(y) + "," + to_string(wide_decide_x) + "," + to_string(wide_decide_y) + ")", MODE_VERBOSE);
 
@@ -1052,7 +1052,7 @@ int AutoStrategy::GoToDot(int x, int y)
 // 	}
 // }
 
-int AutoStrategy::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
+int World2_Test1::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 {
 	//fprintf(logfile, " %d Start GoToDots(%d, %d, %d, %d)\n", getRepeatedNum(), x, y, wide_decide_x, wide_decide_y);
 	// printf("GoToDots(): %d %d %d %d\n", x, y, wide_decide_x, wide_decide_y);
@@ -1221,7 +1221,7 @@ int AutoStrategy::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 	}
 }
 
-void AutoStrategy::autoSearch(float parameter)
+void World2_Test1::autoSearch(float parameter)
 {
 	// 0: Normal search 1: Direct to Desposit area (confirmed) 2: Searching for Deposit area
 	static int status = 0;
@@ -1394,19 +1394,19 @@ void AutoStrategy::autoSearch(float parameter)
 			target_x = max_score_x;
 			target_y = max_score_y;
 			LOG_MESSAGE(FUNCNAME + "(): calculated best area (" + to_string(max_score_x * kCM2AreaScale + TO_INT(kCM2AreaScale / 2)) + ", " + to_string(max_score_y * kCM2AreaScale + TO_INT(kCM2AreaScale / 2)) + ")", MODE_DEBUG);
-			GoToDots(max_score_x * kCM2AreaScale + TO_INT(kCM2AreaScale / 2), max_score_y * kCM2AreaScale + TO_INT(kCM2AreaScale / 2), TO_INT(kCM2AreaScale / 2), TO_INT(kCM2AreaScale / 2));
+			//GoToDots(max_score_x * kCM2AreaScale + TO_INT(kCM2AreaScale / 2), max_score_y * kCM2AreaScale + TO_INT(kCM2AreaScale / 2), TO_INT(kCM2AreaScale / 2), TO_INT(kCM2AreaScale / 2));
 		}
 	}
 
 	//cout << "target " << target_x * kCM2AreaScale << " " << target_y * kCM2AreaScale << endl;
-	if (GoToDots(target_x * kCM2AreaScale + TO_INT(kCM2AreaScale / 2), target_y * kCM2AreaScale + TO_INT(kCM2AreaScale / 2), TO_INT(kCM2AreaScale / 2), TO_INT(kCM2AreaScale / 2)))
-	{
-		is_changed = 1;
-		LOG_MESSAGE(FUNCNAME + "(): is_changed true", MODE_VERBOSE);
-	}
+	// if (GoToDots(target_x * kCM2AreaScale + TO_INT(kCM2AreaScale / 2), target_y * kCM2AreaScale + TO_INT(kCM2AreaScale / 2), TO_INT(kCM2AreaScale / 2), TO_INT(kCM2AreaScale / 2)))
+	// {
+	// 	is_changed = 1;
+	// 	LOG_MESSAGE(FUNCNAME + "(): is_changed true", MODE_VERBOSE);
+	// }
 }
 
-void AutoStrategy::Astar(int goal_x, int goal_y)
+void World2_Test1::Astar(int goal_x, int goal_y)
 {
 	static int is_not_finished = 0;
 	static int log_astar[kDotHeight][kDotWidth];
@@ -1676,11 +1676,11 @@ void AutoStrategy::Astar(int goal_x, int goal_y)
 	// printf("\n");
 }
 
-AutoStrategy::~AutoStrategy()
+World2_Test1::~World2_Test1()
 {
 }
 
-AutoStrategy::AutoStrategy()
+World2_Test1::World2_Test1()
 {
 	pt.start();
 	// setRunMode(MODE_NORMAL);
@@ -1697,9 +1697,9 @@ AutoStrategy::AutoStrategy()
 		}
 	}
 
-	pt.print("AutoStrategy::AutoStrategy() :");
+	pt.print("World2_Test1::World2_Test1() :");
 }
-void AutoStrategy::setup()
+void World2_Test1::setup()
 {
 	pt.start();
 	UserGame1::setup();
@@ -1724,10 +1724,10 @@ void AutoStrategy::setup()
 	}
 
 	cout << "run mode : " << TO_INT(getRunMode()) << endl;
-	pt.print("AutoStrategy::setup() :");
+	pt.print("World2_Test1::setup() :");
 }
 
-void AutoStrategy::CheckNowDot()
+void World2_Test1::CheckNowDot()
 {
 	LOG_MESSAGE(FUNCNAME + "(): start pos_x,y = (" + to_string(pos_x) + ", " + to_string(pos_y) + ")", MODE_DEBUG);
 	// 左のカラーセンサ、右のカラーセンサ、座標の中心点をそれぞれA,B,Cとすると、
@@ -1815,7 +1815,7 @@ void AutoStrategy::CheckNowDot()
 	now_dot_id = robot_dot_positions[1][1] * kDotWidth + robot_dot_positions[1][0];
 }
 
-long AutoStrategy::WhereIsMotor(void)
+long World2_Test1::WhereIsMotor(void)
 {
 	LOG_MESSAGE(FUNCNAME + "(): start", MODE_VERBOSE);
 	long x, y;
@@ -1841,7 +1841,7 @@ long AutoStrategy::WhereIsMotor(void)
 	return y * 1000 + x;
 }
 
-long AutoStrategy::WhereIsColorSensor(void)
+long World2_Test1::WhereIsColorSensor(void)
 {
 	LOG_MESSAGE(FUNCNAME + "(): start", MODE_VERBOSE);
 	long x, y;
@@ -1877,7 +1877,7 @@ long AutoStrategy::WhereIsColorSensor(void)
 	return y * 1000 + x;
 }
 
-int AutoStrategy::GoToPosition(int x, int y, int wide_decide_x, int wide_decide_y, int wide_judge_arrived)
+int World2_Test1::GoToPosition(int x, int y, int wide_decide_x, int wide_decide_y, int wide_judge_arrived)
 {
 	//fprintf(logfile, " %d Start GoToPosition(%d, %d, %d, %d, %d)\n", getRepeatedNum(), x, y, wide_decide_x, wide_decide_y, wide_judge_arrived);
 	LOG_MESSAGE(FUNCNAME + "(" + to_string(x) + ", " + to_string(y) + ", " + to_string(wide_decide_x) + ", " + to_string(wide_decide_y) + ", " + to_string(wide_judge_arrived) + "): start", MODE_DEBUG);
@@ -1987,7 +1987,7 @@ int AutoStrategy::GoToPosition(int x, int y, int wide_decide_x, int wide_decide_
 	return 0;
 }
 
-int AutoStrategy::isNearTheFloor(CospaceMap::MapInfo color, int x, int y, int cm_radius)
+int World2_Test1::isNearTheFloor(CospaceMap::MapInfo color, int x, int y, int cm_radius)
 {
 	LOG_MESSAGE(FUNCNAME + "(" + to_string(TO_INT(color)) + "," + to_string(x) + "," + to_string(y) + "," + to_string(cm_radius) + "): start", MODE_VERBOSE);
 	int dot_radious = (cm_radius + kCM2DotScale - 1) / kCM2DotScale;
@@ -2018,7 +2018,7 @@ int AutoStrategy::isNearTheFloor(CospaceMap::MapInfo color, int x, int y, int cm
 	return 0;
 }
 
-void AutoStrategy::GoToAngle(int angle, int distance)
+void World2_Test1::GoToAngle(int angle, int distance)
 {
 	LOG_MESSAGE(FUNCNAME + "(" + to_string(angle) + "," + to_string(distance) + "): start", MODE_VERBOSE);
 	angle = angle - Compass;
@@ -2445,7 +2445,7 @@ void AutoStrategy::GoToAngle(int angle, int distance)
 	LOG_MESSAGE(FUNCNAME + "(): end with motor(" + to_string(WheelLeft) + "," + to_string(WheelRight) + ")", MODE_VERBOSE);
 }
 
-void AutoStrategy::Dijkstra(void)
+void World2_Test1::Dijkstra(void)
 {
 	// Initialization
 	rep(yi, kDotHeight)
@@ -2586,7 +2586,7 @@ void AutoStrategy::Dijkstra(void)
 	// printf("\n");
 }
 
-AutoStrategy::CospaceMap::CospaceMap()
+World2_Test1::CospaceMap::CospaceMap()
 {
 	rep(i, TO_INT((extent<decltype(map), 0>::value)))
 	{
@@ -2606,7 +2606,7 @@ AutoStrategy::CospaceMap::CospaceMap()
 		}
 	}
 }
-int AutoStrategy::CospaceMap::getMapCurvedTimes(int from_x, int from_y, int target_x, int target_y)
+int World2_Test1::CospaceMap::getMapCurvedTimes(int from_x, int from_y, int target_x, int target_y)
 {
 	LOG_MESSAGE(FUNCNAME + "(" + to_string(from_x) + ", " + to_string(from_y) + ", " + to_string(target_x) + "," + to_string(target_y) + "): start", MODE_DEBUG);
 
@@ -2639,7 +2639,7 @@ int AutoStrategy::CospaceMap::getMapCurvedTimes(int from_x, int from_y, int targ
 	}
 }
 
-void AutoStrategy::saveColorInfo(void)
+void World2_Test1::saveColorInfo(void)
 {
 	if (ColorJudgeLeft(object_box2))
 	{
@@ -2853,7 +2853,7 @@ void AutoStrategy::saveColorInfo(void)
 	}
 }
 
-void AutoStrategy::calculateWallPosition(void)
+void World2_Test1::calculateWallPosition(void)
 {
 
 	if (PositionX != -1)

@@ -3,9 +3,10 @@
 //#include "Hikaru.hpp"
 //#include "Masuda.hpp"
 #include "Superteam.hpp"
-#include "Test2.hpp"
+//#include "Test2.hpp"
 //#include "AutoStrategy2019.hpp"
-#include "test.hpp"
+//#include "test.hpp"
+#include "TestWorld2AS.hpp"
 #include <bits/stdc++.h>
 
 // sprintfのエラーを無視するため
@@ -37,7 +38,9 @@ using namespace std;
 //Game0_Masuda game0;
 Game0_Superteam game0;
 //Game1_Hikaru game1;
-Game1_Test2 game1;
+//Game1_Test2 game1;
+//World2_Test1 game1;
+World2_Test2 game1;
  //Game1_Masuda game1;
 //AutoStrategy game1;
 

@@ -7,11 +7,11 @@
 #include <random>
 #include <ctime>
 
-class AutoStrategy : public UserGame1
+class World2_Test2 : public UserGame1
 {
 public:
-    AutoStrategy();
-    ~AutoStrategy() override;
+    World2_Test2();
+    ~World2_Test2() override;
     void setup() override;
     void loop() override;
 
@@ -434,7 +434,7 @@ private:
 
     long now_dot_id;
 
-    int dotsForInvestegation[5][2] = {{15, 15}, {345, 15}, {180, 135}, {60, 180}, {290, 190}};
+    int dotsForInvestegation[5][2] = {{45, 45}, {345, 45}, {180, 135}, {60, 180}, {290, 190}};
     int next_allowed_go_time[5];
     int large_process = -1;
     int processGoToDots = 0;
