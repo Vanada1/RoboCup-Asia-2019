@@ -1,24 +1,17 @@
-# How to use(使用方法)
+# How to use
 
-## First(はじめに)
+## First
 
 This is all of the source codes of team Ninja from Japan.
 
-日本チーム「Ninja」のすべてのソースコードに入っています。
-
 If there is any error or English syntax error, please contact me.
-
-もし、ソースコードのエラーや、英語の文法的な間違いがあれば、指摘してもらえると嬉しいです。
 
 If you want my source code quickly, please look at `code(c++)/Hikaru.cpp`.
 
-もし、私のソースコードをすぐに見たければ、`code(c++)/Hikaru.cpp`を見てください
 
-## OverView(概要)
+## OverView
 
 There are 8 folders.
-
-8つのフォルダーがあります。
 
 > cospace2019-ninja-share
 >
@@ -40,41 +33,25 @@ There are 8 folders.
 
 Each folder has software or program.
 
-それぞれ、ソフトやプログラムが入っています。
-
 For details, please read each folder's ReadMe.
-
-詳しい説明は、それぞれのフォルダのReadMeを見てください。
 
 ### Array2Coordinate
 
 This software is written by c++.  This software's purpose is to repesent wall positions as formula.
 
-このソフトは、C++で書かれています。このソフトの目的は壁の座標を数式で表すことです。
-
 If you put the array of the map to the software, the software returns the formulas of all wall position.
 
-マップの情報をソフトに入力すると、ソフトはすべての壁を数式として出力します。
-
 This makes it possible to calculate own robot coordinate in world 1.
-
-このソフトは、World1で自分のロボットの座標を計算することに使えます。
 
 ## auto dll generator(c++)
 
 If you are nerbous to run compiler every time you save the code, just use this foftware to auto compile.
 
-もし、保存するたびにコンパイルするのが面倒なら、このソフトを使ってください。
-
 This software will compile your source code automatically. This software compiles your code when it detects the changes of your source codes.
-
-このソフトは、あなたのソースコードを自動でコンパイルします。このソフトは、あなたのソースコードが変更されたことを検知したときにコンパイルします。
 
 ## code(c)
 
 This folder has cospace source code written in C-language. However, I last time I used C-language for rescue simulation was a ancient period. So, you should not use this source code. It has bugs, and old way.
-
-このフォルダには、Cospace用のC言語でかかれたソースコードが入っています。しかし、僕が最後にC言語を使っていたのは古代のことなので、使わないほうが良いです。バグが入っていますし、古い手法です。
 
 ## code(c++)
 
