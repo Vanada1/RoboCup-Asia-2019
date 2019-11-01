@@ -211,7 +211,13 @@ private:
                 }
                 return kFailure;
             }
-            map[object_loaded_id][y][x] = value;
+            for (int yi = y-1; yi<=y+1;yi++)
+            {
+                for (int xj = x-1; xj <= x+1; xj++)
+                {
+            map[object_loaded_id][yi][xj] = value;
+                }
+            }
             return kSuccess;
         }
         inline int getMapObjInfo(int x, int y, int object_loaded_id)
@@ -435,7 +441,7 @@ private:
     long now_dot_id;
 
     int dotsForInvestegation[5][2] = {{45, 45}, {345, 45}, {180, 135}, {60, 180}, {290, 190}};
-    int next_allowed_go_time[5];
+    int next_allowed_go_time[5][5];
     int large_process = -1;
     int processGoToDots = 0;
     int process_times = 0;
@@ -445,7 +451,7 @@ private:
     void GoToAngle(int angle, int distance);
     int GoToPosition(int x, int y, int wide_decide_x, int wide_decide_y, int wide_judge_arrived);
     void Dijkstra(void);
-    void Astar(int goal_x, int goal_y);
+   // void Astar(int goal_x, int goal_y);
     int GoToDot(int x, int y);
     long WhereIsMotor(void);
     long WhereIsColorSensor(void);
@@ -457,6 +463,8 @@ private:
     void autoSearch(float parameter);
     void saveColorInfo(void);
     void calculateWallPosition(void);
+    void SearchDeposit(void);
+    void UnknownDeposit(void);
     inline double sigmoid(double gain, double value, double scale)
     {
         return (1.0 / (1.0 + exp(-gain * value))) * scale;

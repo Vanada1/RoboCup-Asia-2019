@@ -8,6 +8,10 @@
 #define ERROR_MESSAGE(MESSAGE, OPTION) \
 	IF((OPTION) <= getRunMode()) { logErrorMessage.errorMessage((MESSAGE), (OPTION)); }
 
+#define POINT_BLACK 20
+#define POINT_RED 10
+#define POINT_CYAN 15
+
 using std::cout;
 using std::endl;
 using std::extent;
@@ -373,12 +377,12 @@ void World2_Test2::loop()
 			LOG_MESSAGE(FUNCNAME + "(): Super Obj Passed because it's not mine", MODE_NORMAL);
 		}
 	}
-	else if (IsOnDepositArea() && LoadedObjects >= 5)
+	else if (IsOnDepositArea() && LoadedObjects >= 6)
 	{
 		//Know where deposit is
-		autoSearch(1);
-		//Unkown where deposit is
-		autoSearch(2);
+		// autoSearch(1);
+		// //Unkown where deposit is
+		// autoSearch(2);
 		switch (IsOnDepositArea())
 		{
 		case 1:
@@ -423,34 +427,173 @@ void World2_Test2::loop()
 			same_time++;
 		}
 	}
+	else if (LoadedObjects >= 6 || (Time > 450 && log_superobj_num == 0 && (LoadedObjects > 2 || loaded_objects[SUPER_LOADED_ID] > 0)))
+	{
+		searching_object = -1;
+		SearchDeposit();
+	}
+	else if (processGoToDots < 5)
+	{
+		if (GoToDots(dotsForInvestegation[processGoToDots][0], dotsForInvestegation[processGoToDots][1], 50, 50))
+		{					
+			if (process_times >= 2)
+			{
+				next_allowed_go_time[4][processGoToDots] = Time + skip_time;
+				processGoToDots++;
+				process_times = 0;
+			}
+			process_times++;
+		}
+	}
+	else if (processGoToDots == 5)
+	{
+		processGoToDots++;
+		process_times = 0;
+	}
+
 	else
 	{
-        if (processGoToDots < 5)
+		if (loaded_objects[CYAN_LOADED_ID] < kBorderSameObjNum)
+		{
+			if (large_process != 1 || next_allowed_go_time[CYAN_LOADED_ID][process] > Time)
 			{
-				if (GoToDots(dotsForInvestegation[processGoToDots][0], dotsForInvestegation[processGoToDots][1], 50, 50))
+				if (PositionY < 180 && next_allowed_go_time[CYAN_LOADED_ID][0] <= Time)
 				{
-					if (process_times >= 2)
+					process = 0;
+				}
+				else if (PositionY >= 180 && next_allowed_go_time[CYAN_LOADED_ID][0] <= Time)
+				{
+					process = 1;
+				}
+				else {
+					if (next_allowed_go_time[CYAN_LOADED_ID][1] < next_allowed_go_time[CYAN_LOADED_ID][0]) {
+						process = 1;
+					}
+					else {
+						process = 0;
+					}
+				}
+				process_times = 0;
+				large_process = 1;
+			}
+			if (process == 0)
+			{
+				if (GoInDots(180, 135, 180, 135, POINT_CYAN))
+				{
+					if (process_times >= 4)
 					{
-						next_allowed_go_time[process] = Time + skip_time;
-						processGoToDots++;
+						next_allowed_go_time[CYAN_LOADED_ID][process] = Time + skip_time;
+						process++;
 						process_times = 0;
 					}
-                    // if (Time % 10 == 0)
-                    // {
-		            //     autoSearch(0);
-                    // }
+					process_times++;
+				}
+			}
+			else if (process == 1)
+			{
+				if (GoInDots(180, 135, 180, 135, POINT_CYAN))
+				{
+					if (process_times >= 3)
+					{
+						next_allowed_go_time[CYAN_LOADED_ID][process] = Time + skip_time;
+						process = 0;
+						process_times = 0;
+					}
 					process_times++;
 				}
 			}
 			else
 			{
-				processGoToDots = 0;
+				process = 0;
 				process_times = 0;
 			}
+		}
+		else if (loaded_objects[RED_LOADED_ID] < kBorderSameObjNum)
+		{
+			if (large_process != 2 || next_allowed_go_time[RED_LOADED_ID][process] > Time)
+			{
+				if (PositionX < 240 && PositionY < 140 && next_allowed_go_time[RED_LOADED_ID][0] <= Time) {
+					process = 0;
+				}
+				else if (!(PositionX < 240 && PositionY < 140)) {
+					process = 1;
+				}
+				else {
+					if (next_allowed_go_time[RED_LOADED_ID][1] < next_allowed_go_time[RED_LOADED_ID][0]) {
+						process = 1;
+					}
+					else {
+						process = 0;
+					}
+				}
+				process_times = 0;
+			}
+			if (process == 0)
+			{
+				if (GoInDots(180, 135, 180, 135, POINT_RED))
+				{
+					if (process_times >= 4)
+					{
+						next_allowed_go_time[RED_LOADED_ID][process] = Time + skip_time;
+						process++;
+						process_times = 0;
+					}
+					process_times++;
+				}
+			}
+			else if (process == 1)
+			{
+				if (GoInDots(180, 135, 180, 135, POINT_RED))
+				{
+					if (process_times >= 3)
+					{
+						next_allowed_go_time[RED_LOADED_ID][process] = Time + skip_time;
+						process = 0;
+						process_times = 0;
+					}
+					process_times++;
+				}
+			}
+			else {
+				process = 0;
+				process_times = 0;
+			}
+			large_process = 2;
+		}
+		else
+		{
+
+			if (large_process != 0 || next_allowed_go_time[BLACK_LOADED_ID][process] > Time)
+			{
+				process = 0;
+				process_times = 0;
+				large_process = 0;
+			}
+			if (process == 0)
+			{
+				if (GoInDots(180, 135, 180, 135, POINT_BLACK))
+				{
+					if (process_times >= 3)
+					{
+						next_allowed_go_time[BLACK_LOADED_ID][process] = Time + skip_time;
+						process = 0;
+						process_times = 0;
+					}
+					process_times++;
+				}
+				//goInArea(30, 180, 20, 45, 10);
+			}
+			else
+			{
+				process = 0;
+				process_times = 0;
+			}
+		}
+	}
 		// GoToDot(17, 22);
 		// GoToAngle(345, 30);
 		// motor(0, 0);
-	}
+	
 
 	switch (TO_INT(getAction()))
 	{
@@ -592,9 +735,13 @@ int World2_Test2::GoToDot(int x, int y)
 			{
 				map_data_to_show[yi * kDotWidth + xj] = 'D';
 			}
-			else
+			else if (cospaceMap.getMapInfo(xj, yi) == cospaceMap.MAP_WHITE)
 			{
 				map_data_to_show[yi * kDotWidth + xj] = ' ';
+			}
+			else 
+			{
+				map_data_to_show[yi * kDotWidth + xj] = '\'';
 			}
 		}
 	}
@@ -1183,275 +1330,275 @@ void World2_Test2::autoSearch(float parameter)
 
 }
 
-void World2_Test2::Astar(int goal_x, int goal_y)
-{
-	static int is_not_finished = 0;
-	static int log_astar[kDotHeight][kDotWidth];
-	static int log_pointer = 0;
-	static int loop_times = 0;
-	ProcessingTime pt2;
-	pt2.start();
-	if (!is_not_finished)
-	{
-		cout << "Astar start with init" << endl;
-		LOG_MESSAGE(FUNCNAME + "(" + to_string(goal_x) + "," + to_string(goal_y) + "): start with init", MODE_DEBUG);
-		// 初期化
-		rep(yi, kDotHeight)
-		{
-			rep(xj, kDotWidth)
-			{
-				cospaceMap.setMapFrom(xj, yi, -1, -1);
-				cospaceMap.setMapStatus(xj, yi, 0);
-			}
-		}
-		if (robot_dot_positions[1][0] < 0 || robot_dot_positions[1][0] >= kDotWidth || robot_dot_positions[1][1] < 0 || robot_dot_positions[1][1] >= kDotHeight)
-		{
-			ERROR_MESSAGE(FUNCNAME + "(); now dot is (" + to_string(robot_dot_positions[1][0]) + ", " + to_string(robot_dot_positions[1][1]) + ")", MODE_NORMAL);
-		}
+// void World2_Test2::Astar(int goal_x, int goal_y)
+// {
+// 	static int is_not_finished = 0;
+// 	static int log_astar[kDotHeight][kDotWidth];
+// 	static int log_pointer = 0;
+// 	static int loop_times = 0;
+// 	ProcessingTime pt2;
+// 	pt2.start();
+// 	if (!is_not_finished)
+// 	{
+// 		cout << "Astar start with init" << endl;
+// 		LOG_MESSAGE(FUNCNAME + "(" + to_string(goal_x) + "," + to_string(goal_y) + "): start with init", MODE_DEBUG);
+// 		// 初期化
+// 		rep(yi, kDotHeight)
+// 		{
+// 			rep(xj, kDotWidth)
+// 			{
+// 				cospaceMap.setMapFrom(xj, yi, -1, -1);
+// 				cospaceMap.setMapStatus(xj, yi, 0);
+// 			}
+// 		}
+// 		if (robot_dot_positions[1][0] < 0 || robot_dot_positions[1][0] >= kDotWidth || robot_dot_positions[1][1] < 0 || robot_dot_positions[1][1] >= kDotHeight)
+// 		{
+// 			ERROR_MESSAGE(FUNCNAME + "(); now dot is (" + to_string(robot_dot_positions[1][0]) + ", " + to_string(robot_dot_positions[1][1]) + ")", MODE_NORMAL);
+// 		}
 
-		cospaceMap.setMapCost(robot_dot_positions[1][0], robot_dot_positions[1][1], 0);
-		cospaceMap.setMapFrom(robot_dot_positions[1][0], robot_dot_positions[1][1], robot_dot_positions[1][0], robot_dot_positions[1][1]);
-		cospaceMap.setMapStatus(robot_dot_positions[1][0], robot_dot_positions[1][1], 1);
-		cospaceMap.setMapCurvedTimes(robot_dot_positions[1][0], robot_dot_positions[1][1], 0);
-		log_pointer = 0;
-		loop_times = 0;
-		rep(i, kDotHeight)
-		{
-			rep(j, kDotWidth)
-			{
-				log_astar[i][j] = -1;
-			}
-		}
-	}
-	else
-	{
-		cout << "Astar start with continue " << is_not_finished << endl;
-		LOG_MESSAGE(FUNCNAME + "(" + to_string(goal_x) + "," + to_string(goal_y) + "): start with no-init " + to_string(is_not_finished), MODE_DEBUG);
-	}
+// 		cospaceMap.setMapCost(robot_dot_positions[1][0], robot_dot_positions[1][1], 0);
+// 		cospaceMap.setMapFrom(robot_dot_positions[1][0], robot_dot_positions[1][1], robot_dot_positions[1][0], robot_dot_positions[1][1]);
+// 		cospaceMap.setMapStatus(robot_dot_positions[1][0], robot_dot_positions[1][1], 1);
+// 		cospaceMap.setMapCurvedTimes(robot_dot_positions[1][0], robot_dot_positions[1][1], 0);
+// 		log_pointer = 0;
+// 		loop_times = 0;
+// 		rep(i, kDotHeight)
+// 		{
+// 			rep(j, kDotWidth)
+// 			{
+// 				log_astar[i][j] = -1;
+// 			}
+// 		}
+// 	}
+// 	else
+// 	{
+// 		cout << "Astar start with continue " << is_not_finished << endl;
+// 		LOG_MESSAGE(FUNCNAME + "(" + to_string(goal_x) + "," + to_string(goal_y) + "): start with no-init " + to_string(is_not_finished), MODE_DEBUG);
+// 	}
 
-	// 外に出そうな危険な範囲には行かないようにする
-	int dangerous_range = 10;
-	// ドット1つ分と、dangerous_range、大きい方を採用する
+// 	// 外に出そうな危険な範囲には行かないようにする
+// 	int dangerous_range = 10;
+// 	// ドット1つ分と、dangerous_range、大きい方を採用する
 
-	if (kCM2DotScale > dangerous_range)
-	{
-		dangerous_range = kCM2DotScale;
-	}
-	dangerous_range /= kCM2DotScale;
-	while (loop_times < (is_not_finished + 1) * 50)
-	{
-		loop_times++;
-		int investigating_dot_x = -1, investigating_dot_y = -1;
+// 	if (kCM2DotScale > dangerous_range)
+// 	{
+// 		dangerous_range = kCM2DotScale;
+// 	}
+// 	dangerous_range /= kCM2DotScale;
+// 	while (loop_times < (is_not_finished + 1) * 50)
+// 	{
+// 		loop_times++;
+// 		int investigating_dot_x = -1, investigating_dot_y = -1;
 
-		rep(yi, kDotHeight)
-		{
-			rep(xj, kDotWidth)
-			{
-				if (cospaceMap.getMapStatus(xj, yi) != 1)
-				{
-					continue;
-				}
-				if (
-					investigating_dot_x == -1 ||
-					cospaceMap.getMapTotalCost(xj, yi) < cospaceMap.getMapTotalCost(investigating_dot_x, investigating_dot_y) ||
-					(cospaceMap.getMapTotalCost(xj, yi) == cospaceMap.getMapTotalCost(investigating_dot_x, investigating_dot_y) &&
-					 cospaceMap.getMapCost(xj, yi) < cospaceMap.getMapCost(investigating_dot_x, investigating_dot_y)))
-				{
-					investigating_dot_x = xj;
-					investigating_dot_y = yi;
-				}
-			}
-		}
+// 		rep(yi, kDotHeight)
+// 		{
+// 			rep(xj, kDotWidth)
+// 			{
+// 				if (cospaceMap.getMapStatus(xj, yi) != 1)
+// 				{
+// 					continue;
+// 				}
+// 				if (
+// 					investigating_dot_x == -1 ||
+// 					cospaceMap.getMapTotalCost(xj, yi) < cospaceMap.getMapTotalCost(investigating_dot_x, investigating_dot_y) ||
+// 					(cospaceMap.getMapTotalCost(xj, yi) == cospaceMap.getMapTotalCost(investigating_dot_x, investigating_dot_y) &&
+// 					 cospaceMap.getMapCost(xj, yi) < cospaceMap.getMapCost(investigating_dot_x, investigating_dot_y)))
+// 				{
+// 					investigating_dot_x = xj;
+// 					investigating_dot_y = yi;
+// 				}
+// 			}
+// 		}
 
-		// goalに到着したとき
-		int goal[2];
-		cospaceMap.getMapFrom(goal_x, goal_y, &goal[0], &goal[1]);
-		if (goal[0] != -1)
-		{
-			LOG_MESSAGE(FUNCNAME + "(): reach to goal(" + to_string(goal_x) + ", " + to_string(goal_y) + ")", MODE_DEBUG);
-			break;
-		}
-		if (investigating_dot_x == -1)
-		{
-			ERROR_MESSAGE(FUNCNAME + "(): investigating_dot_x is -1", MODE_NORMAL);
-			break;
-		}
+// 		// goalに到着したとき
+// 		int goal[2];
+// 		cospaceMap.getMapFrom(goal_x, goal_y, &goal[0], &goal[1]);
+// 		if (goal[0] != -1)
+// 		{
+// 			LOG_MESSAGE(FUNCNAME + "(): reach to goal(" + to_string(goal_x) + ", " + to_string(goal_y) + ")", MODE_DEBUG);
+// 			break;
+// 		}
+// 		if (investigating_dot_x == -1)
+// 		{
+// 			ERROR_MESSAGE(FUNCNAME + "(): investigating_dot_x is -1", MODE_NORMAL);
+// 			break;
+// 		}
 
-		cospaceMap.setMapStatus(investigating_dot_x, investigating_dot_y, 2);
+// 		cospaceMap.setMapStatus(investigating_dot_x, investigating_dot_y, 2);
 
-		log_astar[investigating_dot_y][investigating_dot_x] = log_pointer;
-		++log_pointer;
+// 		log_astar[investigating_dot_y][investigating_dot_x] = log_pointer;
+// 		++log_pointer;
 
-		for (int y = investigating_dot_y - 1; y <= investigating_dot_y + 1; ++y)
-		{
-			if (0 <= y && y < kDotHeight)
-			{
-				for (int x = investigating_dot_x - 1; x <= investigating_dot_x + 1; ++x)
-				{
-					if (0 <= x && x < kDotWidth)
-					{
-						// x = investigating_x, y = investigating_yは、setMapStatus(inv_x, inv_y, 2)で回避
-						if (cospaceMap.getMapStatus(x, y) == 2)
-						{
-							continue;
-						}
-						int cost = kCM2DotScale;
+// 		for (int y = investigating_dot_y - 1; y <= investigating_dot_y + 1; ++y)
+// 		{
+// 			if (0 <= y && y < kDotHeight)
+// 			{
+// 				for (int x = investigating_dot_x - 1; x <= investigating_dot_x + 1; ++x)
+// 				{
+// 					if (0 <= x && x < kDotWidth)
+// 					{
+// 						// x = investigating_x, y = investigating_yは、setMapStatus(inv_x, inv_y, 2)で回避
+// 						if (cospaceMap.getMapStatus(x, y) == 2)
+// 						{
+// 							continue;
+// 						}
+// 						int cost = kCM2DotScale;
 
-						if (x < dangerous_range || x >= kDotWidth - dangerous_range || y < dangerous_range || y >= kDotHeight - dangerous_range)
-						{
-							cost += 10 * kCM2DotScale;
-						}
+// 						if (x < dangerous_range || x >= kDotWidth - dangerous_range || y < dangerous_range || y >= kDotHeight - dangerous_range)
+// 						{
+// 							cost += 10 * kCM2DotScale;
+// 						}
 
-						if (isNearTheFloor(cospaceMap.MAP_WALL, x, y, kCM2DotScale))
-						{
-							cost += kCM2DotScale / 2;
-						}
-						cost += kCM2DotScale / 2 * cospaceMap.getMapCurvedTimes(investigating_dot_x, investigating_dot_y, x, y);
-						cost += cospaceMap.getMapArrivedTimes(x, y) / 5;
+// 						if (isNearTheFloor(cospaceMap.MAP_WALL, x, y, kCM2DotScale))
+// 						{
+// 							cost += kCM2DotScale / 2;
+// 						}
+// 						cost += kCM2DotScale / 2 * cospaceMap.getMapCurvedTimes(investigating_dot_x, investigating_dot_y, x, y);
+// 						cost += cospaceMap.getMapArrivedTimes(x, y) / 5;
 
-						if (cospaceMap.getMapInfo(x, y) == cospaceMap.MAP_YELLOW || cospaceMap.getMapInfo(x, y) == cospaceMap.MAP_WALL)
-						{
-							cost += 100 * kCM2DotScale;
-							// continue;
-						}
-						if (cospaceMap.getMapInfo(x, y) == cospaceMap.MAP_SWAMPLAND)
-						{
-							cost += 100 * kCM2DotScale;
-						}
-						if (cospaceMap.getMapInfo(x, y) == cospaceMap.MAP_UNKNOWN && LoadedObjects < 6)
-						{
-							if (Time < 60)
-							{
-								cost -= kCM2DotScale;
-							}
-							else
-							{
-								cost -= kCM2DotScale / 2;
-							}
-						}
-						/*if (cospaceMap.getMapObjInfo(x, y, RED_LOADED_ID) > 0 && loaded_objects[RED_LOADED_ID] < kBorderSameObjNum)
-						{
-							LOG_MESSAGE(FUNCNAME + "(): We can get Red Obj here(" + to_string(x * kCM2DotScale) + ',' + to_string(y * kCM2DotScale) + ")", MODE_VERBOSE);
-							cost -= kCM2DotScale / 2;
-						}
-						if (cospaceMap.getMapObjInfo(x, y, CYAN_LOADED_ID) > 0 && loaded_objects[CYAN_LOADED_ID] < kBorderSameObjNum)
-						{
-							LOG_MESSAGE(FUNCNAME + "(): We can get Cyan Obj here(" + to_string(x * kCM2DotScale) + ',' + to_string(y * kCM2DotScale) + ")", MODE_VERBOSE);
-							cost -= kCM2DotScale / 2;
-						}
-						if (cospaceMap.getMapObjInfo(x, y, BLACK_LOADED_ID) > 0 && loaded_objects[BLACK_LOADED_ID] < kBorderSameObjNum)
-						{
-							LOG_MESSAGE(FUNCNAME + "(): We can get Black Obj here(" + to_string(x * kCM2DotScale) + ',' + to_string(y * kCM2DotScale) + ")", MODE_VERBOSE);
-							cost -= kCM2DotScale / 2;
-						}*/
-						if (cospaceMap.getMapStatus(x, y) == 0 || cospaceMap.getMapCost(investigating_dot_x, investigating_dot_y) + cost < cospaceMap.getMapCost(x, y))
-						{
-							cospaceMap.setMapCost(x, y, cospaceMap.getMapCost(investigating_dot_x, investigating_dot_y) + cost);
-							cospaceMap.setMapTotalCost(x, y, cospaceMap.getMapCost(x, y) + TO_INT(sqrt(pow((goal_x - x) * kCM2DotScale, 2) + pow((goal_y - y) * kCM2DotScale, 2))));
-							cospaceMap.setMapFrom(x, y, investigating_dot_x, investigating_dot_y);
-							cospaceMap.setMapStatus(x, y, 1);
-							cospaceMap.setMapCurvedTimes(x, y, cospaceMap.getMapCurvedTimes(investigating_dot_x, investigating_dot_y, x, y));
-						}
-					}
-				}
-			}
-		}
-	}
-	// if (getRepeatedNum() % 10 == 0)
-	// {
-	// 	rep(yi, kDotHeight)
-	// 	{
-	// 		rep(xj, kDotWidth)
-	// 		{
+// 						if (cospaceMap.getMapInfo(x, y) == cospaceMap.MAP_YELLOW || cospaceMap.getMapInfo(x, y) == cospaceMap.MAP_WALL)
+// 						{
+// 							cost += 100 * kCM2DotScale;
+// 							// continue;
+// 						}
+// 						if (cospaceMap.getMapInfo(x, y) == cospaceMap.MAP_SWAMPLAND)
+// 						{
+// 							cost += 100 * kCM2DotScale;
+// 						}
+// 						if (cospaceMap.getMapInfo(x, y) == cospaceMap.MAP_UNKNOWN && LoadedObjects < 6)
+// 						{
+// 							if (Time < 60)
+// 							{
+// 								cost -= kCM2DotScale;
+// 							}
+// 							else
+// 							{
+// 								cost -= kCM2DotScale / 2;
+// 							}
+// 						}
+// 						/*if (cospaceMap.getMapObjInfo(x, y, RED_LOADED_ID) > 0 && loaded_objects[RED_LOADED_ID] < kBorderSameObjNum)
+// 						{
+// 							LOG_MESSAGE(FUNCNAME + "(): We can get Red Obj here(" + to_string(x * kCM2DotScale) + ',' + to_string(y * kCM2DotScale) + ")", MODE_VERBOSE);
+// 							cost -= kCM2DotScale / 2;
+// 						}
+// 						if (cospaceMap.getMapObjInfo(x, y, CYAN_LOADED_ID) > 0 && loaded_objects[CYAN_LOADED_ID] < kBorderSameObjNum)
+// 						{
+// 							LOG_MESSAGE(FUNCNAME + "(): We can get Cyan Obj here(" + to_string(x * kCM2DotScale) + ',' + to_string(y * kCM2DotScale) + ")", MODE_VERBOSE);
+// 							cost -= kCM2DotScale / 2;
+// 						}
+// 						if (cospaceMap.getMapObjInfo(x, y, BLACK_LOADED_ID) > 0 && loaded_objects[BLACK_LOADED_ID] < kBorderSameObjNum)
+// 						{
+// 							LOG_MESSAGE(FUNCNAME + "(): We can get Black Obj here(" + to_string(x * kCM2DotScale) + ',' + to_string(y * kCM2DotScale) + ")", MODE_VERBOSE);
+// 							cost -= kCM2DotScale / 2;
+// 						}*/
+// 						if (cospaceMap.getMapStatus(x, y) == 0 || cospaceMap.getMapCost(investigating_dot_x, investigating_dot_y) + cost < cospaceMap.getMapCost(x, y))
+// 						{
+// 							cospaceMap.setMapCost(x, y, cospaceMap.getMapCost(investigating_dot_x, investigating_dot_y) + cost);
+// 							cospaceMap.setMapTotalCost(x, y, cospaceMap.getMapCost(x, y) + TO_INT(sqrt(pow((goal_x - x) * kCM2DotScale, 2) + pow((goal_y - y) * kCM2DotScale, 2))));
+// 							cospaceMap.setMapFrom(x, y, investigating_dot_x, investigating_dot_y);
+// 							cospaceMap.setMapStatus(x, y, 1);
+// 							cospaceMap.setMapCurvedTimes(x, y, cospaceMap.getMapCurvedTimes(investigating_dot_x, investigating_dot_y, x, y));
+// 						}
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// 	// if (getRepeatedNum() % 10 == 0)
+// 	// {
+// 	// 	rep(yi, kDotHeight)
+// 	// 	{
+// 	// 		rep(xj, kDotWidth)
+// 	// 		{
 
-	// 			if (goal_y == kDotHeight - yi - 1 && goal_x == xj)
-	// 			{
-	// 				printf("goal");
-	// 			}
-	// 			else if (robot_dot_positions[1][1] == kDotHeight - yi - 1 && robot_dot_positions[1][0] == xj)
-	// 			{
-	// 				printf(" go ");
-	// 			}
-	// 			else if (log_astar[kDotHeight - yi - 1][xj] == -1)
-	// 			{
-	// 				printf("    ");
-	// 			}
-	// 			else
-	// 			{
+// 	// 			if (goal_y == kDotHeight - yi - 1 && goal_x == xj)
+// 	// 			{
+// 	// 				printf("goal");
+// 	// 			}
+// 	// 			else if (robot_dot_positions[1][1] == kDotHeight - yi - 1 && robot_dot_positions[1][0] == xj)
+// 	// 			{
+// 	// 				printf(" go ");
+// 	// 			}
+// 	// 			else if (log_astar[kDotHeight - yi - 1][xj] == -1)
+// 	// 			{
+// 	// 				printf("    ");
+// 	// 			}
+// 	// 			else
+// 	// 			{
 
-	// 				printf("%3d ", log_astar[kDotHeight - yi - 1][xj]);
-	// 			}
-	// 		}
-	// 		printf("\n");
-	// 	}
-	// 	printf("\n");
-	// }
+// 	// 				printf("%3d ", log_astar[kDotHeight - yi - 1][xj]);
+// 	// 			}
+// 	// 		}
+// 	// 		printf("\n");
+// 	// 	}
+// 	// 	printf("\n");
+// 	// }
 
-	// goalに到着したとき
-	int goal[2];
-	cospaceMap.getMapFrom(goal_x, goal_y, &goal[0], &goal[1]);
-	if (goal[0] != -1)
-	{
-		is_not_finished = 1;
-		return;
-	}
-	else
-	{
-		++is_not_finished;
-	}
+// 	// goalに到着したとき
+// 	int goal[2];
+// 	cospaceMap.getMapFrom(goal_x, goal_y, &goal[0], &goal[1]);
+// 	if (goal[0] != -1)
+// 	{
+// 		is_not_finished = 1;
+// 		return;
+// 	}
+// 	else
+// 	{
+// 		++is_not_finished;
+// 	}
 
-	LOG_MESSAGE(FUNCNAME + "(): while num " + to_string(loop_times), MODE_DEBUG);
-	//cout << "astar num " << loop_times << endl;
-	//cout << "astar " << pt2.end() << endl;
+// 	LOG_MESSAGE(FUNCNAME + "(): while num " + to_string(loop_times), MODE_DEBUG);
+// 	//cout << "astar num " << loop_times << endl;
+// 	//cout << "astar " << pt2.end() << endl;
 
-	// // 出力
-	// int max_value = INT_MIN;
-	// rep(yi, kDotHeight)
-	// {
-	//     rep(xj, kDotWidth)
-	//     {
-	//         if (cospaceMap.getMapCost(xj, yi) > max_value)
-	//         {
-	//             max_value = cospaceMap.getMapCost(xj, yi);
-	//         }
-	//     }
-	// }
-	// LOG_MESSAGE(FUNCNAME + "(): max value : " + to_string(max_value), MODE_VERBOSE);
-	// if (max_value == INT_MIN)
-	// {
-	//     ERROR_MESSAGE(FUNCNAME + "(): max value is 0", MODE_NORMAL);
-	//     return;
-	// }
-	// if (max_value < 0)
-	// {
-	//     ERROR_MESSAGE(FUNCNAME + "(): max value is " + to_string(max_value), MODE_NORMAL);
-	// }
+// 	// // 出力
+// 	// int max_value = INT_MIN;
+// 	// rep(yi, kDotHeight)
+// 	// {
+// 	//     rep(xj, kDotWidth)
+// 	//     {
+// 	//         if (cospaceMap.getMapCost(xj, yi) > max_value)
+// 	//         {
+// 	//             max_value = cospaceMap.getMapCost(xj, yi);
+// 	//         }
+// 	//     }
+// 	// }
+// 	// LOG_MESSAGE(FUNCNAME + "(): max value : " + to_string(max_value), MODE_VERBOSE);
+// 	// if (max_value == INT_MIN)
+// 	// {
+// 	//     ERROR_MESSAGE(FUNCNAME + "(): max value is 0", MODE_NORMAL);
+// 	//     return;
+// 	// }
+// 	// if (max_value < 0)
+// 	// {
+// 	//     ERROR_MESSAGE(FUNCNAME + "(): max value is " + to_string(max_value), MODE_NORMAL);
+// 	// }
 
-	// for (long yi = kDotHeight - 1; yi >= 0; --yi)
-	// {
-	//     rep(xj, kDotWidth)
-	//     {
-	//         switch (map[0][yi][xj])
-	//         {
-	//         case cospaceMap.MAP_YELLOW:
-	//         case cospaceMap.MAP_WALL:
-	//             printf("*");
-	//             break;
-	//         default:
-	//             if (map_cost[yi][xj] < 0)
-	//             {
-	//                 printf("'");
-	//             }
-	//             else
-	//             {
-	//                 printf("%d", TO_INT(map_cost[yi][xj] * 9 / max_value));
-	//             }
-	//         }
-	//     }
-	//     printf("\n");
-	// }
-	// printf("\n");
-}
+// 	// for (long yi = kDotHeight - 1; yi >= 0; --yi)
+// 	// {
+// 	//     rep(xj, kDotWidth)
+// 	//     {
+// 	//         switch (map[0][yi][xj])
+// 	//         {
+// 	//         case cospaceMap.MAP_YELLOW:
+// 	//         case cospaceMap.MAP_WALL:
+// 	//             printf("*");
+// 	//             break;
+// 	//         default:
+// 	//             if (map_cost[yi][xj] < 0)
+// 	//             {
+// 	//                 printf("'");
+// 	//             }
+// 	//             else
+// 	//             {
+// 	//                 printf("%d", TO_INT(map_cost[yi][xj] * 9 / max_value));
+// 	//             }
+// 	//         }
+// 	//     }
+// 	//     printf("\n");
+// 	// }
+// 	// printf("\n");
+// }
 
 World2_Test2::~World2_Test2()
 {
@@ -1591,6 +1738,213 @@ void World2_Test2::CheckNowDot()
 	}
 	now_dot_id = robot_dot_positions[1][1] * kDotWidth + robot_dot_positions[1][0];
 }
+int World2_Test2::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, int color)
+{
+	LOG_MESSAGE(FUNCNAME + "(): start", MODE_DEBUG);
+	//fprintf(logfile, " %d Start GoToDots(%d, %d, %d, %d)\n", getRepeatedNum(), x, y, wide_decide_x, wide_decide_y);
+	// printf("GoToDots(): %d %d %d %d\n", x, y, wide_decide_x, wide_decide_y);
+	static int prev_x = -1;
+	static int prev_y = -1;
+	static int prev_color = -1000;
+	static int target_x = -1;
+	static int target_y = -1;
+	static int local_same_target = 0;
+	static int same_target_border = 0;
+	if (x != prev_x || y != prev_y || color != prev_color)
+	{
+		LOG_MESSAGE("changed dots", MODE_NORMAL);
+		local_same_target = 0;
+		prev_x = x;
+		prev_y = y;
+		//0:left bottom corner 1:right bottom corner 2:right bottom corner
+		int corner_x[2], corner_y[2];
+		corner_x[0] = (x - wide_decide_x) / kCM2DotScale;
+		corner_y[0] = (y - wide_decide_y) / kCM2DotScale;
+		corner_x[1] = (x + wide_decide_x) / kCM2DotScale;
+		corner_y[1] = (y + wide_decide_y) / kCM2DotScale;
+
+		for (int i = 0; i < 2; i++)
+		{
+			if (corner_x[i] < 0)
+			{
+				//fprintf(errfile, " %d GoToDots() corner_x[%d] is %d < 0\n", getRepeatedNum(), i, corner_x[i]);
+				//fprintf(logfile, " %d GoToDots() corner_x[%d] is %d < 0\n", getRepeatedNum(), i, corner_x[i]);
+				corner_x[i] = 0;
+			}
+			if (corner_x[i] >= kDotWidth)
+			{
+				//fprintf(errfile, " %d GoToDots() corner_x[%d] is %d >= %d\n", getRepeatedNum(), i, corner_x[i], kDotWidth);
+				//fprintf(logfile, " %d GoToDots() corner_x[%d] is %d >= %d\n", getRepeatedNum(), i, corner_x[i], kDotWidth);
+				corner_x[i] = kDotWidth - 1;
+			}
+			if (corner_y[i] < 0)
+			{
+				//fprintf(errfile, " %d GoToDots() corner_y[%d] is %d < 0\n", getRepeatedNum(), i, corner_y[i]);
+				//fprintf(logfile, " %d GoToDots() corner_y[%d] is %d < 0\n", getRepeatedNum(), i, corner_y[i]);
+				corner_y[i] = 0;
+			}
+			if (corner_y[i] >= kDotHeight)
+			{
+				//fprintf(errfile, " %d GoToDots() corner_y[%d] is %d >= %d\n", getRepeatedNum(), i, corner_y[i], kDotHeight);
+				//fprintf(logfile, " %d GoToDots() corner_y[%d] is %d >= %d\n", getRepeatedNum(), i, corner_y[i], kDotHeight);
+				corner_y[i] = kDotHeight - 1;
+			}
+		}
+
+		int min = 100000, id = -1;
+		// Move once every n times
+		int option = rnd() % 3;
+		if (color == cospaceMap.MAP_DEPOSIT) {
+			Dijkstra();
+		}
+		for (int xi = corner_x[0]; xi <= corner_x[1]; xi++)
+		{
+			for (int yj = corner_y[0]; yj <= corner_y[1]; yj++)
+			{
+				int investigating_dot_id = yj * kDotWidth + xi;
+				if (xi <= 0 || xi >= kDotWidth - 1 || yj <= 0 || yj >= kDotHeight - 1)
+				{
+					continue;
+				}
+				//yellow or wall or deposit
+				if (cospaceMap.getMapInfo(xi, yj) == cospaceMap.MAP_DEPOSIT || cospaceMap.getMapInfo(xi, yj) == cospaceMap.MAP_WALL)
+				{
+					continue;
+				}
+				if (color == POINT_RED)
+				{
+					if (cospaceMap.getMapObjInfo(xi,yj,RED_LOADED_ID) != 1)
+					{
+						continue;
+					}
+				}
+				else if (color == POINT_CYAN)
+				{
+					if (cospaceMap.getMapObjInfo(xi,yj,CYAN_LOADED_ID) != 1)
+					{
+						continue;
+					}
+				}
+				else if (color == POINT_BLACK)
+				{
+					if (cospaceMap.getMapObjInfo(xi,yj,BLACK_LOADED_ID) != 1)
+					{
+						continue;
+					}
+				}
+				else if (color == cospaceMap.MAP_DEPOSIT)
+				{
+					if (cospaceMap.getMapInfo(xi, yj) != cospaceMap.MAP_DEPOSIT)
+					{
+						continue;
+					}
+				}
+
+				int costs = static_cast<int>(cospaceMap.getMapArrivedTimes(xi, yj) * 100 + rnd() % 10);
+
+				if (option)
+				{
+					// 移動しないとき
+					int k = 30;
+					costs += static_cast<int>(sqrt(pow(abs(xi * kCM2DotScale - pos_x) - k, 2) + pow(abs(yj * kCM2DotScale - pos_y) - k, 2)));
+				}
+				else
+				{
+					// 移動するとき
+					costs -= static_cast<int>(pow(xi * kCM2DotScale - pos_x, 2) / 100 - pow(yj * kCM2DotScale - pos_y, 2) / 100);
+				}
+				if (color == cospaceMap.MAP_DEPOSIT)
+				{
+					costs = cospaceMap.getMapCost(xi,yj);
+				}
+				// cout << "position cost " << pow(i * kCM2DotScale - pos_x, 2) / 100 + pow(j * kCM2DotScale - pos_y, 2) / 100 << " arrived cost " << cospaceMap.getMapArrivedTimes(xi, yj) * 100 << endl;
+				// for (int i = 0; i < 100000; i++) {
+				// 	// for (int j = 0; j < 1000000; j++) {
+				// 		// for (int k = 0; k < 100000; k++) {
+				// 		// }
+				// 	// }
+				// }
+				if (costs < min)
+				{
+					min = costs;
+					id = investigating_dot_id;
+				}
+			}
+		}
+		if (id == -1)
+		{
+			//fprintf(errfile, "%d GoInDots(): There is no dot that can go\n", getRepeatedNum());
+			//fprintf(logfile, " %d GoToDots(): There is no dot that can go\n", getRepeatedNum());
+			//fprintf(stdout, "%d GoInDots(): There is no dot that can go\n", getRepeatedNum());
+			target_x = x / kCM2DotScale;
+			target_y = y / kCM2DotScale;
+		}
+		else
+		{
+			target_y = id / kDotWidth;
+			target_x = id - target_y * kDotWidth;
+			LOG_MESSAGE("target(" + to_string(target_x) + ", " + to_string(target_y), MODE_NORMAL);
+			//fprintf(logfile, " %d decide target as (%d, %d)\n", getRepeatedNum(), target_x, target_y);
+		}
+
+		same_target_border = static_cast<int>(sqrt(pow(pos_x - target_x * kCM2DotScale, 2) + pow(pos_y - target_y * kCM2DotScale, 2)));
+		same_target_border *= 2;
+		same_target_border += 30;
+
+		// int i = 0;
+		// do {
+		// 	i++;
+		// 	if(i > 20) {
+		// 		printf("%d GoToDots(): can not decide target\n", getRepeatedNum());
+		// 		//fprintf(errfile, "%d GoToDots(): Can not decide target\n", getRepeatedNum());
+		// 		//fprintf(logfile, " %d GoToDots(): Can not decide target\n", getRepeatedNum());
+		// 		target_x = x;
+		// 		target_y = y;
+		// 		target_x /= kCM2DotScale;
+		// 		target_y /= kCM2DotScale;
+		// 		break;
+		// 	}
+		// 	target_x = x - wide_decide_x + rand() % (wide_decide_x * 2 + 1);
+		// 	target_y = y - wide_decide_y + rand() % (wide_decide_y * 2 + 1);
+		// 	target_x /= kCM2DotScale;
+		// 	target_y /= kCM2DotScale;
+		// 	if(target_x <= 0) {
+		// 		target_x = 1;
+		// 	}
+		// 	if(target_x >= kDotWidth - 1) {
+		// 		target_x = kDotWidth - 2;
+		// 	}
+		// 	if(target_y <= 0) {
+		// 		target_y = 1;
+		// 	}
+		// 	if(target_y >= kDotHeight - 1) {
+		// 		target_y = kDotHeight - 2;
+		// 	}
+		// } while(dot[target_y * kDotWidth + target_x].point <= POINT_WALL);
+	}
+
+	prev_x = x;
+	prev_y = y;
+	prev_color = color;
+
+	local_same_target++;
+	// printf("%d\n", local_same_target);
+	// printf("%d %d\n", local_same_target, same_target_border);
+	LOG_MESSAGE("target_x, y " + to_string(target_x * kCM2DotScale) + " " + to_string(target_y * kCM2DotScale), MODE_NORMAL);
+	if (GoToDot(target_x, target_y) || local_same_target > same_target_border)
+	{
+		prev_x = -1;
+		local_same_target = 0;
+		//fprintf(logfile, " %d End GoToDots() with returning 1\n", getRepeatedNum());
+		return 1;
+	}
+	else
+	{
+		//fprintf(logfile, " %d End GoToDots() with returning 0\n", getRepeatedNum());
+		return 0;
+	}
+}
+
 
 long World2_Test2::WhereIsMotor(void)
 {
@@ -2221,7 +2575,7 @@ void World2_Test2::GoToAngle(int angle, int distance)
 	// }
 	LOG_MESSAGE(FUNCNAME + "(): end with motor(" + to_string(WheelLeft) + "," + to_string(WheelRight) + ")", MODE_VERBOSE);
 }
-	
+
 
 void World2_Test2::Dijkstra(void)
 {
@@ -2272,23 +2626,6 @@ void World2_Test2::Dijkstra(void)
 		{
 			break;
 		}
-		// if (investigating_dot_x==0)
-		// 		{
-		// 			investigating_dot_x = 1;
-		// 		}
-		// 		if (investigating_dot_x==kDotWidth)
-		// 		{
-		// 			investigating_dot_x = kDotWidth - 1;
-		// 		}
-		// 		if (investigating_dot_y==0)
-		// 		{
-		// 			investigating_dot_y = 1;
-		// 		}
-		// 		if (investigating_dot_y==kDotHeight)
-		// 		{
-		// 			investigating_dot_y = kDotHeight - 1;
-		// 		}
-
 		cospaceMap.setMapStatus(investigating_dot_x, investigating_dot_y, 2);
 		for (int y = investigating_dot_y - 1; y <= investigating_dot_y + 1; ++y)
 		{
@@ -2311,7 +2648,7 @@ void World2_Test2::Dijkstra(void)
 					{
 						cost *= 1000;
 					}
-					if (cospaceMap.getMapInfo(x, y) == cospaceMap.MAP_UNKNOWN)
+					if (cospaceMap.getMapInfo(x, y) == cospaceMap.MAP_UNKNOWN || cospaceMap.getMapInfo(x, y) == cospaceMap.MAP_WHITE)
 					{
 						if (Time < 60)
 						{
@@ -2337,7 +2674,7 @@ void World2_Test2::Dijkstra(void)
 					}
 					if (cospaceMap.getMapStatus(x, y) == 0 || cospaceMap.getMapCost(investigating_dot_x, investigating_dot_y) + cost < cospaceMap.getMapCost(x, y))
 					{
-						cospaceMap.setMapCost(x, y, cospaceMap.getMapInfo(investigating_dot_x, investigating_dot_y) + cost);
+						cospaceMap.setMapCost(x, y, cospaceMap.getMapCost(investigating_dot_x, investigating_dot_y) + cost);
 						cospaceMap.setMapFrom(x, y, investigating_dot_x, investigating_dot_y);
 						cospaceMap.setMapStatus(x, y, 1);
 					}
@@ -2913,4 +3250,35 @@ void World2_Test2::calculateWallPosition(void)
 
 		// }
 	}
+}
+
+
+void World2_Test2::SearchDeposit(void)
+{
+	int deposit_x = -1; int deposit_y = -1;
+	for (int xi = 0; xi <= kDotWidth; xi++)
+	{
+		for (int yj = 0; yj <= kDotHeight; yj++)
+		{
+			if (cospaceMap.getMapInfo(xi, yj) != cospaceMap.MAP_DEPOSIT)
+			{
+				continue;
+			}
+			deposit_x = xi;
+			deposit_y = yj;
+		}
+	}
+	if (deposit_x == -1)
+	{
+		UnknownDeposit();
+	}
+	else
+	{
+		GoToDot(deposit_x, deposit_y);
+	}
+}
+
+void UnknownDeposit(void)
+{
+	
 }
