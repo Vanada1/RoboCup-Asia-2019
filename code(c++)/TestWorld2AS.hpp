@@ -30,6 +30,8 @@ private:
     const static int kAreaHeight = kCospaceHeight / kCM2AreaScale;
 	const static int kUSLimit = 150;
 
+    char map_data_to_show[kDotWidth * kDotHeight];
+
     const int kBorderSameObjNum = 2;
     const int kFindObjDuration = 45;
     const int kDepositObjDuration = 45;
@@ -211,9 +213,9 @@ private:
                 }
                 return kFailure;
             }
-            for (int yi = y-1; yi<=y+1;yi++)
+            for (int yi = y-2; yi<=y+2;yi++)
             {
-                for (int xj = x-1; xj <= x+1; xj++)
+                for (int xj = x-2; xj <= x+2; xj++)
                 {
             map[object_loaded_id][yi][xj] = value;
                 }
@@ -415,6 +417,33 @@ private:
         }
         int getMapCurvedTimes(int from_x, int from_y, int target_x, int target_y);
 
+        inline int setMapCostUnknow(int x, int y, int cost)
+        {
+            if (x < 0 || x >= kDotWidth || y < 0 || y >= kDotHeight)
+            {
+                if (MODE_NORMAL <= getRunMode())
+                {
+                    logErrorMessage.errorMessage(FUNCNAME + " Failed; (x, y)=(" + std::to_string(x) + ", " + std::to_string(y) + ")", MODE_NORMAL);
+                }
+                return kFailure;
+            }
+            map_cost_unknow[x][y] = cost;
+            return kSuccess;
+        }
+
+        inline int getMapCostUnknow(int x, int y)
+        {
+            if (x < 0 || x >= kDotWidth || y < 0 || y >= kDotHeight)
+            {
+                if (MODE_NORMAL <= getRunMode())
+                {
+                    logErrorMessage.errorMessage(FUNCNAME + " Failed; (x, y)=(" + std::to_string(x) + ", " + std::to_string(y) + ")", MODE_NORMAL);
+                }
+                return kFailure;
+            }
+            return map_cost_unknow[x][y];
+        }
+
         const static int kSuccess = -1;
         const static int kFailure = INT_MIN;
         const static int kGuessedMapSize = 10;
@@ -423,8 +452,10 @@ private:
         const static int map_wall_index = 4;
         // 0:Floor information 1:red 2:cyan 3:black 4:Wall information
         int map[5][kDotHeight][kDotWidth];
+
         int map_arrived_times[kDotHeight][kDotWidth];
         int map_from[kDotHeight][kDotWidth][2];
+        int map_cost_unknow[kDotWidth][kDotHeight];
         int map_cost[kDotHeight][kDotWidth];
         int map_total_cost[kDotHeight][kDotWidth];
         int map_status[kDotHeight][kDotWidth];
@@ -443,7 +474,7 @@ private:
     int dotsForInvestegation[5][2] = {{45, 45}, {345, 45}, {180, 135}, {60, 180}, {290, 190}};
     int next_allowed_go_time[5][5];
     int large_process = -1;
-    int processGoToDots = 0;
+    int processGoToDots = 6;///////////////////////Need 0
     int process_times = 0;
     int skip_time = 100;
 
@@ -463,8 +494,8 @@ private:
     void autoSearch(float parameter);
     void saveColorInfo(void);
     void calculateWallPosition(void);
-    void SearchDeposit(void);
-    void UnknownDeposit(void);
+    int SearchDots(int info);
+    void UnknownDots(void);
     inline double sigmoid(double gain, double value, double scale)
     {
         return (1.0 / (1.0 + exp(-gain * value))) * scale;

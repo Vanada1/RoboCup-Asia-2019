@@ -26,6 +26,45 @@ void World2_Test2::loop()
 
 	// static int same_time = 0;
 	// static int prev_repeated_num = 0;
+	if (getRepeatedNum() % 1 == 0)
+	{
+		//cout << "out map" << endl;
+		ProcessingTime pt2;
+		pt2.start();
+		FILE *fp = fopen("map_out.txt", "w");
+		if (fp == NULL)
+		{
+			ERROR_MESSAGE(FUNCNAME + "(): failed to make map_out.txt", MODE_NORMAL);
+		}
+		else
+		{
+			//cout << "out map start" << endl;
+			rep(xj, kDotWidth + 2)
+			{
+				fprintf(fp, "#");
+				// printf("#");
+			}
+			rep(yi, kDotHeight)
+			{
+				fprintf(fp, "#");
+				// printf("#");
+				rep(xj, kDotWidth)
+				{
+					fprintf(fp, "%c", map_data_to_show[(kDotHeight - 1 - yi) * kDotWidth + xj]);
+				}
+				fprintf(fp, "#");
+				// printf("#");
+				fprintf(fp, "\n");
+			}
+			rep(xj, kDotWidth + 2)
+			{
+				fprintf(fp, "#");
+			}
+			fprintf(fp, "\n");
+			fclose(fp);
+			//cout << "out map end " << pt2.end() << endl;
+		}
+	}
 	if (PositionX != 0 || PositionY != 0)
 	{
 		LOG_MESSAGE(FUNCNAME + "(): not in PLA and (x, y) is (" + to_string(PositionX) + ", " + to_string(PositionY) + ")", MODE_DEBUG);
@@ -317,6 +356,10 @@ void World2_Test2::loop()
 		logErrorMessage.outputData("out.txt", "\n");
 		cout << "output! finished" << endl;*/
 	}
+	if (IsOnTrapBlue() != 0)
+	{
+		resetLoadedObjects();
+	}
 	if (SuperDuration > 0)
 	{
 		--SuperDuration;
@@ -385,6 +428,9 @@ void World2_Test2::loop()
 		// autoSearch(2);
 		switch (IsOnDepositArea())
 		{
+		case 0:
+			motor(5, 5);
+			break;
 		case 1:
 			motor(5, 3);
 			break;
@@ -430,7 +476,7 @@ void World2_Test2::loop()
 	else if (LoadedObjects >= 6 || (Time > 450 && log_superobj_num == 0 && (LoadedObjects > 2 || loaded_objects[SUPER_LOADED_ID] > 0)))
 	{
 		searching_object = -1;
-		SearchDeposit();
+		SearchDots(cospaceMap.MAP_DEPOSIT);
 	}
 	else if (processGoToDots < 5)
 	{
@@ -451,9 +497,16 @@ void World2_Test2::loop()
 		process_times = 0;
 	}
 
+	// else if (processGoToDots == 6)
+	// {
+	// 	UnknownDots();
+	// }
+
 	else
 	{
 		if (loaded_objects[CYAN_LOADED_ID] < kBorderSameObjNum)
+		{
+			if (SearchDots(CYAN_LOADED_ID) == 1)
 		{
 			if (large_process != 1 || next_allowed_go_time[CYAN_LOADED_ID][process] > Time)
 			{
@@ -508,7 +561,11 @@ void World2_Test2::loop()
 				process_times = 0;
 			}
 		}
+		}
 		else if (loaded_objects[RED_LOADED_ID] < kBorderSameObjNum)
+		{
+		
+		if (SearchDots(RED_LOADED_ID) == 1)
 		{
 			if (large_process != 2 || next_allowed_go_time[RED_LOADED_ID][process] > Time)
 			{
@@ -560,33 +617,36 @@ void World2_Test2::loop()
 			}
 			large_process = 2;
 		}
+		}
 		else
 		{
-
-			if (large_process != 0 || next_allowed_go_time[BLACK_LOADED_ID][process] > Time)
+			if (SearchDots(BLACK_LOADED_ID) == 1)
 			{
-				process = 0;
-				process_times = 0;
-				large_process = 0;
-			}
-			if (process == 0)
-			{
-				if (GoInDots(180, 135, 180, 135, POINT_BLACK))
+				if (large_process != 0 || next_allowed_go_time[BLACK_LOADED_ID][process] > Time)
 				{
-					if (process_times >= 3)
-					{
-						next_allowed_go_time[BLACK_LOADED_ID][process] = Time + skip_time;
-						process = 0;
-						process_times = 0;
-					}
-					process_times++;
+					process = 0;
+					process_times = 0;
+					large_process = 0;
 				}
-				//goInArea(30, 180, 20, 45, 10);
-			}
-			else
-			{
-				process = 0;
-				process_times = 0;
+				if (process == 0)
+				{
+					if (GoInDots(180, 135, 180, 135, POINT_BLACK))
+					{
+						if (process_times >= 3)
+						{
+							next_allowed_go_time[BLACK_LOADED_ID][process] = Time + skip_time;
+							process = 0;
+							process_times = 0;
+						}
+						process_times++;
+					}
+					//goInArea(30, 180, 20, 45, 10);
+				}
+				else
+				{
+					process = 0;
+					process_times = 0;
+				}
 			}
 		}
 	}
@@ -714,7 +774,6 @@ int World2_Test2::GoToDot(int x, int y)
 		GoToPosition(x * kCM2DotScale, y * kCM2DotScale, 10, 10, 5);
 		return 1;
 	}
-	char map_data_to_show[kDotWidth * kDotHeight];
 	rep(yi, kDotHeight)
 	{
 		rep(xj, kDotWidth)
@@ -739,10 +798,19 @@ int World2_Test2::GoToDot(int x, int y)
 			{
 				map_data_to_show[yi * kDotWidth + xj] = ' ';
 			}
-			else 
+			else if (cospaceMap.getMapInfo(xj, yi) == cospaceMap.MAP_SUPER_AREA)
+			{
+				map_data_to_show[yi * kDotWidth + xj] = 'S';
+			}
+			else if (cospaceMap.getMapInfo(xj, yi) == cospaceMap.MAP_UNKNOWN)
 			{
 				map_data_to_show[yi * kDotWidth + xj] = '\'';
 			}
+			else
+			{
+				map_data_to_show[yi * kDotWidth + xj] = '-';
+			}
+			
 		}
 	}
 
@@ -3253,32 +3321,110 @@ void World2_Test2::calculateWallPosition(void)
 }
 
 
-void World2_Test2::SearchDeposit(void)
+int World2_Test2::SearchDots(int info)
 {
-	int deposit_x = -1; int deposit_y = -1;
+	int target_x = -1; int target_y = -1;
 	for (int xi = 0; xi <= kDotWidth; xi++)
 	{
 		for (int yj = 0; yj <= kDotHeight; yj++)
 		{
-			if (cospaceMap.getMapInfo(xi, yj) != cospaceMap.MAP_DEPOSIT)
+			if (info == cospaceMap.MAP_DEPOSIT)
 			{
-				continue;
+				if (cospaceMap.getMapInfo(xi, yj) != cospaceMap.MAP_DEPOSIT)
+				{
+					continue;
+				}
+				if (sqrt(pow(abs(robot_dot_positions[1][0] - xi), 2) + pow(abs(robot_dot_positions[1][1] - yj), 2)) > 
+				sqrt(pow(abs(robot_dot_positions[1][0] - target_x), 2) + pow(abs(robot_dot_positions[1][1] - target_y), 2)) && target_x != -1)
+				{
+					continue;
+				}
+				target_x = xi;
+				target_y = yj;
 			}
-			deposit_x = xi;
-			deposit_y = yj;
+			else 
+			{
+				if (cospaceMap.getMapObjInfo(xi,yj,info) != 1)
+				{
+					continue;
+				}
+				target_x = xi;
+				target_y = yj;
+			}
 		}
 	}
-	if (deposit_x == -1)
+	if (target_x == -1)
 	{
-		UnknownDeposit();
+		UnknownDots();
+		return 0;
 	}
 	else
 	{
-		GoToDot(deposit_x, deposit_y);
+		if (info == cospaceMap.MAP_DEPOSIT)
+		{
+		GoToDot(target_x, target_y);
+		}
+	return 1;
 	}
 }
 
-void UnknownDeposit(void)
+
+void World2_Test2::UnknownDots(void)
 {
+	int best_x, best_y;
+	//MAY BE NOT
+	if (robot_dot_positions[1][0] < 0 || robot_dot_positions[1][0] >= kDotWidth || robot_dot_positions[1][1] < 0 || robot_dot_positions[1][1] >= kDotHeight)
+	{
+		ERROR_MESSAGE(FUNCNAME + "(); now dot is (" + to_string(robot_dot_positions[1][0]) + ", " + to_string(robot_dot_positions[1][1]) + ")", MODE_NORMAL);
+	}
+	rep(yi, kDotHeight)
+	{
+		rep(xj, kDotWidth)
+		{	
+			int cost = 0;
+			for (int y = yi - 1; y <= yi + 1; y++)
+			{
+				for (int x = xj - 1; x <= xj+1; x++)
+				{
+					if (x < 0 || x > kDotWidth || y < 0 || y > kDotHeight)
+					{
+						continue;
+					}
+					if (cospaceMap.getMapInfo(x, y) == cospaceMap.MAP_UNKNOWN)
+					{
+						cost++;
+					}
+					// if (cospaceMap.getMapInfo(x, y) == cospaceMap.MAP_WALL || cospaceMap.getMapInfo(x, y) == cospaceMap.MAP_YELLOW || cospaceMap.getMapInfo(x, y) == cospaceMap.MAP_SWAMPLAND )
+					// {
+					// 	cost--;
+					// }
+				}
+			}
+			cospaceMap.setMapCostUnknow(xj, yi, cospaceMap.getMapCostUnknow(xj, yi) + cost);
+
+		}
+
+	}
 	
+	int max_value = -100;
+	rep(yi, kDotHeight)
+	{
+		rep(xj, kDotWidth)
+		{
+			if (cospaceMap.getMapCostUnknow(xj, yi) > max_value)
+			{
+				max_value = cospaceMap.getMapCostUnknow(xj, yi);
+				best_x = xj;
+				best_y = yi;
+			}
+		}
+	}
+	LOG_MESSAGE(FUNCNAME + "(): max value : " + to_string(max_value), MODE_VERBOSE);
+	if (max_value <= 0)
+	{
+		ERROR_MESSAGE(FUNCNAME + "(): max value is " + to_string(max_value), MODE_NORMAL);
+		return;
+	}
+	GoToDot(best_x,best_y);
+	//GoToDots(best_x * kCM2DotScale, best_y * kCM2DotScale, 10, 10);
 }
