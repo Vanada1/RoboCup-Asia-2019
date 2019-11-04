@@ -480,7 +480,7 @@ void World2_Test2::loop()
 	}
 	else if (processGoToDots < 5)
 	{
-		if (GoToDots(dotsForInvestegation[processGoToDots][0], dotsForInvestegation[processGoToDots][1], 50, 50))
+		if (GoToDots(dotsForInvestegation[processGoToDots][0], dotsForInvestegation[processGoToDots][1], kDotWidth / 4, kDotHeight / 4))
 		{					
 			if (process_times >= 2)
 			{
@@ -3362,7 +3362,7 @@ int World2_Test2::SearchDots(int info)
 	{
 		if (info == cospaceMap.MAP_DEPOSIT)
 		{
-		GoToDot(target_x, target_y);
+			GoToDot(target_x, target_y);
 		}
 	return 1;
 	}
@@ -3372,6 +3372,13 @@ int World2_Test2::SearchDots(int info)
 void World2_Test2::UnknownDots(void)
 {
 	int best_x, best_y;
+	rep(yi, kDotHeight)
+	{
+		rep(xj, kDotWidth)
+		{	
+			cospaceMap.setMapCostUnknow(xj, yi, 0);
+		}
+	}
 	//MAY BE NOT
 	if (robot_dot_positions[1][0] < 0 || robot_dot_positions[1][0] >= kDotWidth || robot_dot_positions[1][1] < 0 || robot_dot_positions[1][1] >= kDotHeight)
 	{
@@ -3381,10 +3388,19 @@ void World2_Test2::UnknownDots(void)
 	{
 		rep(xj, kDotWidth)
 		{	
-			int cost = 0;
-			for (int y = yi - 1; y <= yi + 1; y++)
+			if (cospaceMap.getStatusUnkow(xj, yi) == 1)
 			{
-				for (int x = xj - 1; x <= xj+1; x++)
+				
+				continue;
+			}
+			if (cospaceMap.getMapInfo(xj, yi) != cospaceMap.MAP_UNKNOWN)
+			{
+				continue;
+			}
+			int cost = 0;
+			for (int y = yi - 2; y <= yi + 2; y += 2)
+			{
+				for (int x = xj - 2; x <= xj + 2; x += 2)
 				{
 					if (x < 0 || x > kDotWidth || y < 0 || y > kDotHeight)
 					{
@@ -3425,6 +3441,23 @@ void World2_Test2::UnknownDots(void)
 		ERROR_MESSAGE(FUNCNAME + "(): max value is " + to_string(max_value), MODE_NORMAL);
 		return;
 	}
-	GoToDot(best_x,best_y);
-	//GoToDots(best_x * kCM2DotScale, best_y * kCM2DotScale, 10, 10);
+	if (GoToDot(best_x, best_y))
+		{					
+			if (process_times >= 3)
+			{
+				for (int y = best_y - 2; y <= best_y + 2; y += 2)
+				{
+					for (int x = best_x - 2; x <= best_x + 2; x += 2)
+					{
+						cospaceMap.setStatusUnkow(x, y, 1);
+					}
+				}
+				UnknownDots();
+			}
+			process_times++;
+		}
+	else {
+		process_times = 0;
+	}
+	//GoToDots(best_x * kCM2DotScale, best_y * kCM2DotScale, 30, 30);
 }

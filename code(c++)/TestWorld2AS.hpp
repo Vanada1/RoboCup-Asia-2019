@@ -28,7 +28,7 @@ private:
     const static int kDot2AreaScale = kCM2AreaScale / kCM2DotScale;
     const static int kAreaWidth = kCospaceWidth / kCM2AreaScale;
     const static int kAreaHeight = kCospaceHeight / kCM2AreaScale;
-	const static int kUSLimit = 150;
+	const static int kUSLimit = 186;
 
     char map_data_to_show[kDotWidth * kDotHeight];
 
@@ -444,6 +444,33 @@ private:
             return map_cost_unknow[x][y];
         }
 
+        inline int setStatusUnkow(int x, int y, int status)
+        {
+            if (x < 0 || x >= kDotWidth || y < 0 || y >= kDotHeight)
+            {
+                if (MODE_NORMAL <= getRunMode())
+                {
+                    logErrorMessage.errorMessage(FUNCNAME + " Failed; (x, y)=(" + std::to_string(x) + ", " + std::to_string(y) + ")", MODE_NORMAL);
+                }
+                return kFailure;
+            }
+            map_unknow_status[y][x] = status;
+            return kSuccess;
+        }
+
+        inline int getStatusUnkow(int x, int y)
+        {
+            if (x < 0 || x >= kDotWidth || y < 0 || y >= kDotHeight)
+            {
+                if (MODE_NORMAL <= getRunMode())
+                {
+                    logErrorMessage.errorMessage(FUNCNAME + " Failed; (x, y)=(" + std::to_string(x) + ", " + std::to_string(y) + ")", MODE_NORMAL);
+                }
+                return kFailure;
+            }
+            return map_unknow_status[y][x];
+        }
+
         const static int kSuccess = -1;
         const static int kFailure = INT_MIN;
         const static int kGuessedMapSize = 10;
@@ -459,6 +486,7 @@ private:
         int map_cost[kDotHeight][kDotWidth];
         int map_total_cost[kDotHeight][kDotWidth];
         int map_status[kDotHeight][kDotWidth];
+        int map_unknow_status[kDotHeight][kDotWidth];
         int map_curved_times[kDotHeight][kDotWidth];
 		//int map_secure[7][kSecureAreaHeight][kSecureAreaWidth];
     };
@@ -471,12 +499,13 @@ private:
 
     long now_dot_id;
 
-    int dotsForInvestegation[5][2] = {{45, 45}, {345, 45}, {180, 135}, {60, 180}, {290, 190}};
+    int dotsForInvestegation[5][2] = {{90, 67}, {270, 67}, {180, 135}, {90, 202}, {270, 202}};
     int next_allowed_go_time[5][5];
     int large_process = -1;
     int processGoToDots = 6;///////////////////////Need 0
     int process_times = 0;
     int skip_time = 100;
+    //int temp = 0;
 
     void CheckNowDot();
     void GoToAngle(int angle, int distance);

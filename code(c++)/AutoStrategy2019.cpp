@@ -1181,7 +1181,7 @@ void AutoStrategy::autoSearch(float parameter)
 void AutoStrategy::Astar(int goal_x, int goal_y)
 {
 	static int is_not_finished = 0;
-	static int log_astar[kDotHeight][kDotWidth];
+	//static int log_astar[kDotHeight][kDotWidth];
 	static int log_pointer = 0;
 	static int loop_times = 0;
 	ProcessingTime pt2;
@@ -1214,7 +1214,7 @@ void AutoStrategy::Astar(int goal_x, int goal_y)
 		{
 			rep(j, kDotWidth)
 			{
-				log_astar[i][j] = -1;
+				//log_astar[i][j] = -1;
 			}
 		}
 	}
@@ -1274,7 +1274,7 @@ void AutoStrategy::Astar(int goal_x, int goal_y)
 
 		cospaceMap.setMapStatus(investigating_dot_x, investigating_dot_y, 2);
 
-		log_astar[investigating_dot_y][investigating_dot_x] = log_pointer;
+		//log_astar[investigating_dot_y][investigating_dot_x] = log_pointer;
 		++log_pointer;
 
 		for (int y = investigating_dot_y - 1; y <= investigating_dot_y + 1; ++y)
