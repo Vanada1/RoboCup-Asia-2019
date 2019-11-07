@@ -147,84 +147,6 @@ void Game1_HikaruForFirstTour::loop()
 		}
 	}
 	
-	// if (getRepeatedNum() % 3 == 0)
-	// {
-	// 	for (int i = 0; i < kMaxDotNum; i++)
-	// 	{
-	// 		if (dot[i].point == POINT_YELLOW)
-	// 		{
-	// 			map_data_to_show[i] = 'Y';
-	// 		}
-	// 		else if (dot[i].point == POINT_WALL)
-	// 		{
-	// 			map_data_to_show[i] = '#';
-	// 		}
-	// 		else if (dot[i].point == POINT_DEPOSIT)
-	// 		{
-	// 			map_data_to_show[i] = 'D';
-	// 		}
-	// 		else if (dot[i].point == POINT_SWAMPLAND || dot[i].point == POINT_MAY_SWAMPLAND)
-	// 		{
-	// 			map_data_to_show[i] = '$';
-	// 		}
-	// 		else if (dot[i].point == POINT_SUPERAREA)
-	// 		{
-	// 			map_data_to_show[i] = 'S';
-	// 		}
-	// 		else if (dot[i].point == POINT_UNKNOWN)
-	// 		{
-	// 			map_data_to_show[i] = '\'';
-	// 		}
-	// 		else
-	// 		{
-	// 			map_data_to_show[i] = ' ';
-	// 		}
-	// 	}
-	// 	cout << "out map" << endl;
-	// 	ProcessingTime pt2;
-	// 	pt2.start();
-	// 	FILE* fp = fopen("map_out.txt", "w");
-	// 	if (fp == NULL)
-	// 	{
-	// 		ERROR_MESSAGE(FUNCNAME + "(): failed to make map_out.txt", MODE_NORMAL);
-	// 	}
-	// 	else
-	// 	{
-	// 		cout << "out map start" << endl;
-	// 		rep(xj, kDotWidthNum + 2)
-	// 		{
-	// 			fprintf(fp, "#");
-	// 			//printf("#");
-	// 		}
-	// 		fprintf(fp, "\n");
-	// 		printf("\n");
-	// 		rep(yi, kDotHeightNum)
-	// 		{
-	// 			fprintf(fp, "#");
-	// 			//printf("#");
-
-	// 			rep(xj, kDotWidthNum)
-	// 			{
-	// 				fprintf(fp, "%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
-	// 				//printf("%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
-	// 			}
-	// 			fprintf(fp, "#");
-	// 			//printf("#");
-
-	// 			fprintf(fp, "\n");
-	// 			//printf("\n");
-	// 		}
-	// 		rep(xj, kDotWidthNum + 2)
-	// 		{
-	// 			//printf("\n");
-	// 			fprintf(fp, "#");
-	// 		}
-	// 		//printf("\n");
-	// 		fprintf(fp, "\n");
-	// 		fclose(fp);
-	// 		cout << "out map end " << pt2.end() << endl;
-	// 	}
-	// }
 	if (SuperObj_Num != 0)
 	{
 		if (log_superobj_num <= 0 && (log_superobj_x[0] != SuperObj_X || log_superobj_y[0] != SuperObj_Y))
@@ -404,9 +326,9 @@ void Game1_HikaruForFirstTour::loop()
          {
             if (superarea_process_times == 0)
             {
-                if (GoInDots(180, 185, 100, 100, POINT_SUPERAREA))
+                if (GoInDots(80, 175, 50, 50, POINT_SUPERAREA))
                 {
-                    if (process_times >= 3)
+                    if (process_times >= 2)
                     {
                         superarea_process_times++;
                         process_times = 0;
@@ -416,9 +338,9 @@ void Game1_HikaruForFirstTour::loop()
             }
                 else if (superarea_process_times == 1)
                 {
-                    if (GoInDots(180, 85, 100, 100, POINT_SUPERAREA))
+                    if (GoInDots(280, 85, 50, 50, POINT_SUPERAREA))
                     {
-                        if (process_times >= 3)
+                        if (process_times >= 2)
                         {
                             superarea_process_times++;
                             process_times = 0;
@@ -1154,14 +1076,14 @@ void Game1_HikaruForFirstTour::InputDotInformation(void)
 		dot[i].point = map_position_color_data[x][y];
 		// dot[i].point = 1;
 		dot[i].color = map_position_color_data[x][y];
-		dot[i].red = red_data[kDotHeightNum - y - 1][x];
+		dot[i].red = red_data[y][x];
 		// if (dot[i].red == 0 && dot[i].color == POINT_WHITE)
 		// {
 		// 	dot[i].cyan = 1;
 		// 	dot[i].black = 1;
 		// }
-		dot[i].cyan = cyan_data[kDotHeightNum - y - 1][x];
-		dot[i].black = black_data[kDotHeightNum - y - 1][x];
+		dot[i].cyan = cyan_data[y][x];
+		dot[i].black = black_data[y][x];
 
 		//these are for dijkstra
 		// dot[i].done = -1;
@@ -1467,7 +1389,7 @@ int Game1_HikaruForFirstTour::GoToDot(int x, int y)
 		GoToPosition(x, y, 10, 10, 5);
 		return 1;
 	}
-	// char map_data_to_show[kMaxDotNum];
+	char map_data_to_show[kMaxDotNum];
 	for (int i = 0; i < kMaxDotNum; i++)
 	{
 		if (dot[i].point == POINT_YELLOW)
@@ -1564,7 +1486,7 @@ int Game1_HikaruForFirstTour::GoToDot(int x, int y)
 	int now_y = now_dot_id / kDotWidthNum;
 	int now_x = now_dot_id - now_y * kDotWidthNum;
 
-	if (getRepeatedNum() % 1 == 0)
+	if (getRepeatedNum() % 3 == 0)
 	{
 		cout << "out map" << endl;
 		ProcessingTime pt2;
@@ -1819,6 +1741,7 @@ int Game1_HikaruForFirstTour::GoToDots(int x, int y, int wide_decide_x, int wide
 
 	if (GoToDot(target_x, target_y) || local_same_target > same_target_border)
 	{
+		Dijkstra(0);
 		prev_x = -1;
 		local_same_target = 0;
 		//fprintf(logfile, " %d End GoToDots() with returning 1\n", getRepeatedNum());

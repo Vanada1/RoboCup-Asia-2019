@@ -23,7 +23,7 @@ private:
 	const static int kMaxEdgeNum = 25;
 	const static int kBorderSameObjNum = 2;
 	const static int kFindObjDuration = 48;
-	const static int limit_superarea = 1;
+	const static int limit_superarea = 2;
 	int process_times = 0;
     int superarea_process_times = 0;
 	int log_superobj_num, log_superobj_x[10], log_superobj_y[10];
@@ -45,7 +45,7 @@ private:
     int unknownY = -1;
 	int dot_x[3], dot_y[3];
 
-	char map_data_to_show[kMaxDotNum];
+	//char map_data_to_show[kMaxDotNum];
 
 	int large_process = -1;
 	int process = 0;
