@@ -70,12 +70,15 @@ void Game0_Masuda::loop(void)
 	{
 		
 	} */
+
+	
 	
 	if (SuperDuration > 0)
 	{
 		SuperDuration--;
 	}
-	else if (IsOnDepositArea() && LoadedObjects >= 1)
+	else if (IsOnDepositArea() && (LoadedObjects >= 5 ||
+	(LoadedObjects>0 && Time > 160)))
 	{
 		depo = 0;
 		LOG_MESSAGE("find object box", MODE_DEBUG);
@@ -101,7 +104,7 @@ void Game0_Masuda::loop(void)
 			break;
 		}
 	}
-	else if (EitherColorJudge(black_obj) && LoadedObjects < 6 && loaded_objects[BLACK_LOADED_ID] < 4
+	else if (EitherColorJudge(black_obj) && LoadedObjects < 6 && loaded_objects[BLACK_LOADED_ID]  < 4
 		&& (loaded_objects[BLACK_LOADED_ID] == 0 
 			|| 6 - reserved_space > 0))
 	{
@@ -111,15 +114,17 @@ void Game0_Masuda::loop(void)
 		SuperDuration = kFindObjDuration;
 	}
 	else if (EitherColorJudge(cyan_obj) && LoadedObjects < 6 && loaded_objects[CYAN_LOADED_ID] < 4
-		&& (loaded_objects[CYAN_LOADED_ID] == 0 || 6 - reserved_space > 0))
+		&& (loaded_objects[CYAN_LOADED_ID] == 0 
+			|| 6 - reserved_space > 0))
 	{
 		LOG_MESSAGE("find cyan obj", MODE_NORMAL);
 		setAction(FIND_OBJ);
 		loaded_objects[CYAN_LOADED_ID]++;
 		SuperDuration = kFindObjDuration;
 	}
-	else if (EitherColorJudge(red_obj) && LoadedObjects < 6 && loaded_objects[RED_LOADED_ID] < 4
-		&& (loaded_objects[RED_LOADED_ID] == 0 || 6- reserved_space > 0))
+	else if (EitherColorJudge(red_obj) && LoadedObjects < 6 && loaded_objects[RED_LOADED_ID]  < 4
+		&& (loaded_objects[RED_LOADED_ID] == 0 
+			|| 6 - reserved_space > 0))
 	{
 		LOG_MESSAGE("find red obj", MODE_NORMAL);
 		setAction(FIND_OBJ);
@@ -130,256 +135,224 @@ void Game0_Masuda::loop(void)
 	{
 		Duration--;
 	}
-	else if (Time < 1)
-	{
-		motor(5, 1);
-		Duration = 2;
-	}
+	// else if (Time < 1)
+	// {
+	// 	motor(5, 5);
+	// 	Duration = 2;
+	// }
 
-	else if (IsOnYellowLine())
+	else if (IsOnWhiteArea() != 0 && magnitflag ==0)
 	{
-		/*if (IsOnYellowLine() == 1)
+		if (IsOnWhiteArea() == 1)
 		{
 			motor(-1, -3);
 		}
-		else
-		{*/
-			//motor(-3, -1);
-		//}
-		setAction(YELLOW_AVOIDANCE);
+		else if (IsOnWhiteArea()==2)
+		{
+			motor(-3, -1);
+		}
+		else 
+		{
+			setAction(YELLOW_AVOIDANCE);
+		}
 		Duration = 10;
-	}else if (depo == -1)
+	}
+	
+
+
+
+	// else if (IsOnYellowLine() != 0 && SameColorCheck(last_color_sow,white_zone))
+	// {
+	// 	if (IsOnYellowLine() == 1)
+	// 	{
+	// 		motor(-1, -3);
+	// 	}
+	// 	else if (IsOnYellowLine()==2)
+	// 	{
+	// 		motor(-3, -1);
+	// 	}
+	// 	else 
+	// 	{
+	// 		setAction(YELLOW_AVOIDANCE);
+	// 	}
+	// 	Duration = 10;
+	// 	magnitflag = 0;
+	// }
+	// else if (IsOnYellowLine2() != 0 && SameColorCheck(last_color_sow,white_zone))
+	// {
+	// 	if (IsOnYellowLine2() == 1)
+	// 	{
+	// 		motor(-1, -3);
+	// 	}
+	// 	else if (IsOnYellowLine2()==2)
+	// 	{
+	// 		motor(-3, -1);
+	// 	}
+	// 	else 
+	// 	{
+	// 		setAction(YELLOW_AVOIDANCE);
+	// 	}
+	// 	Duration = 10;
+	// 	magnitflag = 0;
+	// }
+
+	//  else if(
+	// 	LoadedObjects >= 5||
+	// 	(
+	// 		loaded_objects[RED_LOADED_ID] > 0 && loaded_objects[CYAN_LOADED_ID] > 0 && loaded_objects[BLACK_LOADED_ID] > 0
+	// 	)
+	// 	||(Time>150 &&Time<175)
+	// 	)
+	// {
+	// 	LOG_MESSAGE("deposit", MODE_NORMAL);
+	// 	if (US_Front < 10)
+	// 	{
+	// 		motor(3, -3);
+	// 	}
+	// 	else if (US_Left < 15 && US_Right < 15)
+	// 	{
+	// 		motor(-2,-3);
+	// 	}
+	// 	else if (US_Left < 10)
+	// 	{
+	// 		motor(-1, -3);
+	// 	}
+	// 	else if (US_Left < 15)
+	// 	{
+	// 		motor(4, 3);
+	// 	}
+	// 	else if (US_Left < 20)
+	// 	{
+	// 		motor(4, 4);
+	// 	}
+	// 	else if (US_Left < 30)
+	// 	{
+	// 		motor(2, 3);
+	// 	}
+	// 	else if (US_Left < 50)
+	// 	{
+	// 		motor(2, 4);
+	// 	}
+	// 	// else if (US_Right > 80 && US_Right < 100 && US_Front >70)
+	// 	// {
+	// 	// 	motor(5, 5);
+	// 	// }
+	// 	else
+	// 	{
+	// 		motor(2, 4);
+	// 	}
+	// }
+	
+		else if (magnitlag > 25)
 	{
-		if (compassJudge(-15, 15)) {
-			if (US_Front < 10) {
-				//真下にBOXがある
-				depo = 2;
-			}
-			else {
-				//WにBOXがある
-				depo = 1;
-			}
+		magnitlag = 0;
+		magnitflag = 0;
+		Duration = 0;
+	}
+
+	else if (magnitflag == 1)
+	{
+		Duration = 1;
+		magnit('L');
+	}
+
+	//Ð•ÑÐ»Ð¸ Ð¿Ñ€eÐ¿ÑÑ‚ÑÐ²Ð¸Ðµ Ð±Ð»Ð¸Ð·ÐºÐ¾ ÑÐ¿ÐµÑ€ÐµÐ´Ð¸
+	else if (US_Front <= 12)
+	{
+		if (US_Left < 5)
+		{
+			motor(1, -3);
 		}
-		else if (compassJudge(0, 90)) {
-			motor(2, -2);
+		else
+		{
+			motor(1, 4);
 		}
-		else if (compassJudge(90, 180)) {
-			motor(2, -2);
+		Duration = 0;
+	}
+
+	//Ð•ÑÐ»Ð¸ Ð¿Ñ€eÐ¿ÑÑ‚ÑÐ²Ð¸Ðµ ÑÐ¿ÐµÑ€ÐµÐ´Ð¸
+	else if (US_Front <= 22)
+	{
+		if (US_Left > US_Right)
+		{
+			motor(1, 4);
 		}
-		else if (compassJudge(180, 270)) {
-			motor(-2, 2);
+		else
+		{
+			motor(4, 1);
 		}
-		else if (compassJudge(270, 360)) {
-			motor(-2, 2);
+		Duration = 0;
+	}
+
+	//Ð•ÑÐ»Ð¸ Ð¿Ñ€eÐ¿ÑÑ‚ÑÐ²Ð¸Ðµ ÑÐ»ÐµÐ²Ð°
+	else if (US_Left < 17)
+	{
+		if (US_Front < 5)
+		{
+			motor(-3, 1);
+		}
+		else
+		{
+			motor(4, 2);
+		}
+		Duration = 0;
+	}
+
+	//Ð•ÑÐ»Ð¸ Ð¿Ñ€eÐ¿ÑÑ‚ÑÐ²Ð¸Ðµ ÑÐ¿Ñ€Ð°Ð²Ð°
+	else if (US_Right < 17)
+	{
+		if (US_Front < 5)
+		{
+			motor(1, -3);
+		}
+		else
+		{
+			motor(1, 4);
+		}
+		Duration = 0;
+	}
+
+
+	//Ð”Ð²Ð¸Ð¶ÐµÐ½Ð¸Ðµ
+	else
+	 {
+		motor(3, 3);
+	}
+
+	if (!(BothColorJudge(last_color_sow)))
+	{
+		if (CSRight_R < CSLeft_R)
+		{
+		last_color_sow[0][0] = CSRight_R;
+		last_color_sow[0][1] = CSLeft_R;
+		}
+		else 
+		{
+			last_color_sow[0][0] = CSLeft_R;
+			last_color_sow[0][1] = CSRight_R;
+		}
+		if (CSRight_G < CSLeft_G)
+		{
+		last_color_sow[1][0] = CSRight_G;
+		last_color_sow[1][1] = CSLeft_G;
+		}
+		else 
+		{
+			last_color_sow[1][0] = CSLeft_G;
+			last_color_sow[1][1] = CSRight_G;
+		}
+		if (CSRight_B < CSLeft_B)
+		{
+		last_color_sow[2][0] = CSRight_B;
+		last_color_sow[2][1] = CSLeft_B;
+		}
+		else 
+		{
+			last_color_sow[2][0] = CSLeft_B;
+			last_color_sow[2][1] = CSRight_B;
 		}
 	}
 	
-	else if (depo == 1) {
-		if (compassJudge(55, 75)) {
-			// if (US_Front < 25) {
-			// 	depo = 0;
-			// }
-			// else {
-			// 	depo = 4;
-			// }
-			depo = 4;
-		}
-		else if (compassJudge(65, 245)) {
-			motor(3, -3);
-		}
-		else {
-			motor(-3, 3);
-		}
-	}
-	else if (depo == 2) {
-		if (compassJudge(170, 190)) {
-			if (US_Front < 25) {
-				depo = 0;
-			}
-			else {
-				depo = 3;
-			}
-		}
-		else if (compassJudge(180, 360)) {
-			motor(3, -3);
-		}
-		else {
-			motor(-3, 3);
-		}
-	}
-	else if (depo == 3) {
-		if (compassJudge(175, 185)) {
-			if (US_Front < 5) {
-				depo = 0;
-			}
-			motor(3, 3);
-		}
-		else if (compassJudge(180, 360)) {
-			motor(3, 1);
-		}
-		else {
-			motor(1, 3);
-		}
-	}
-	else if (depo == 4) {
-		//WのBOXに向かっている
-
-		// if (US_Front < 5) {
-		// 	depo = 0;
-		// }
-		if (compassJudge(60, 70)) {
-			motor(3, 3);
-		}
-		else if (compassJudge(-115, 65)) {
-			motor(1, 3);
-		}
-		else {
-			motor(3, 1);
-		}
-	}
-	else if (
-	IsOnWorld1MakerArea() &&
-		(LoadedObjects >= 5 || 
-		(
-		(loaded_objects[RED_LOADED_ID] > 0 && loaded_objects[CYAN_LOADED_ID] > 0 && loaded_objects[BLACK_LOADED_ID] > 0)
-		&& should_deposit
-		)
-		||(Time>165 &&Time<175))
-		) {
-			depo = -1;
-		// if (compassJudge(-15, 15)) {
-		// 	if (US_Front < 10) {
-		// 		//真下にBOXがある
-		// 		depo = 2;
-		// 	}
-		// 	else {
-		// 		//WにBOXがある
-		// 		depo = 1;
-		// 	}
-		// }
-		// else if (compassJudge(0, 90)) {
-		// 	motor(2, -2);
-		// }
-		// else if (compassJudge(90, 180)) {
-		// 	motor(2, -2);
-		// }
-		// else if (compassJudge(180, 270)) {
-		// 	motor(-2, 2);
-		// }
-		// else if (compassJudge(270, 360)) {
-		// 	motor(-2, 2);
-		// }
-	}else if (
-		LoadedObjects >= 5||
-		(
-			loaded_objects[RED_LOADED_ID] > 0 && loaded_objects[CYAN_LOADED_ID] > 0 && loaded_objects[BLACK_LOADED_ID] > 0
-		)
-		||(Time>150 &&Time<175)
-		)
-	{
-		LOG_MESSAGE("deposit", MODE_NORMAL);
-		if (US_Front < 10)
-		{
-			motor(-3, 3);
-		}
-		else if (US_Right < 10)
-		{
-			motor(-3, -1);
-		}
-		else if (US_Right < 15)
-		{
-			motor(3, 4);
-		}
-		else if (US_Right < 20)
-		{
-			motor(4, 4);
-		}
-		else if (US_Right < 30)
-		{
-			motor(3, 2);
-		}
-		else if (US_Right < 50)
-		{
-			motor(4, 2);
-		}
-		// else if (US_Right > 80 && US_Right < 100 && US_Front >70)
-		// {
-		// 	motor(5, 5);
-		// }
-		else
-		{
-			motor(4, 2);
-		}
-	}
-	
-	else if (compassJudge(220,320) || compassJudge(45,135))
-	{
-		// if (US_Front < 30 && US_Left < 15 && US_Right < 15 && compassJudge(240, 300))
-		// {
-		// 	motor(-1, -2);
-		// }
-
-		// else 
-		if (US_Front < 14)
-		{
-			motor(-2, 1);
-		}
-		else if (US_Left < 5)
-		{
-			motor(-1, -2);
-		}
-		else if (US_Right < 5)
-		{
-			motor(-2, -1);
-		}
-		else if (US_Right < 25) {
-			motor(3, 5);
-		}
-		else if (US_Right < 35 + (deposit_num % 2) * 10 +  static_cast<int>(rnd()) % 10)
-		{
-			motor(2, 4);
-		}
-		else if (US_Right < 60 + (deposit_num % 2) * 10 +  static_cast<int>(rnd()) % 10)
-		{
-			motor(5, 3);
-		}
-		else if (US_Right < 90)
-		{
-			motor(5, 1);
-		}
-		
-		else
-		{
-			motor(4, 3);
-		}
-	}else
-	{
-		if (US_Front < 10)
-		{
-			motor(-4, 4);
-		}
-		else if (US_Right < 5)
-		{
-			motor(-3, -1);
-		}
-		else if (US_Right < 10)
-		{
-			motor(3, 4);
-		}
-		else if (US_Right < 20)
-		{
-			motor(4, 3);
-		}
-		else if (US_Right < 50)
-		{
-			motor(4, 2);
-		}
-		else
-		{
-			motor(4, 2);
-		}
-	}
-
 	/*if (Time > 180 && getAction() != FIND_OBJ && getAction() != DEPOSIT_OBJ && (!EitherColorJudge(object_box) && LoadedObjects < 3) || Time > 200)
 	{
 		LOG_MESSAGE("Teleport");
@@ -414,8 +387,14 @@ void Game0_Masuda::loop(void)
 		LED_1 = 1;
 		MyState = 0;
 		motor_no_action_change(0, 0);
+		if (Duration < 5  && SuperDuration < 5)
+		{
+			motor(3,3);
+			LED_1 = 0;
+		}
 		if (Duration == 0 && SuperDuration == 0)
 		{
+			motor(3,3);
 			LED_1 = 0;
 		}
 		break;
@@ -424,6 +403,8 @@ void Game0_Masuda::loop(void)
 		LED_1 = 2;
 		MyState = 0;
 		LoadedObjects = 0;
+		magnitflag = 1;
+		magnitlag = 0;
 		// loaded_objects全体の大きさ / loaded_objects[0]の大きさ
 		resetLoadedObjects();
 
@@ -435,8 +416,8 @@ void Game0_Masuda::loop(void)
 		}
 		else if (SuperDuration < 15)
 		{
-			WheelLeft = 5;
-			WheelRight = 4;
+			WheelLeft = -3;
+			WheelRight = -3;
 		}
 		else if (!BothColorJudge(object_box))
 		{
@@ -467,6 +448,60 @@ void Game0_Masuda::loop(void)
 	LOG_MESSAGE("World1 Loop End", MODE_NORMAL);
 }
 
+void Game0_Masuda::magnit(char x) 
+{
+	if (x == 'R')
+	{
+		if (US_Front < 20 && US_Front >= 9)
+			motor(2, 5);
+		else if (US_Front < 9)
+			motor(-4, -1);
+		else if (US_Right > 45)
+		{
+			motor(4, 1);
+			magnitlag++;
+		}
+		else if (US_Right < 17)
+		{
+			motor(1, 4);
+			magnitlag = 0;
+		}
+		else if (US_Front > 37)
+			motor(5, 5);
+		else motor(4, 4);
+	}
+
+	else if (x == 'L')
+	{
+		if (US_Front < 20 && US_Front >= 9)
+		{
+			motor(5, 2);
+		}
+		else if (US_Front < 9)
+		{
+			motor(-1, -4);
+		}
+		else if (US_Left > 45)
+		{
+			motor(1, 4);
+			magnitlag++;
+		}
+		else if (US_Left < 17)
+		{
+			motor(4, 1);
+			magnitlag = 0;
+		}
+		else if (US_Front > 37)
+		{
+			motor(5, 5);
+		}
+		else
+		{
+			motor(4, 4);
+		}
+	}
+}
+
 int Game0_Masuda::shouldTeleport(void)
 {
 	if (Time > 180 &&!IsOnDepositArea()&&!(depo!= 0&&(loaded_objects[RED_LOADED_ID] > 0 && loaded_objects[CYAN_LOADED_ID] > 0 && loaded_objects[BLACK_LOADED_ID] > 0))) 
@@ -487,7 +522,7 @@ void Game0_Masuda::taskOnTeleport(void)
 	loaded_objects[1] = 0;
 	loaded_objects[2] = 0;
 	loaded_objects[3] = 0;
-	Teleport = 1;
+	Teleport = 2;
 	cout << "teleport " << endl;
 }
 
@@ -642,7 +677,7 @@ void Game1_Masuda::loop()
 		setAction(YELLOW_AVOIDANCE);
 		Duration = 6;
 	}
-	else if (IsOnDepositArea() && (LoadedObjects >= 6 || (LoadedObjects > 0 && Time > 270)))
+	else if (IsOnDepositArea() && (LoadedObjects >= 6 || (LoadedObjects > 0 && Time > 160)))
 	{
 		process = 0;
 		if (IsOnDepositArea() == 3)
@@ -738,6 +773,7 @@ void Game1_Masuda::loop()
 		if (Duration == 0 && SuperDuration == 0)
 		{
 			LED_1 = 0;
+			motor(3,3);
 		}
 		break;
 	case DEPOSIT_OBJ:

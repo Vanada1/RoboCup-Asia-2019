@@ -18,14 +18,19 @@ extern int world1_maker[3][2];
 extern int object_box2[3][2];
 extern int blue_trap[3][2];
 
+extern int last_color_sow[3][2];
+
 int ColorJudgeLeft(int col[3][2]);
 int ColorJudgeRight(int col[3][2]);
 int EitherColorJudge(int col[3][2]);
 int BothColorJudge(int col[3][2]);
 
+int SameColorCheck(int color1[3][2], int color2[3][2]);
+
 // 別バージョン
 void InputColorInformation(void);
 int IsOnYellowLine(void);
+int IsOnYellowLine2(void);
 int IsOnRedObj(void);
 int IsOnCyanObj(void);
 int IsOnBlackObj(void);

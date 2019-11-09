@@ -19,8 +19,11 @@ public:
 private:
 	ProcessingTime pt;
 	int depo = 0;
+	int magnitflag = 1;
+	int magnitlag = 0;
 	int should_deposit =1;
 	int deposit_num = 0;
+	void magnit (char x);
 };
 
 // World2
@@ -50,6 +53,7 @@ private:
 	int GoToPosition(int x, int y, int wide_decide_x, int wide_decide_y, int wide_judge_arrived);
 	long WhereIsMotor(void);
 	long WhereIsColorSensor(void);
+	
 };
 
 #endif // !MASUDA_HPP

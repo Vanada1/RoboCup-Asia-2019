@@ -238,7 +238,7 @@ void Game1_Hikaru::loop()
 	{
 		Duration--;
 	}
-	else if (IsOnYellowLine() && LoadedObjects > 0)
+	else if (IsOnYellowLine() && LoadedObjects > 0) 
 	{
 		if (IsOnSwampland())
 		{
@@ -270,7 +270,7 @@ void Game1_Hikaru::loop()
 			{
 				motor(-5, -5);
 			}
-			Duration = 2;
+			Duration = 3;
 		}
 	}
 	else if (IsOnDepositArea() && (LoadedObjects >= 6 || (LoadedObjects > 0 && Time > 430)))
@@ -309,7 +309,7 @@ void Game1_Hikaru::loop()
 			if (same_time > 7)
 			{
 				log_superobj_num = 0;
-				cout << "gave up superobj because of same_times" << endl;
+				//cout << "gave up superobj because of same_times" << endl;
 				LOG_MESSAGE("There is no superobj", MODE_NORMAL);
 			}
 			GoToPosition(log_superobj_x[0] - 5 + rand() % 10, log_superobj_y[0] - 5 + rand() % 10, 1, 1, 1);
@@ -319,70 +319,15 @@ void Game1_Hikaru::loop()
 	//Xyiny ne ponyatno/ I dont know what this shit do. DO NOT TOUCH!!!!!!!1
 	else
 	{
-		if (loaded_objects[CYAN_LOADED_ID] < kBorderSameObjNum)
-		{
-			if (large_process != 1 || next_allowed_go_time[CYAN_LOADED_ID][process] > Time)
-			{
-				if (PositionY < 180 && next_allowed_go_time[CYAN_LOADED_ID][0] <= Time)
-				{
-					process = 0;
-				}
-				else if (PositionY >= 180 && next_allowed_go_time[CYAN_LOADED_ID][0] <= Time)
-				{
-					process = 1;
-				}
-				else {
-					if (next_allowed_go_time[CYAN_LOADED_ID][1] < next_allowed_go_time[CYAN_LOADED_ID][0]) {
-						process = 1;
-					}
-					else {
-						process = 0;
-					}
-				}
-				process_times = 0;
-				large_process = 1;
-			}
-			if (process == 0)
-			{
-				if (GoInDots(180, 135, 180, 135, POINT_CYAN))
-				{
-					if (process_times >= 4)
-					{
-						next_allowed_go_time[CYAN_LOADED_ID][process] = Time + skip_time;
-						process++;
-						process_times = 0;
-					}
-					process_times++;
-				}
-			}
-			else if (process == 1)
-			{
-				if (GoInDots(180, 135, 180, 135, POINT_CYAN))
-				{
-					if (process_times >= 3)
-					{
-						next_allowed_go_time[CYAN_LOADED_ID][process] = Time + skip_time;
-						process = 0;
-						process_times = 0;
-					}
-					process_times++;
-				}
-			}
-			else
-			{
-				process = 0;
-				process_times = 0;
-			}
-		}
-		else if (loaded_objects[RED_LOADED_ID] < kBorderSameObjNum)
+		if (loaded_objects[RED_LOADED_ID] < kBorderSameObjNum)
 		{
 			if (large_process != 2 || next_allowed_go_time[RED_LOADED_ID][process] > Time)
 			{
 				if (PositionX < 240 && PositionY < 140 && next_allowed_go_time[RED_LOADED_ID][0] <= Time) {
-					process = 0;
+					process = 1;
 				}
 				else if (!(PositionX < 240 && PositionY < 140)) {
-					process = 1;
+					process = 0;
 				}
 				else {
 					if (next_allowed_go_time[RED_LOADED_ID][1] < next_allowed_go_time[RED_LOADED_ID][0]) {
@@ -396,7 +341,7 @@ void Game1_Hikaru::loop()
 			}
 			if (process == 0)
 			{
-				if (GoInDots(180, 135, 180, 135, POINT_RED))
+				if (GoInDots(180, 230, 60, 60, POINT_RED))
 				{
 					if (process_times >= 4)
 					{
@@ -409,7 +354,7 @@ void Game1_Hikaru::loop()
 			}
 			else if (process == 1)
 			{
-				if (GoInDots(180, 135, 180, 135, POINT_RED))
+				if (GoInDots(45, 45, 60, 60, POINT_RED))
 				{
 					if (process_times >= 3)
 					{
@@ -425,6 +370,61 @@ void Game1_Hikaru::loop()
 				process_times = 0;
 			}
 			large_process = 2;
+		}
+		else if (loaded_objects[CYAN_LOADED_ID] < kBorderSameObjNum)
+		{
+			if (large_process != 1 || next_allowed_go_time[CYAN_LOADED_ID][process] > Time)
+			{
+				if (PositionY < 180 && next_allowed_go_time[CYAN_LOADED_ID][0] <= Time)
+				{
+					process = 1;
+				}
+				else if (PositionY >= 180 && next_allowed_go_time[CYAN_LOADED_ID][0] <= Time)
+				{
+					process = 0;
+				}
+				else {
+					if (next_allowed_go_time[CYAN_LOADED_ID][1] < next_allowed_go_time[CYAN_LOADED_ID][0]) {
+						process = 1;
+					}
+					else {
+						process = 0;
+					}
+				}
+				process_times = 0;
+				large_process = 1;
+			}
+			if (process == 0)
+			{
+				if (GoInDots(50, 230, 60, 60, POINT_CYAN))
+				{
+					if (process_times >= 4)
+					{
+						next_allowed_go_time[CYAN_LOADED_ID][process] = Time + skip_time;
+						process++;
+						process_times = 0;
+					}
+					process_times++;
+				}
+			}
+			else if (process == 1)
+			{
+				if (GoInDots(45, 45, 60, 60, POINT_CYAN))
+				{
+					if (process_times >= 3)
+					{
+						next_allowed_go_time[CYAN_LOADED_ID][process] = Time + skip_time;
+						process = 0;
+						process_times = 0;
+					}
+					process_times++;
+				}
+			}
+			else
+			{
+				process = 0;
+				process_times = 0;
+			}
 		}
 		else
 		{
@@ -523,7 +523,7 @@ void Game1_Hikaru::loop()
 		}
 		break;
 	default:
-		printf("World2System(): action's value is ubnormal\n");
+		//printf("World2System(): action's value is ubnormal\n");
 		break;
 	}
 
@@ -537,7 +537,7 @@ void Game1_Hikaru::loop()
 	}
 	if (super_sameoperate > 800)
 	{
-		cout << "gave up because super_sameoperate" << endl;
+		//cout << "gave up because super_sameoperate" << endl;
 		log_superobj_num = 0;
 		super_sameoperate = 0;
 	}
@@ -545,54 +545,54 @@ void Game1_Hikaru::loop()
 	/*if (getRepeatedNum() % 10 == 0) {
 		rep(yi, kDotHeightNum) {
 			rep(xj, kDotWidthNum) {
-				printf("%2llu", dot[(kDotHeightNum - yi - 1) * kDotWidthNum + xj].arrived_times);
+				//printf("%2llu", dot[(kDotHeightNum - yi - 1) * kDotWidthNum + xj].arrived_times);
 			}
-			printf("\n");
+			//printf("\n");
 		}
-		printf("\n");
-		printf("\n");
+		//printf("\n");
+		//printf("\n");
 	}*/
 
 	double seconds = pt.end();
 	LOG_MESSAGE("loop time :" + to_string(seconds) + " ms", MODE_NORMAL);
-	cout << "passed time : " << seconds << " ms" << endl;
+	//cout << "passed time : " << seconds << " ms" << endl;
 }
 
 long Game1_Hikaru::WhereIsColorSensor(void)
 {
-	//fprintf(logfile, "%4d Start WhereIsColorSensor()\n", getRepeatedNum());
+	//fprintfLOL(logfile, "%4d Start WhereIsColorSensor()\n", getRepeatedNum());
 	long x, y;
 	if (log_x < 0 || log_x >= kCospaceWidth || log_y < 0 || log_y >= kCospaceHeight)
 	{
-		//fprintf(errfile, "%4d WhereIsColorSensor(): log_x, log_y = (%d, %d)\n", getRepeatedNum(), log_x, log_y);
-		//fprintf(logfile, "%4d WhereIsColorSensor(): log_x, log_y = (%d, %d)\n", getRepeatedNum(), log_x, log_y);
+		//fprintfLOL(errfile, "%4d WhereIsColorSensor(): log_x, log_y = (%d, %d)\n", getRepeatedNum(), log_x, log_y);
+		//fprintfLOL(logfile, "%4d WhereIsColorSensor(): log_x, log_y = (%d, %d)\n", getRepeatedNum(), log_x, log_y);
 		log_x = kCospaceWidth / 2;
 		log_y = kCospaceHeight / 2;
 	}
 	x = log_x + static_cast<long>(cos((Compass + 90) * 3.14 / 180) * 5);
 	y = log_y + static_cast<long>(sin((Compass + 90) * 3.14 / 180) * 5);
-	//fprintf(logfile, "%4d WhereIsColorSensor() (x, y) = (%ld, %ld)\n", getRepeatedNum(), x, y);
+	//fprintfLOL(logfile, "%4d WhereIsColorSensor() (x, y) = (%ld, %ld)\n", getRepeatedNum(), x, y);
 	if (x < 0)
 	{
-		//fprintf(errfile, "%4d WhereIsColorSensor() (x, y) = (%ld, %ld)\n", getRepeatedNum(), x, y);
+		//fprintfLOL(errfile, "%4d WhereIsColorSensor() (x, y) = (%ld, %ld)\n", getRepeatedNum(), x, y);
 		x = 0;
 	}
 	if (y < 0)
 	{
-		//fprintf(errfile, "%4d WhereIsColorSensor() (x, y) = (%ld, %ld)\n", getRepeatedNum(), x, y);
+		//fprintfLOL(errfile, "%4d WhereIsColorSensor() (x, y) = (%ld, %ld)\n", getRepeatedNum(), x, y);
 		y = 0;
 	}
 	if (x >= kCospaceWidth)
 	{
-		//fprintf(errfile, "%4d WhereIsColorSensor() (x, y) = (%ld, %ld)\n", getRepeatedNum(), x, y);
+		//fprintfLOL(errfile, "%4d WhereIsColorSensor() (x, y) = (%ld, %ld)\n", getRepeatedNum(), x, y);
 		x = kCospaceWidth - 1;
 	}
 	if (y >= kCospaceHeight)
 	{
-		//fprintf(errfile, "%4d WhereIsColorSensor() (x, y) = (%ld, %ld)\n", getRepeatedNum(), x, y);
+		//fprintfLOL(errfile, "%4d WhereIsColorSensor() (x, y) = (%ld, %ld)\n", getRepeatedNum(), x, y);
 		y = kCospaceHeight - 1;
 	}
-	//fprintf(logfile, "%4d End WhereIsColorSensor() with returning %ld * 1000 + %ld = %ld\n", getRepeatedNum(), y, x, y * 1000 + x);
+	//fprintfLOL(logfile, "%4d End WhereIsColorSensor() with returning %ld * 1000 + %ld = %ld\n", getRepeatedNum(), y, x, y * 1000 + x);
 	return y * 1000 + x;
 }
 
@@ -685,7 +685,7 @@ void Game1_Hikaru::CheckNowDot(void)
 
 int Game1_Hikaru::IsNearYellow(int num, int x, int y)
 {
-	//fprintf(logfile, "%4d Start IsNearYellow(%d, %d, %d)\n", getRepeatedNum(), num, x, y);
+	//fprintfLOL(logfile, "%4d Start IsNearYellow(%d, %d, %d)\n", getRepeatedNum(), num, x, y);
 	num = num * 2 + 1;
 	if (x < 0)
 	{
@@ -745,7 +745,7 @@ int Game1_Hikaru::GoToPosition(int x, int y, int wide_decide_x, int wide_decide_
 	// If the argument value is strange
 	if (x < 0 || y < 0 || x > kCospaceWidth || y > kCospaceHeight || wide_decide_x < 0 || wide_decide_y < 0 || wide_judge_arrived < 0)
 	{
-		printf("GoToPosition(): 引数が(%d, %d, %d, %d, %d)\n", x, y, wide_decide_x, wide_decide_y, wide_judge_arrived);
+		//printf("GoToPosition(): 引数が(%d, %d, %d, %d, %d)\n", x, y, wide_decide_x, wide_decide_y, wide_judge_arrived);
 		return 0;
 	}
 
@@ -776,7 +776,7 @@ int Game1_Hikaru::GoToPosition(int x, int y, int wide_decide_x, int wide_decide_
 
 	if (absolute_distance < same_operate)
 	{
-		printf("(%d, %d) arrive because too many same_operate\n", x, y);
+		//printf("(%d, %d) arrive because too many same_operate\n", x, y);
 		absolute_x = -1;
 		absolute_y = -1;
 		same_operate = -1;
@@ -794,7 +794,7 @@ int Game1_Hikaru::GoToPosition(int x, int y, int wide_decide_x, int wide_decide_
 	temp_x -= temp_y * 1000;
 	if (PLUSMINUS(absolute_x, temp_x, wide_judge_arrived) && PLUSMINUS(absolute_y, temp_y, wide_judge_arrived))
 	{
-		printf("(%d, %d)に到着しました\n", absolute_x, absolute_y);
+		//printf("(%d, %d)に到着しました\n", absolute_x, absolute_y);
 		LOG_MESSAGE("(" + to_string(absolute_x) + "," + to_string(absolute_y) + ")に到着しました", MODE_NORMAL);
 		absolute_x = -1;
 		absolute_y = -1;
@@ -884,7 +884,7 @@ void Game1_Hikaru::InputDotInformation(void)
 		}
 	}*/
 
-	/*printf("map\n");
+	/*//printf("map\n");
 	for (int yi = kDotHeightNum - 1; yi >= 0; --yi)
 	{
 		for (int xj = 0; xj < kDotWidthNum; ++xj)
@@ -892,32 +892,32 @@ void Game1_Hikaru::InputDotInformation(void)
 			switch (map_position_color_data[xj][yi])
 			{
 			case POINT_WHITE:
-				printf(" ");
+				//printf(" ");
 				break;
 			case POINT_YELLOW:
-				printf("Y");
+				//printf("Y");
 				break;
 			case POINT_WALL:
-				printf("#");
+				//printf("#");
 				break;
 			case POINT_SWAMPLAND:
-				printf("$");
+				//printf("$");
 				break;
 			case POINT_DEPOSIT:
-				printf("D");
+				//printf("D");
 				break;
 			case POINT_SUPERAREA:
-				printf("S");
+				//printf("S");
 				break;
 			default:
-				printf(" ");
+				//printf(" ");
 				break;
 			}
 		}
-		printf("\n");
+		//printf("\n");
 	}
-	printf("\n");
-	printf("\n");*/
+	//printf("\n");
+	//printf("\n");*/
 
 	for (long i = 0; i < kMaxDotNum; i++)
 	{
@@ -937,7 +937,7 @@ void Game1_Hikaru::InputDotInformation(void)
 		dot[i].y = y * kSize + kSize / 2;
 		//the wide of dot
 		dot[i].wide = kSize;
-		//printf("(%d, %d, %d, %d)\n", x, y, dot[i].x, dot[i].y);
+		//printfLOL("(%d, %d, %d, %d)\n", x, y, dot[i].x, dot[i].y);
 
 		//point means what's this dot belongs?
 		//For example, this dot belongs yellow.
@@ -1021,48 +1021,48 @@ void Game1_Hikaru::InputDotInformation(void)
 	// 		switch (dot[hi * kDotWidthNum + wj].point)
 	// 		{
 	// 		case POINT_YELLOW:
-	// 			cout << "$";
+	// 			//cout << "$";
 	// 			break;
 	// 		case POINT_WALL:
-	// 			cout << "#";
+	// 			//cout << "#";
 	// 			break;
 	// 		case POINT_DEPOSIT:
-	// 			cout << "@";
+	// 			//cout << "@";
 	// 			break;
 	// 		case POINT_SUPERAREA:
-	// 			cout << "^";
+	// 			//cout << "^";
 	// 			break;
 	// 		case POINT_SWAMPLAND:
-	// 			cout << "|";
+	// 			//cout << "|";
 	// 			break;
 	// 		default:
 	// 			if (dot[hi * kDotWidthNum + wj].black == 1)
 	// 			{
-	// 				cout << "B";
+	// 				//cout << "B";
 	// 			}
 	// 			else if (dot[hi * kDotWidthNum + wj].cyan == 1)
 	// 			{
-	// 				cout << "C";
+	// 				//cout << "C";
 	// 			}
 	// 			else if (dot[hi * kDotWidthNum + wj].red == 1)
 	// 			{
-	// 				cout << "R";
+	// 				//cout << "R";
 	// 			}
 	// 			else
 	// 			{
-	// 				cout << " ";
+	// 				//cout << " ";
 	// 			}
 	// 			break;
 	// 		}
 	// 	}
-	// 	cout << endl;
+	// 	//cout << endl;
 	// }
-	// cout << endl;
+	// //cout << endl;
 }
 
 void Game1_Hikaru::Dijkstra(int option)
 {
-	//fprintf(logfile, " %d Start Dijkstra()\n", getRepeatedNum());
+	//fprintfLOL(logfile, " %d Start Dijkstra()\n", getRepeatedNum());
 	for (int i = 0; i < kMaxDotNum; i++)
 	{
 		dot[i].id = i;
@@ -1176,14 +1176,14 @@ void Game1_Hikaru::Dijkstra(int option)
 
 			if (dot[i].point == POINT_SWAMPLAND || dot[i].point == POINT_MAY_SWAMPLAND)
 			{
-				cout << "s" << endl;
+				//cout << "s" << endl;
 				target_cost *= 1000;
 			}
 
 
 			if (dot[i].point == POINT_WALL || dot[i].point == POINT_YELLOW)
 			{
-				target_cost *= 100000;
+				target_cost *= 10000000;
 			}
 
 			// if (dot[target_id].point < -1) {
@@ -1247,49 +1247,49 @@ void Game1_Hikaru::Dijkstra(int option)
 
 int Game1_Hikaru::GoToDot(int x, int y)
 {
-	// printf("%d %d\n", x * kSize, y * kSize);
+	// //printf("%d %d\n", x * kSize, y * kSize);
 	static int prev_x = -1, prev_y = -1, prev_now_dot_id = -1;
 
-	//fprintf(logfile, " %d Start GoToDot(%d, %d)\n", getRepeatedNum(), x, y);
+	//fprintfLOL(logfile, " %d Start GoToDot(%d, %d)\n", getRepeatedNum(), x, y);
 	if (PositionX == -1 && (PLUSMINUS(log_x, x * kSize, kSize) && PLUSMINUS(log_y, y * kSize, kSize)))
 	{
-		//fprintf(logfile, " %d End GoToDot() with returning 1 because I am in PLA and it's near target(%d, %d)\n", getRepeatedNum(), x, y);
+		//fprintfLOL(logfile, " %d End GoToDot() with returning 1 because I am in PLA and it's near target(%d, %d)\n", getRepeatedNum(), x, y);
 		LOG_MESSAGE(FUNC_NAME + "() end returning 1 because I am in PLA and it's near target(" + to_string(x) + ", " + to_string(y) + ")", MODE_NORMAL);
 		GoToPosition(x, y, 10, 10, 5);
 		return 1;
 	}
-	char map_data_to_show[kMaxDotNum];
-	for (int i = 0; i < kMaxDotNum; i++)
-	{
-		if (dot[i].point == POINT_YELLOW)
-		{
-			map_data_to_show[i] = 'Y';
-		}
-		else if (dot[i].point == POINT_WALL)
-		{
-			map_data_to_show[i] = '#';
-		}
-		else if (dot[i].point == POINT_DEPOSIT)
-		{
-			map_data_to_show[i] = 'D';
-		}
-		else if (dot[i].point == POINT_SWAMPLAND || dot[i].point == POINT_MAY_SWAMPLAND)
-		{
-			map_data_to_show[i] = '$';
-		}
-		else if (dot[i].point == POINT_SUPERAREA)
-		{
-			map_data_to_show[i] = 'S';
-		}
-		else if (dot[i].point == POINT_UNKNOWN)
-		{
-			map_data_to_show[i] = '\'';
-		}
-		else
-		{
-			map_data_to_show[i] = ' ';
-		}
-	}
+	// char map_data_to_show[kMaxDotNum];
+	// for (int i = 0; i < kMaxDotNum; i++)
+	// {
+	// 	if (dot[i].point == POINT_YELLOW)
+	// 	{
+	// 		map_data_to_show[i] = 'Y';
+	// 	}
+	// 	else if (dot[i].point == POINT_WALL)
+	// 	{
+	// 		map_data_to_show[i] = '#';
+	// 	}
+	// 	else if (dot[i].point == POINT_DEPOSIT)
+	// 	{
+	// 		map_data_to_show[i] = 'D';
+	// 	}
+	// 	else if (dot[i].point == POINT_SWAMPLAND || dot[i].point == POINT_MAY_SWAMPLAND)
+	// 	{
+	// 		map_data_to_show[i] = '$';
+	// 	}
+	// 	else if (dot[i].point == POINT_SUPERAREA)
+	// 	{
+	// 		map_data_to_show[i] = 'S';
+	// 	}
+	// 	else if (dot[i].point == POINT_UNKNOWN)
+	// 	{
+	// 		map_data_to_show[i] = '\'';
+	// 	}
+	// 	else
+	// 	{
+	// 		map_data_to_show[i] = ' ';
+	// 	}
+	// }
 
 	//If the node I want to go will be go out
 	if (x < 1 || x >= kDotWidthNum - 1 || y < 1 || y >= kDotHeightNum - 1)
@@ -1310,7 +1310,7 @@ int Game1_Hikaru::GoToDot(int x, int y)
 	prev_x = x;
 	prev_y = y;
 
-	// printf("from %d %d to %d %d\n", now_dot_id - (int)(now_dot_id / kDotWidthNum) * kDotWidthNum, now_dot_id / kDotWidthNum, x, y);
+	// //printf("from %d %d to %d %d\n", now_dot_id - (int)(now_dot_id / kDotWidthNum) * kDotWidthNum, now_dot_id / kDotWidthNum, x, y);
 
 	int goal_dot = y * kDotWidthNum + x;
 
@@ -1321,7 +1321,7 @@ int Game1_Hikaru::GoToDot(int x, int y)
 	}
 
 	int temp = goal_dot;
-	map_data_to_show[goal_dot] = 'T';
+	//map_data_to_show[goal_dot] = 'T';
 	int i = 0;
 
 	while (dot[temp].from != now_dot_id && i < 200)
@@ -1330,8 +1330,8 @@ int Game1_Hikaru::GoToDot(int x, int y)
 		// go_y = temp / kDotWidthNum;
 		// go_x = temp - (int)go_y * kDotWidthNum;
 		temp = dot[temp].from;
-		map_data_to_show[temp] = '+';
-		// printf("%d\n", dot[temp].point);
+		//map_data_to_show[temp] = '+';
+		// //printf("%d\n", dot[temp].point);
 		i++;
 		if (temp < 0 || temp >= kMaxDotNum)
 		{
@@ -1342,11 +1342,11 @@ int Game1_Hikaru::GoToDot(int x, int y)
 	}
 	if (i == 200)
 	{
-		printf("\n\n\niの値が200ですByGoToNode()\n\n\n\n");
+		//printf("\n\n\niの値が200ですByGoToNode()\n\n\n\n");
 		LOG_MESSAGE(FUNC_NAME + "(): iの値が200です", MODE_NORMAL);
 	}
 
-	map_data_to_show[now_dot_id] = '@';
+	//map_data_to_show[now_dot_id] = '@';
 
 	int next_x, next_y;
 	next_y = temp / kDotWidthNum;
@@ -1355,53 +1355,53 @@ int Game1_Hikaru::GoToDot(int x, int y)
 	int now_y = now_dot_id / kDotWidthNum;
 	int now_x = now_dot_id - now_y * kDotWidthNum;
 
-	if (getRepeatedNum() % 3 == 0)
-	{
-		cout << "out map" << endl;
-		ProcessingTime pt2;
-		pt2.start();
-		FILE* fp = fopen("map_out.txt", "w");
-		if (fp == NULL)
-		{
-			ERROR_MESSAGE(FUNCNAME + "(): failed to make map_out.txt", MODE_NORMAL);
-		}
-		else
-		{
-			cout << "out map start" << endl;
-			rep(xj, kDotWidthNum + 2)
-			{
-				fprintf(fp, "#");
-				//printf("#");
-			}
-			fprintf(fp, "\n");
-			printf("\n");
-			rep(yi, kDotHeightNum)
-			{
-				fprintf(fp, "#");
-				//printf("#");
+	// if (getRepeatedNum() % 3 == 0)
+	// {
+	// 	//cout << "out map" << endl;
+	// 	ProcessingTime pt2;
+	// 	pt2.start();
+	// 	FILE* fp = fopen("map_out.txt", "w");
+	// 	if (fp == NULL)
+	// 	{
+	// 		ERROR_MESSAGE(FUNCNAME + "(): failed to make map_out.txt", MODE_NORMAL);
+	// 	}
+	// 	else
+	// 	{
+	// 		//cout << "out map start" << endl;
+	// 		rep(xj, kDotWidthNum + 2)
+	// 		{
+	// 			//fprintf(fp, "#");
+	// 			//printfLOL("#");
+	// 		}
+	// 		//fprintf(fp, "\n");
+	// 		//printf("\n");
+	// 		rep(yi, kDotHeightNum)
+	// 		{
+	// 			//fprintf(fp, "#");
+	// 			//printfLOL("#");
 
-				rep(xj, kDotWidthNum)
-				{
-					fprintf(fp, "%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
-					//printf("%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
-				}
-				fprintf(fp, "#");
-				//printf("#");
+	// 			rep(xj, kDotWidthNum)
+	// 			{
+	// 				//fprintf(fp, "%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
+	// 				//printfLOL("%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
+	// 			}
+	// 			//fprintf(fp, "#");
+	// 			//printfLOL("#");
 
-				fprintf(fp, "\n");
-				//printf("\n");
-			}
-			rep(xj, kDotWidthNum + 2)
-			{
-				//printf("\n");
-				fprintf(fp, "#");
-			}
-			//printf("\n");
-			fprintf(fp, "\n");
-			fclose(fp);
-			cout << "out map end " << pt2.end() << endl;
-		}
-	}
+	// 			//fprintf(fp, "\n");
+	// 			//printfLOL("\n");
+	// 		}
+	// 		rep(xj, kDotWidthNum + 2)
+	// 		{
+	// 			//printfLOL("\n");
+	// 			//fprintf(fp, "#");
+	// 		}
+	// 		//printfLOL("\n");
+	// 		//fprintf(fp, "\n");
+	// 		fclose(fp);
+	// 		//cout << "out map end " << pt2.end() << endl;
+	// 	}
+	// }
 
 	int distance = 20;
 	if (next_x < now_x)
@@ -1455,8 +1455,8 @@ int Game1_Hikaru::GoToDot(int x, int y)
 
 int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 {
-	//fprintf(logfile, " %d Start GoToDots(%d, %d, %d, %d)\n", getRepeatedNum(), x, y, wide_decide_x, wide_decide_y);
-	// printf("GoToDots(): %d %d %d %d\n", x, y, wide_decide_x, wide_decide_y);
+	//fprintfLOL(logfile, " %d Start GoToDots(%d, %d, %d, %d)\n", getRepeatedNum(), x, y, wide_decide_x, wide_decide_y);
+	// //printf("GoToDots(): %d %d %d %d\n", x, y, wide_decide_x, wide_decide_y);
 
 	static int prev_x = -1;
 	static int prev_y = -1;
@@ -1482,26 +1482,26 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 		{
 			if (corner_x[i] < 0)
 			{
-				//fprintf(errfile, " %d GoToDots() corner_x[%d] is %d < 0\n", getRepeatedNum(), i, corner_x[i]);
-				//fprintf(logfile, " %d GoToDots() corner_x[%d] is %d < 0\n", getRepeatedNum(), i, corner_x[i]);
+				//fprintfLOL(errfile, " %d GoToDots() corner_x[%d] is %d < 0\n", getRepeatedNum(), i, corner_x[i]);
+				//fprintfLOL(logfile, " %d GoToDots() corner_x[%d] is %d < 0\n", getRepeatedNum(), i, corner_x[i]);
 				corner_x[i] = 0;
 			}
 			if (corner_x[i] >= kDotWidthNum)
 			{
-				//fprintf(errfile, " %d GoToDots() corner_x[%d] is %d >= %d\n", getRepeatedNum(), i, corner_x[i], kDotWidthNum);
-				//fprintf(logfile, " %d GoToDots() corner_x[%d] is %d >= %d\n", getRepeatedNum(), i, corner_x[i], kDotWidthNum);
+				//fprintfLOL(errfile, " %d GoToDots() corner_x[%d] is %d >= %d\n", getRepeatedNum(), i, corner_x[i], kDotWidthNum);
+				//fprintfLOL(logfile, " %d GoToDots() corner_x[%d] is %d >= %d\n", getRepeatedNum(), i, corner_x[i], kDotWidthNum);
 				corner_x[i] = kDotWidthNum - 1;
 			}
 			if (corner_y[i] < 0)
 			{
-				//fprintf(errfile, " %d GoToDots() corner_y[%d] is %d < 0\n", getRepeatedNum(), i, corner_y[i]);
-				//fprintf(logfile, " %d GoToDots() corner_y[%d] is %d < 0\n", getRepeatedNum(), i, corner_y[i]);
+				//fprintfLOL(errfile, " %d GoToDots() corner_y[%d] is %d < 0\n", getRepeatedNum(), i, corner_y[i]);
+				//fprintfLOL(logfile, " %d GoToDots() corner_y[%d] is %d < 0\n", getRepeatedNum(), i, corner_y[i]);
 				corner_y[i] = 0;
 			}
 			if (corner_y[i] >= kDotHeightNum)
 			{
-				//fprintf(errfile, " %d GoToDots() corner_y[%d] is %d >= %d\n", getRepeatedNum(), i, corner_y[i], kDotHeightNum);
-				//fprintf(logfile, " %d GoToDots() corner_y[%d] is %d >= %d\n", getRepeatedNum(), i, corner_y[i], kDotHeightNum);
+				//fprintfLOL(errfile, " %d GoToDots() corner_y[%d] is %d >= %d\n", getRepeatedNum(), i, corner_y[i], kDotHeightNum);
+				//fprintfLOL(logfile, " %d GoToDots() corner_y[%d] is %d >= %d\n", getRepeatedNum(), i, corner_y[i], kDotHeightNum);
 				corner_y[i] = kDotHeightNum - 1;
 			}
 		}
@@ -1552,9 +1552,9 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 		}
 		if (id == -1)
 		{
-			//fprintf(stdout, "%d GoToDots(): There is no dot that can go target(%d %d) log(%d %d) eme %d\n", getRepeatedNum(), target_x, target_y, log_x, log_y, now_dot_id);
-			// //fprintf(logfile, " %d GoToDots(): There is no dot that can go log(%d %d) eme %d\n", getRepeatedNum());
-			// //fprintf(stdout, "%d GoToDots(): There is no dot that can go log(%d %d) eme %d\n", getRepeatedNum());
+			//fprintfLOL(stdout, "%d GoToDots(): There is no dot that can go target(%d %d) log(%d %d) eme %d\n", getRepeatedNum(), target_x, target_y, log_x, log_y, now_dot_id);
+			// //fprintfLOL(logfile, " %d GoToDots(): There is no dot that can go log(%d %d) eme %d\n", getRepeatedNum());
+			// //fprintfLOL(stdout, "%d GoToDots(): There is no dot that can go log(%d %d) eme %d\n", getRepeatedNum());
 			target_x = x / kSize;
 			target_y = y / kSize;
 		}
@@ -1562,7 +1562,7 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 		{
 			target_y = id / kDotWidthNum;
 			target_x = id - target_y * kDotWidthNum;
-			//fprintf(logfile, " %d decide target as (%d, %d)\n", getRepeatedNum(), target_x, target_y);
+			//fprintfLOL(logfile, " %d decide target as (%d, %d)\n", getRepeatedNum(), target_x, target_y);
 		}
 
 		same_target_border = static_cast<int>(sqrt(pow(log_x - target_x * kSize, 2) + pow(log_y - target_y * kSize, 2)));
@@ -1573,9 +1573,9 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 		// do {
 		// 	i++;
 		// 	if(i > 20) {
-		// 		printf("%d GoToDots(): can not decide target\n", getRepeatedNum());
-		// 		//fprintf(errfile, "%d GoToDots(): Can not decide target\n", getRepeatedNum());
-		// 		//fprintf(logfile, " %d GoToDots(): Can not decide target\n", getRepeatedNum());
+		// 		//printf("%d GoToDots(): can not decide target\n", getRepeatedNum());
+		// 		//fprintfLOL(errfile, "%d GoToDots(): Can not decide target\n", getRepeatedNum());
+		// 		//fprintfLOL(logfile, " %d GoToDots(): Can not decide target\n", getRepeatedNum());
 		// 		target_x = x;
 		// 		target_y = y;
 		// 		target_x /= kSize;
@@ -1601,8 +1601,8 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 		// } while(dot[target_y * kDotWidthNum + target_x].point <= POINT_WALL);
 	}
 	local_same_target++;
-	cout << "target " << target_x * kSize << " " << target_y * kSize << endl;
-	// printf("%d %d\n", local_same_target, same_target_border);
+	//cout << "target " << target_x * kSize << " " << target_y * kSize << endl;
+	// //printf("%d %d\n", local_same_target, same_target_border);
 	if (prev_loaded_num != LoadedObjects) {
 		prev_loaded_num = LoadedObjects;
 		local_same_target -= 100;
@@ -1612,12 +1612,12 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 	{
 		prev_x = -1;
 		local_same_target = 0;
-		//fprintf(logfile, " %d End GoToDots() with returning 1\n", getRepeatedNum());
+		//fprintfLOL(logfile, " %d End GoToDots() with returning 1\n", getRepeatedNum());
 		return 1;
 	}
 	else
 	{
-		//fprintf(logfile, " %d End GoToDots() with returning 0\n", getRepeatedNum());
+		//fprintfLOL(logfile, " %d End GoToDots() with returning 0\n", getRepeatedNum());
 		return 0;
 	}
 }
@@ -1625,8 +1625,8 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, int color)
 {
 	LOG_MESSAGE(FUNCNAME + "(): start", MODE_DEBUG);
-	//fprintf(logfile, " %d Start GoToDots(%d, %d, %d, %d)\n", getRepeatedNum(), x, y, wide_decide_x, wide_decide_y);
-	// printf("GoToDots(): %d %d %d %d\n", x, y, wide_decide_x, wide_decide_y);
+	//fprintfLOL(logfile, " %d Start GoToDots(%d, %d, %d, %d)\n", getRepeatedNum(), x, y, wide_decide_x, wide_decide_y);
+	// //printf("GoToDots(): %d %d %d %d\n", x, y, wide_decide_x, wide_decide_y);
 	static int prev_x = -1;
 	static int prev_y = -1;
 	static int prev_color = -1000;
@@ -1651,26 +1651,26 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 		{
 			if (corner_x[i] < 0)
 			{
-				//fprintf(errfile, " %d GoToDots() corner_x[%d] is %d < 0\n", getRepeatedNum(), i, corner_x[i]);
-				//fprintf(logfile, " %d GoToDots() corner_x[%d] is %d < 0\n", getRepeatedNum(), i, corner_x[i]);
+				//fprintfLOL(errfile, " %d GoToDots() corner_x[%d] is %d < 0\n", getRepeatedNum(), i, corner_x[i]);
+				//fprintfLOL(logfile, " %d GoToDots() corner_x[%d] is %d < 0\n", getRepeatedNum(), i, corner_x[i]);
 				corner_x[i] = 0;
 			}
 			if (corner_x[i] >= kDotWidthNum)
 			{
-				//fprintf(errfile, " %d GoToDots() corner_x[%d] is %d >= %d\n", getRepeatedNum(), i, corner_x[i], kDotWidthNum);
-				//fprintf(logfile, " %d GoToDots() corner_x[%d] is %d >= %d\n", getRepeatedNum(), i, corner_x[i], kDotWidthNum);
+				//fprintfLOL(errfile, " %d GoToDots() corner_x[%d] is %d >= %d\n", getRepeatedNum(), i, corner_x[i], kDotWidthNum);
+				//fprintfLOL(logfile, " %d GoToDots() corner_x[%d] is %d >= %d\n", getRepeatedNum(), i, corner_x[i], kDotWidthNum);
 				corner_x[i] = kDotWidthNum - 1;
 			}
 			if (corner_y[i] < 0)
 			{
-				//fprintf(errfile, " %d GoToDots() corner_y[%d] is %d < 0\n", getRepeatedNum(), i, corner_y[i]);
-				//fprintf(logfile, " %d GoToDots() corner_y[%d] is %d < 0\n", getRepeatedNum(), i, corner_y[i]);
+				//fprintfLOL(errfile, " %d GoToDots() corner_y[%d] is %d < 0\n", getRepeatedNum(), i, corner_y[i]);
+				//fprintfLOL(logfile, " %d GoToDots() corner_y[%d] is %d < 0\n", getRepeatedNum(), i, corner_y[i]);
 				corner_y[i] = 0;
 			}
 			if (corner_y[i] >= kDotHeightNum)
 			{
-				//fprintf(errfile, " %d GoToDots() corner_y[%d] is %d >= %d\n", getRepeatedNum(), i, corner_y[i], kDotHeightNum);
-				//fprintf(logfile, " %d GoToDots() corner_y[%d] is %d >= %d\n", getRepeatedNum(), i, corner_y[i], kDotHeightNum);
+				//fprintfLOL(errfile, " %d GoToDots() corner_y[%d] is %d >= %d\n", getRepeatedNum(), i, corner_y[i], kDotHeightNum);
+				//fprintfLOL(logfile, " %d GoToDots() corner_y[%d] is %d >= %d\n", getRepeatedNum(), i, corner_y[i], kDotHeightNum);
 				corner_y[i] = kDotHeightNum - 1;
 			}
 		}
@@ -1741,7 +1741,7 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 				{
 					costs = dot[j * kDotWidthNum + i].cost;
 				}
-				// cout << "position cost " << pow(i * kSize - log_x, 2) / 100 + pow(j * kSize - log_y, 2) / 100 << " arrived cost " << dot[investigating_dot_id].arrived_times * 100 << endl;
+				// //cout << "position cost " << pow(i * kSize - log_x, 2) / 100 + pow(j * kSize - log_y, 2) / 100 << " arrived cost " << dot[investigating_dot_id].arrived_times * 100 << endl;
 				// for (int i = 0; i < 100000; i++) {
 				// 	// for (int j = 0; j < 1000000; j++) {
 				// 		// for (int k = 0; k < 100000; k++) {
@@ -1757,9 +1757,9 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 		}
 		if (id == -1)
 		{
-			//fprintf(errfile, "%d GoInDots(): There is no dot that can go\n", getRepeatedNum());
-			//fprintf(logfile, " %d GoToDots(): There is no dot that can go\n", getRepeatedNum());
-			//fprintf(stdout, "%d GoInDots(): There is no dot that can go\n", getRepeatedNum());
+			//fprintfLOL(errfile, "%d GoInDots(): There is no dot that can go\n", getRepeatedNum());
+			//fprintfLOL(logfile, " %d GoToDots(): There is no dot that can go\n", getRepeatedNum());
+			//fprintfLOL(stdout, "%d GoInDots(): There is no dot that can go\n", getRepeatedNum());
 			target_x = x / kSize;
 			target_y = y / kSize;
 		}
@@ -1768,7 +1768,7 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 			target_y = id / kDotWidthNum;
 			target_x = id - target_y * kDotWidthNum;
 			LOG_MESSAGE("target(" + to_string(target_x) + ", " + to_string(target_y), MODE_NORMAL);
-			//fprintf(logfile, " %d decide target as (%d, %d)\n", getRepeatedNum(), target_x, target_y);
+			//fprintfLOL(logfile, " %d decide target as (%d, %d)\n", getRepeatedNum(), target_x, target_y);
 		}
 
 		same_target_border = static_cast<int>(sqrt(pow(log_x - target_x * kSize, 2) + pow(log_y - target_y * kSize, 2)));
@@ -1779,9 +1779,9 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 		// do {
 		// 	i++;
 		// 	if(i > 20) {
-		// 		printf("%d GoToDots(): can not decide target\n", getRepeatedNum());
-		// 		//fprintf(errfile, "%d GoToDots(): Can not decide target\n", getRepeatedNum());
-		// 		//fprintf(logfile, " %d GoToDots(): Can not decide target\n", getRepeatedNum());
+		// 		//printf("%d GoToDots(): can not decide target\n", getRepeatedNum());
+		// 		//fprintfLOL(errfile, "%d GoToDots(): Can not decide target\n", getRepeatedNum());
+		// 		//fprintfLOL(logfile, " %d GoToDots(): Can not decide target\n", getRepeatedNum());
 		// 		target_x = x;
 		// 		target_y = y;
 		// 		target_x /= kSize;
@@ -1812,19 +1812,19 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 	prev_color = color;
 
 	local_same_target++;
-	// printf("%d\n", local_same_target);
-	// printf("%d %d\n", local_same_target, same_target_border);
+	// //printf("%d\n", local_same_target);
+	// //printf("%d %d\n", local_same_target, same_target_border);
 	LOG_MESSAGE("target_x, y " + to_string(target_x * kSize) + " " + to_string(target_y * kSize), MODE_NORMAL);
 	if (GoToDot(target_x, target_y) || local_same_target > same_target_border)
 	{
 		prev_x = -1;
 		local_same_target = 0;
-		//fprintf(logfile, " %d End GoToDots() with returning 1\n", getRepeatedNum());
+		//fprintfLOL(logfile, " %d End GoToDots() with returning 1\n", getRepeatedNum());
 		return 1;
 	}
 	else
 	{
-		//fprintf(logfile, " %d End GoToDots() with returning 0\n", getRepeatedNum());
+		//fprintfLOL(logfile, " %d End GoToDots() with returning 0\n", getRepeatedNum());
 		return 0;
 	}
 }
@@ -1840,17 +1840,17 @@ int Game1_Hikaru::HowManyCurved(int id)
 	//道の長さ
 	int distance_way = -1;
 	route[0] = id;
-	// printf("id is %d now is %d \n", id, now_dot_id);
+	// //printf("id is %d now is %d \n", id, now_dot_id);
 	for (int i = 1; i < kMaxDotNum; i++)
 	{
 		if (route[i - 1] < 0 || route[i - 1] > kMaxDotNum)
 		{
-			//fprintf(errfile, " %d HowManyCurved() route[%d - 1] = %d is strange\n", getRepeatedNum(), i, route[i - 1]);
+			//fprintfLOL(errfile, " %d HowManyCurved() route[%d - 1] = %d is strange\n", getRepeatedNum(), i, route[i - 1]);
 			distance_way = i + 1;
 			break;
 		}
 		route[i] = dot[route[i - 1]].from;
-		// printf("%d route[%d] = dot[route[%d - 1] = %d] = %d %d\n", distance_way, i, i, route[i - 1], dot[route[i - 1]].from, route[i]);
+		// //printf("%d route[%d] = dot[route[%d - 1] = %d] = %d %d\n", distance_way, i, i, route[i - 1], dot[route[i - 1]].from, route[i]);
 		//routeの最後の2つには-1を入れることにしている <- 嘘
 		if (route[i] == now_dot_id)
 		{
@@ -1861,19 +1861,19 @@ int Game1_Hikaru::HowManyCurved(int id)
 		//dotの数を超えた場合
 		if (route[i] >= kMaxDotNum || route[i] < 0)
 		{
-			//fprintf(errfile, "%d HowManyCurved(): route[%d]の値が%dでおかしい\n", getRepeatedNum(), i, route[i]);
-			//fprintf(logfile, "%d HowManyCurved(): route[%d]の値が%dでおかしい\n", getRepeatedNum(), i, route[i]);
+			//fprintfLOL(errfile, "%d HowManyCurved(): route[%d]の値が%dでおかしい\n", getRepeatedNum(), i, route[i]);
+			//fprintfLOL(logfile, "%d HowManyCurved(): route[%d]の値が%dでおかしい\n", getRepeatedNum(), i, route[i]);
 			distance_way = i;
 			break;
 		}
 	}
-	// printf("distance_way = %d\n", distance_way);
+	// //printf("distance_way = %d\n", distance_way);
 	int x[kMaxDotNum], y[kMaxDotNum], direction[kMaxDotNum];
 	//directionは、左上=0で、右に行くごとに+1、下に行くごとに+3される
 	if (distance_way >= kMaxDotNum)
 	{
-		//fprintf(logfile, " %d Warming HowManyCurved(): routeの要素数が%dで kMaxDotNum を超えている\n", getRepeatedNum(), distance_way);
-		//fprintf(errfile, "%d Warming HowManyCurved(): routeの要素数が%dで kMaxDotNum を超えている\n", getRepeatedNum(), distance_way);
+		//fprintfLOL(logfile, " %d Warming HowManyCurved(): routeの要素数が%dで kMaxDotNum を超えている\n", getRepeatedNum(), distance_way);
+		//fprintfLOL(errfile, "%d Warming HowManyCurved(): routeの要素数が%dで kMaxDotNum を超えている\n", getRepeatedNum(), distance_way);
 		distance_way = kMaxDotNum - 2;
 	}
 	y[0] = route[0] / kDotWidthNum;
@@ -1895,8 +1895,8 @@ int Game1_Hikaru::HowManyCurved(int id)
 			direction[i] = 2;
 			break;
 		default:
-			//fprintf(errfile, "%d HowManyCurved(): x[%d] = %d - x[%d - 1] = %dの値が%dでおかしい\n", getRepeatedNum(), i, x[i], i, x[i] - x[i - 1], x[i - 1]);
-			//fprintf(logfile, " %d HowManyCurved(): x[%d] = %d - x[%d - 1] = %dの値が%dでおかしい\n", getRepeatedNum(), i, x[i], i, x[i] - x[i - 1], x[i - 1]);
+			//fprintfLOL(errfile, "%d HowManyCurved(): x[%d] = %d - x[%d - 1] = %dの値が%dでおかしい\n", getRepeatedNum(), i, x[i], i, x[i] - x[i - 1], x[i - 1]);
+			//fprintfLOL(logfile, " %d HowManyCurved(): x[%d] = %d - x[%d - 1] = %dの値が%dでおかしい\n", getRepeatedNum(), i, x[i], i, x[i] - x[i - 1], x[i - 1]);
 			direction[i] = 5;
 			break;
 		}
@@ -2041,7 +2041,7 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 		{
 			if (log_superobj_num > 0 && pow(log_y - log_superobj_y[0], 2) + pow(log_x - log_superobj_x[0], 2) < 400)
 			{
-				cout << "near super" << endl;
+				//cout << "near super" << endl;
 				if (abs(angle) < 30)
 				{
 					if (distance < 3 + static_cast<int>(rnd() % 5))
@@ -2092,7 +2092,7 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 			}
 			else if (IsOnSwampland())
 			{
-				cout << "in swampland" << endl;
+				//cout << "in swampland" << endl;
 				if (IsOnSwampland() == 1 && angle > 0 && angle < 90)
 				{
 					// left
@@ -2137,7 +2137,7 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 			}
 			else if (IsNearYellow(2, -1, -1) && LoadedObjects != 0)
 			{
-				cout << "near yellow" << endl;
+				//cout << "near yellow" << endl;
 				if (abs(angle) < 10)
 				{
 					motor(3, 3);
