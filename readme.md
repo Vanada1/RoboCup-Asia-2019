@@ -4,6 +4,8 @@
 
 This is all of the source codes of team Ninja from Japan.
 
+Modified by Victoria team from Russia
+
 If there is any error or English syntax error, please contact me.
 
 If you want my source code quickly, please look at `code(c++)/Hikaru.cpp`.
