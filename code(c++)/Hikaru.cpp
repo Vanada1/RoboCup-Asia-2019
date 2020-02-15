@@ -1,7 +1,7 @@
 /*
-todo : 回転するときに、カラーセンサが沼地に入ってしまう問題を解決
-オドメトリを用いて、PLAでTrapに入る問題を解決
-360 x 270にすること
+todo : Addressed an issue where color sensors would enter swamps when rotating
+Odometry solves the problem of trapping in PLA
+360 x 270
 */
 #include "Hikaru.hpp"
 #include "MapData.hpp"
@@ -316,7 +316,7 @@ void Game1_Hikaru::loop()
 			same_time++;
 		}
 	}
-	//Xyiny ne ponyatno/ I dont know what this shit do. DO NOT TOUCH!!!!!!!1
+	//TODO: сделать езду по зонам в отдельной функции
 	else
 	{
 		if (loaded_objects[RED_LOADED_ID] < kBorderSameObjNum)
@@ -867,58 +867,6 @@ void Game1_Hikaru::InputDotInformation(void)
 		}
 	}
 
-	/*rep(kind, 7)
-	{
-		rep(ysi, 5)
-		{
-			rep(xsj, 6)
-			{
-				for (int yi = ysi * kDotHeightNum / 5; yi < (ysi + 1) * kDotHeightNum / 5; ++yi)
-				{
-					for (int xj = xsj * kDotWidthNum / 6; xj < (xsj + 1) * kDotWidthNum / 6; ++xj)
-					{
-						map_secure[kind][yi * kDotWidthNum + xj] = map_secure_lite_data[kind][4 - ysi][xsj];
-					}
-				}
-			}
-		}
-	}*/
-
-	/*//printf("map\n");
-	for (int yi = kDotHeightNum - 1; yi >= 0; --yi)
-	{
-		for (int xj = 0; xj < kDotWidthNum; ++xj)
-		{
-			switch (map_position_color_data[xj][yi])
-			{
-			case POINT_WHITE:
-				//printf(" ");
-				break;
-			case POINT_YELLOW:
-				//printf("Y");
-				break;
-			case POINT_WALL:
-				//printf("#");
-				break;
-			case POINT_SWAMPLAND:
-				//printf("$");
-				break;
-			case POINT_DEPOSIT:
-				//printf("D");
-				break;
-			case POINT_SUPERAREA:
-				//printf("S");
-				break;
-			default:
-				//printf(" ");
-				break;
-			}
-		}
-		//printf("\n");
-	}
-	//printf("\n");
-	//printf("\n");*/
-
 	for (long i = 0; i < kMaxDotNum; i++)
 	{
 		//I use id of dot
@@ -997,7 +945,7 @@ void Game1_Hikaru::InputDotInformation(void)
 			{
 				dot[i].edge_cost[dot[i].edge_num] = (dot[i].wide + dot[target_id].wide) * 1000 * 1000;
 			}
-			//マップの端
+			//Map edge
 			else if (x == 0 || y == 0 || x == kDotWidthNum - 1 || y == kDotHeightNum - 1 || temp_x == 0 || temp_y == 0 || temp_x == kDotWidthNum - 1 || temp_y == kDotHeightNum - 1)
 			{
 				dot[i].edge_cost[dot[i].edge_num] = (dot[i].wide + dot[target_id].wide) * 1000 * 1000;
@@ -1014,50 +962,6 @@ void Game1_Hikaru::InputDotInformation(void)
 			dot[i].edge_num++;
 		}
 	}
-	// for (int hi = kDotHeightNum - 1; hi >= 0; hi--)
-	// {
-	// 	rep(wj, kDotWidthNum)
-	// 	{
-	// 		switch (dot[hi * kDotWidthNum + wj].point)
-	// 		{
-	// 		case POINT_YELLOW:
-	// 			//cout << "$";
-	// 			break;
-	// 		case POINT_WALL:
-	// 			//cout << "#";
-	// 			break;
-	// 		case POINT_DEPOSIT:
-	// 			//cout << "@";
-	// 			break;
-	// 		case POINT_SUPERAREA:
-	// 			//cout << "^";
-	// 			break;
-	// 		case POINT_SWAMPLAND:
-	// 			//cout << "|";
-	// 			break;
-	// 		default:
-	// 			if (dot[hi * kDotWidthNum + wj].black == 1)
-	// 			{
-	// 				//cout << "B";
-	// 			}
-	// 			else if (dot[hi * kDotWidthNum + wj].cyan == 1)
-	// 			{
-	// 				//cout << "C";
-	// 			}
-	// 			else if (dot[hi * kDotWidthNum + wj].red == 1)
-	// 			{
-	// 				//cout << "R";
-	// 			}
-	// 			else
-	// 			{
-	// 				//cout << " ";
-	// 			}
-	// 			break;
-	// 		}
-	// 	}
-	// 	//cout << endl;
-	// }
-	// //cout << endl;
 }
 
 void Game1_Hikaru::Dijkstra(int option)
@@ -1183,7 +1087,7 @@ void Game1_Hikaru::Dijkstra(int option)
 
 			if (dot[i].point == POINT_WALL || dot[i].point == POINT_YELLOW)
 			{
-				target_cost *= 10000000;
+				target_cost *= 10000;
 			}
 
 			// if (dot[target_id].point < -1) {
@@ -1258,38 +1162,38 @@ int Game1_Hikaru::GoToDot(int x, int y)
 		GoToPosition(x, y, 10, 10, 5);
 		return 1;
 	}
-	// char map_data_to_show[kMaxDotNum];
-	// for (int i = 0; i < kMaxDotNum; i++)
-	// {
-	// 	if (dot[i].point == POINT_YELLOW)
-	// 	{
-	// 		map_data_to_show[i] = 'Y';
-	// 	}
-	// 	else if (dot[i].point == POINT_WALL)
-	// 	{
-	// 		map_data_to_show[i] = '#';
-	// 	}
-	// 	else if (dot[i].point == POINT_DEPOSIT)
-	// 	{
-	// 		map_data_to_show[i] = 'D';
-	// 	}
-	// 	else if (dot[i].point == POINT_SWAMPLAND || dot[i].point == POINT_MAY_SWAMPLAND)
-	// 	{
-	// 		map_data_to_show[i] = '$';
-	// 	}
-	// 	else if (dot[i].point == POINT_SUPERAREA)
-	// 	{
-	// 		map_data_to_show[i] = 'S';
-	// 	}
-	// 	else if (dot[i].point == POINT_UNKNOWN)
-	// 	{
-	// 		map_data_to_show[i] = '\'';
-	// 	}
-	// 	else
-	// 	{
-	// 		map_data_to_show[i] = ' ';
-	// 	}
-	// }
+	char map_data_to_show[kMaxDotNum];
+	for (int i = 0; i < kMaxDotNum; i++)
+	{
+		if (dot[i].point == POINT_YELLOW)
+		{
+			map_data_to_show[i] = 'Y';
+		}
+		else if (dot[i].point == POINT_WALL)
+		{
+			map_data_to_show[i] = '#';
+		}
+		else if (dot[i].point == POINT_DEPOSIT)
+		{
+			map_data_to_show[i] = 'D';
+		}
+		else if (dot[i].point == POINT_SWAMPLAND || dot[i].point == POINT_MAY_SWAMPLAND)
+		{
+			map_data_to_show[i] = '$';
+		}
+		else if (dot[i].point == POINT_SUPERAREA)
+		{
+			map_data_to_show[i] = 'S';
+		}
+		else if (dot[i].point == POINT_UNKNOWN)
+		{
+			map_data_to_show[i] = '\'';
+		}
+		else
+		{
+			map_data_to_show[i] = ' ';
+		}
+	}
 
 	//If the node I want to go will be go out
 	if (x < 1 || x >= kDotWidthNum - 1 || y < 1 || y >= kDotHeightNum - 1)
@@ -1321,7 +1225,7 @@ int Game1_Hikaru::GoToDot(int x, int y)
 	}
 
 	int temp = goal_dot;
-	//map_data_to_show[goal_dot] = 'T';
+	map_data_to_show[goal_dot] = 'T';
 	int i = 0;
 
 	while (dot[temp].from != now_dot_id && i < 200)
@@ -1330,7 +1234,7 @@ int Game1_Hikaru::GoToDot(int x, int y)
 		// go_y = temp / kDotWidthNum;
 		// go_x = temp - (int)go_y * kDotWidthNum;
 		temp = dot[temp].from;
-		//map_data_to_show[temp] = '+';
+		map_data_to_show[temp] = '+';
 		// //printf("%d\n", dot[temp].point);
 		i++;
 		if (temp < 0 || temp >= kMaxDotNum)
@@ -1346,7 +1250,7 @@ int Game1_Hikaru::GoToDot(int x, int y)
 		LOG_MESSAGE(FUNC_NAME + "(): iの値が200です", MODE_NORMAL);
 	}
 
-	//map_data_to_show[now_dot_id] = '@';
+	map_data_to_show[now_dot_id] = '@';
 
 	int next_x, next_y;
 	next_y = temp / kDotWidthNum;
@@ -1354,54 +1258,11 @@ int Game1_Hikaru::GoToDot(int x, int y)
 
 	int now_y = now_dot_id / kDotWidthNum;
 	int now_x = now_dot_id - now_y * kDotWidthNum;
-
-	// if (getRepeatedNum() % 3 == 0)
-	// {
-	// 	//cout << "out map" << endl;
-	// 	ProcessingTime pt2;
-	// 	pt2.start();
-	// 	FILE* fp = fopen("map_out.txt", "w");
-	// 	if (fp == NULL)
-	// 	{
-	// 		ERROR_MESSAGE(FUNCNAME + "(): failed to make map_out.txt", MODE_NORMAL);
-	// 	}
-	// 	else
-	// 	{
-	// 		//cout << "out map start" << endl;
-	// 		rep(xj, kDotWidthNum + 2)
-	// 		{
-	// 			//fprintf(fp, "#");
-	// 			//printfLOL("#");
-	// 		}
-	// 		//fprintf(fp, "\n");
-	// 		//printf("\n");
-	// 		rep(yi, kDotHeightNum)
-	// 		{
-	// 			//fprintf(fp, "#");
-	// 			//printfLOL("#");
-
-	// 			rep(xj, kDotWidthNum)
-	// 			{
-	// 				//fprintf(fp, "%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
-	// 				//printfLOL("%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
-	// 			}
-	// 			//fprintf(fp, "#");
-	// 			//printfLOL("#");
-
-	// 			//fprintf(fp, "\n");
-	// 			//printfLOL("\n");
-	// 		}
-	// 		rep(xj, kDotWidthNum + 2)
-	// 		{
-	// 			//printfLOL("\n");
-	// 			//fprintf(fp, "#");
-	// 		}
-	// 		//printfLOL("\n");
-	// 		//fprintf(fp, "\n");
-	// 		fclose(fp);
-	// 		//cout << "out map end " << pt2.end() << endl;
-	// 	}
-	// }
+	// Output map in file
+	if (getRepeatedNum() % 3 == 0)
+	{
+		OutputMap();
+	}
 
 	int distance = 20;
 	if (next_x < now_x)
@@ -1832,12 +1693,12 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 int Game1_Hikaru::HowManyCurved(int id)
 {
 	/*
-	道の長さ * 10 + 曲がった回数 * 20 + (Object < 6 のとき) Objectのとれる試算
+	Path length * 10 + number of turns * 20 + (when Object <6) Estimated calculation of Object
 	*/
 	int route[kMaxDotNum];
-	//曲がった回数
+	//Number of revolutions
 	int curved_times = 0;
-	//道の長さ
+	//Path length
 	int distance_way = -1;
 	route[0] = id;
 	// //printf("id is %d now is %d \n", id, now_dot_id);
@@ -1851,14 +1712,14 @@ int Game1_Hikaru::HowManyCurved(int id)
 		}
 		route[i] = dot[route[i - 1]].from;
 		// //printf("%d route[%d] = dot[route[%d - 1] = %d] = %d %d\n", distance_way, i, i, route[i - 1], dot[route[i - 1]].from, route[i]);
-		//routeの最後の2つには-1を入れることにしている <- 嘘
+		//We decide to put -1 in the last two of the route <-lie
 		if (route[i] == now_dot_id)
 		{
 			distance_way = i + 1;
 			break;
 		}
 
-		//dotの数を超えた場合
+		//When the number of dots is exceeded
 		if (route[i] >= kMaxDotNum || route[i] < 0)
 		{
 			//fprintfLOL(errfile, "%d HowManyCurved(): route[%d]の値が%dでおかしい\n", getRepeatedNum(), i, route[i]);
@@ -1937,14 +1798,16 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 	}
 
 	int classification = obstacle(8, 10, 8);
-	if (abs(WheelLeft) + abs(WheelRight) < 6) {
+	if (abs(WheelLeft) + abs(WheelRight) < 6) 
+	{
 		classification = obstacle(8, 10, 8);
 	}
 	if (log_superobj_num > 0)
 	{
 		classification = obstacle(5, 7, 5);
 	}
-	if (LoadedObjects >= 6 || (Time > 460 && LoadedObjects > 1)) {
+	if (LoadedObjects >= 6 || (Time > 460 && LoadedObjects > 1)) 
+	{
 		classification = obstacle(5, 7, 4);
 	}
 
@@ -2424,20 +2287,20 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 void Game1_Hikaru::saveColorInfo(void)
 {
 	/*
-	最上位
+	Top
 	POINT_DEPOSIT
 	POINT_YELLOW
 	POINT_SWAMPLAND
 
-	中位
+	Medium
 	POINT_SUPERAREA
 	POINT_WHITE
 
-	下位
+	Lower rank
 	POINT_MAY_SWAMPLAND
 	POINT_UNKNWON
 
-	その他
+	Other
 	POINT_WALL
 	 */
 	if (ColorJudgeLeft(object_box2))
@@ -2929,4 +2792,53 @@ int Game1_Hikaru::goInArea(int x, int y, int wide_decide_x, int wide_decide_y, i
 	}
 	return 0;
 
+}
+
+
+void Game1_Hikaru::OutputMap(void)
+{
+	//cout << "out map" << endl;
+		ProcessingTime pt2;
+		pt2.start();
+		FILE* fp = fopen("map_out.txt", "w");
+		if (fp == NULL)
+		{
+			ERROR_MESSAGE(FUNCNAME + "(): failed to make map_out.txt", MODE_NORMAL);
+		}
+		else
+		{
+			//cout << "out map start" << endl;
+			rep(xj, kDotWidthNum + 2)
+			{
+				fprintf(fp, "#");
+				//printfLOL("#");
+			}
+			fprintf(fp, "\n");
+			//printf("\n");
+			rep(yi, kDotHeightNum)
+			{
+				fprintf(fp, "#");
+				//printfLOL("#");
+
+				rep(xj, kDotWidthNum)
+				{
+					fprintf(fp, "%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
+					//printfLOL("%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
+				}
+				fprintf(fp, "#");
+				//printfLOL("#");
+
+				fprintf(fp, "\n");
+				//printfLOL("\n");
+			}
+			rep(xj, kDotWidthNum + 2)
+			{
+				fprintf(fp, "#");
+				//printfLOL("\n");
+			}
+			fprintf(fp, "\n");
+			//printfLOL("\n");
+			fclose(fp);
+			//cout << "out map end " << pt2.end() << endl;
+		}
 }
