@@ -1308,7 +1308,7 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 		}
 
 		int min = 100000, id = -1;
-		const int N = 3
+		const int N = 3;
 		// Move once every N times
 		int option = rnd() % N;
 		if (color == POINT_DEPOSIT) 
