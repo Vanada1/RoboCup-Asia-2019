@@ -14,6 +14,23 @@ public:
 	void loop(void) override;
 
 private:
+	/*
+		Settings
+	*/
+// TODO: Naming
+	int toChooseRED[2] = 		{240, 140};
+	int toChooseBLACK[2] = 		{240, 140};
+	int toChooseCYACN[2] = 		{240, 140};
+
+	int FirstCoordAriaRED[2] = 		{240, 140};
+	int SecondcoordAriaRED[2] = 	{240, 140};
+	int FirstCoordAriaBLACK[2] = 	{240, 140};
+	int SecontCoordAriaBLACK[2] = 	{240, 140};
+	int FirstCoordAriaCYAN[2] = 	{240, 140};
+	int SecontCoordAriaCYAN[2] = 	{240, 140};
+	int scatter[2] = {60, 60};
+
+
 	const static int kCospaceWidth = 360;
 	const static int kCospaceHeight = 270;
 	const static int kSize = 10;
@@ -97,7 +114,9 @@ private:
 	void saveColorInfo(void);
 	void calculateWallPosition(void);
 
-	void OutputMap(void);
+	void CreateMap(char* map_data_to_show)
+	void OutputMap(char* map_data_to_show);
+	void GoToArea(int color);
 };
 
 #endif // !HIKARU
