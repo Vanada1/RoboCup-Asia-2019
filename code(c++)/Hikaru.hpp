@@ -18,9 +18,9 @@ private:
 		Settings
 	*/
 // TODO: Naming
-	int toChooseRED[2] = 		{240, 140};
-	int toChooseBLACK[2] = 		{240, 140};
-	int toChooseCYACN[2] = 		{240, 140};
+	int toChooseRED[2] = 			{240, 140};
+	int toChooseBLACK[2] = 			{240, 140};
+	int toChooseCYACN[2] = 			{240, 140};
 
 	int FirstCoordAriaRED[2] = 		{240, 140};
 	int SecondcoordAriaRED[2] = 	{240, 140};

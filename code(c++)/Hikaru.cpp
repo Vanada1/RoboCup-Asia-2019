@@ -1367,7 +1367,8 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 				{
 					// When not moving
 					int k = 30;
-					costs += static_cast<int>(sqrt(pow(abs(i * kSize - log_x) - k, 2) + pow(abs(j * kSize - log_y) - k, 2)));
+					costs += static_cast<int>(sqrt(pow(abs(i * kSize - log_x) - k, 2) 
+												+ pow(abs(j * kSize - log_y) - k, 2)));
 				}
 				else
 				{
@@ -1387,9 +1388,7 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 		}
 		if (id == -1)
 		{
-			//fprintfLOL(errfile, "%d GoInDots(): There is no dot that can go\n", getRepeatedNum());
 			//fprintfLOL(logfile, " %d GoToDots(): There is no dot that can go\n", getRepeatedNum());
-			//fprintfLOL(stdout, "%d GoInDots(): There is no dot that can go\n", getRepeatedNum());
 			target_x = x / kSize;
 			target_y = y / kSize;
 		}

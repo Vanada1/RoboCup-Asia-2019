@@ -1,6 +1,6 @@
 #include "JudgeColorTools.hpp"
 
-// SuperObjば場合は、プラスされる
+// If SuperObj, you will be a plus
 int color_width = 10;
 int super_obj_color_width = color_width + 20;
 
@@ -41,8 +41,12 @@ int gray_zone[3][2] = {{141, 162}, {150, 171}, {198, 219}};
 
 int ColorJudgeLeft(int col[3][2])
 {
-	return (col[0][0] - color_width <= CSLeft_R && CSLeft_R <= col[0][0] + color_width && col[1][0] - color_width <= CSLeft_G && CSLeft_G <= col[1][0] + color_width && col[2][0] - color_width <= CSLeft_B && CSLeft_B <= col[2][0] + color_width) ||
-		   (col[0][1] - color_width <= CSLeft_R && CSLeft_R <= col[0][1] + color_width && col[1][1] - color_width <= CSLeft_G && CSLeft_G <= col[1][1] + color_width && col[2][1] - color_width <= CSLeft_B && CSLeft_B <= col[2][1] + color_width);
+	return (col[0][0] - color_width <= CSLeft_R && CSLeft_R <= col[0][0] + color_width 
+			&& col[1][0] - color_width <= CSLeft_G && CSLeft_G <= col[1][0] + color_width 
+			&& col[2][0] - color_width <= CSLeft_B && CSLeft_B <= col[2][0] + color_width) 
+			|| (col[0][1] - color_width <= CSLeft_R && CSLeft_R <= col[0][1] + color_width 
+				&& col[1][1] - color_width <= CSLeft_G && CSLeft_G <= col[1][1] + color_width 
+				&& col[2][1] - color_width <= CSLeft_B && CSLeft_B <= col[2][1] + color_width);
 }
 int ColorJudgeRight(int col[3][2])
 {
