@@ -2618,7 +2618,7 @@ void Game1_Hikaru::GoToArea(int color)
 				}
 				process_times = 0;
 			}
-				switch (process)
+			switch (process)
 			{
 				case 0:
 					if (GoInDots(firstArea[X], firstArea[Y], scatter[X], scatter[Y], color))
