@@ -2561,96 +2561,93 @@ void Game1_Hikaru::GoToArea(int color)
 	int secondArea[2];
 	// TODO: Naming
 	int supportCoordColor[2];
-	switch (color)
+	if  (color  == RED_LOADED_ID)
 	{
-		case RED_LOADED_ID:
-			colorID = RED_LOADED_ID;
-			supportCoordColor[X] = toChooseRED[X];
-			supportCoordColor[Y] = toChooseRED[Y];
-			firstArea[X] = FirstCoordAriaRED[X];
-			firstArea[Y] = FirstCoordAriaRED[Y];
-			secondArea[X] = SecondcoordAriaRED[X];
-			secondArea[Y] = SecondcoordAriaRED[Y];
-			break;
-		case BLACK_LOADED_ID:
-			colorID = BLACK_LOADED_ID;
-			supportCoordColor[X] = toChooseBLACK[X];
-			supportCoordColor[Y] = toChooseBLACK[Y];
-			firstArea[X] = FirstCoordAriaBLACK[X];
-			firstArea[Y] = FirstCoordAriaBLACK[Y];
-			secondArea[X] = SecontCoordAriaBLACK[X];
-			secondArea[Y] = SecontCoordAriaBLACK[Y];
-			break;
-		case CYAN_LOADED_ID:
-			colorID = CYAN_LOADED_ID;
-			supportCoordColor[X] = toChooseCYACN[X];
-			supportCoordColor[Y] = toChooseCYACN[Y];
-			firstArea[X] = FirstCoordAriaCYAN[X];
-			firstArea[Y] = FirstCoordAriaCYAN[Y];
-			secondArea[X] = SecontCoordAriaCYAN[X];
-			secondArea[Y] = SecontCoordAriaCYAN[Y];
-			break;
-
-		default:
-			return;
-			break;
+		colorID = RED_LOADED_ID;
+		supportCoordColor[X] = toChooseRED[X];
+		supportCoordColor[Y] = toChooseRED[Y];
+		firstArea[X] = FirstCoordAriaRED[X];
+		firstArea[Y] = FirstCoordAriaRED[Y];
+		secondArea[X] = SecondcoordAriaRED[X];
+		secondArea[Y] = SecondcoordAriaRED[Y];
+	}
+	else if(color  == BLACK_LOADED_ID)
+	{
+		colorID = BLACK_LOADED_ID;
+		supportCoordColor[X] = toChooseBLACK[X];
+		supportCoordColor[Y] = toChooseBLACK[Y];
+		firstArea[X] = FirstCoordAriaBLACK[X];
+		firstArea[Y] = FirstCoordAriaBLACK[Y];
+		secondArea[X] = SecontCoordAriaBLACK[X];
+		secondArea[Y] = SecontCoordAriaBLACK[Y];
+	}
+	else if(color  == CYAN_LOADED_ID)
+	{
+		colorID = CYAN_LOADED_ID;
+		supportCoordColor[X] = toChooseCYACN[X];
+		supportCoordColor[Y] = toChooseCYACN[Y];
+		firstArea[X] = FirstCoordAriaCYAN[X];
+		firstArea[Y] = FirstCoordAriaCYAN[Y];
+		secondArea[X] = SecontCoordAriaCYAN[X];
+		secondArea[Y] = SecontCoordAriaCYAN[Y];
 	}
 	if (loaded_objects[colorID] < kBorderSameObjNum)
+	{
+		if (large_process != 2 || next_allowed_go_time[colorID][process] > Time)
 		{
-			if (large_process != 2 || next_allowed_go_time[colorID][process] > Time)
+			if (PositionX < supportCoordColor[X] && PositionY < supportCoordColor[Y] && next_allowed_go_time[colorID][0] <= Time) 
 			{
-				if (PositionX < supportCoordColor[X] && PositionY < supportCoordColor[Y] && next_allowed_go_time[colorID][0] <= Time) 
-				{
+				process = 1;
+			}
+			else if (!(PositionX < supportCoordColor[X] && PositionY < supportCoordColor[Y])) 
+			{
+				process = 0;
+			}
+			else 
+			{
+				if (next_allowed_go_time[colorID][1] < next_allowed_go_time[colorID][0]) {
 					process = 1;
 				}
-				else if (!(PositionX < supportCoordColor[X] && PositionY < supportCoordColor[Y])) 
-				{
+				else {
 					process = 0;
 				}
-				else 
-				{
-					if (next_allowed_go_time[colorID][1] < next_allowed_go_time[colorID][0]) {
-						process = 1;
-					}
-					else {
-						process = 0;
-					}
-				}
-				process_times = 0;
 			}
-			switch (process)
-			{
-				case 0:
-					if (GoInDots(firstArea[X], firstArea[Y], scatter[X], scatter[Y], color))
-					{
-						if (process_times >= 4)
-						{
-							next_allowed_go_time[colorID][process] = Time + skip_time;
-							process++;
-							process_times = 0;
-						}
-						process_times++;
-					}
-					break;
-				case 1:
-					if (GoInDots(secondArea[X], secondArea[Y], scatter[X], scatter[Y], color))
-					{
-						if (process_times >= 3)
-						{
-							next_allowed_go_time[colorID][process] = Time + skip_time;
-							process = 0;
-							process_times = 0;
-						}
-						process_times++;
-					}
+			process_times = 0;
+		}
 
-				default:
+		if (process == 0)
+		{
+			if (GoInDots(firstArea[X], firstArea[Y], scatter[X], scatter[Y], color))
+			{
+				if (process_times >= 4)
+				{
+					next_allowed_go_time[colorID][process] = Time + skip_time;
+					process++;
+					process_times = 0;
+				}
+				process_times++;
+			}
+		}
+		else  if(process == 1)
+		{
+			if (GoInDots(secondArea[X], secondArea[Y], scatter[X], scatter[Y], color))
+			{
+				if (process_times >= 3)
+				{
+					next_allowed_go_time[colorID][process] = Time + skip_time;
 					process = 0;
 					process_times = 0;
-					break;
+				}
+				process_times++;
 			}
-			large_process = 2;
 		}
+		else
+		{
+			process = 0;
+			process_times = 0;
+		}
+		large_process = 2;
+	}
 
 }
 
