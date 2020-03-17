@@ -1009,8 +1009,38 @@ int Game1_Hikaru::GoToDot(int x, int y)
 		GoToPosition(x, y, 10, 10, 5);
 		return 1;
 	}
-	char map_data_to_show[kMaxDotNum];
-	CreateMap(map_data_to_show);
+	char map_data_to_show[kMaxDotNum]; 
+	for (int i = 0; i < kMaxDotNum; i++)
+	{
+		if (dot[i].point == POINT_YELLOW)
+		{
+			map_data_to_show[i] = 'Y';
+		}
+		else if (dot[i].point == POINT_WALL)
+		{
+			map_data_to_show[i] = '#';
+		}
+		else if (dot[i].point == POINT_DEPOSIT)
+		{
+			map_data_to_show[i] = 'D';
+		}
+		else if (dot[i].point == POINT_SWAMPLAND || dot[i].point == POINT_MAY_SWAMPLAND)
+		{
+			map_data_to_show[i] = '$';
+		}
+		else if (dot[i].point == POINT_SUPERAREA)
+		{
+			map_data_to_show[i] = 'S';
+		}
+		else if (dot[i].point == POINT_UNKNOWN)
+		{
+			map_data_to_show[i] = '\'';
+		}
+		else
+		{
+			map_data_to_show[i] = ' ';
+		}
+	}
 	//If the node I want to go will be go out
 	if (x < 1 || x >= kDotWidthNum - 1 || y < 1 || y >= kDotHeightNum - 1)
 	{
@@ -1076,7 +1106,50 @@ int Game1_Hikaru::GoToDot(int x, int y)
 	// Output map in file
 	if (getRepeatedNum() % 3 == 0)
 	{
-		OutputMap(map_data_to_show);
+		//cout << "out map" << endl;
+		ProcessingTime pt2;
+		pt2.start();
+		FILE* fp = fopen("map_out.txt", "w");
+		if (fp == NULL)
+		{
+			ERROR_MESSAGE(FUNCNAME + "(): failed to make map_out.txt", MODE_NORMAL);
+		}
+		else
+		{
+			//cout << "out map start" << endl;
+			rep(xj, kDotWidthNum + 2)
+			{
+				fprintf(fp, "#");
+				//printfLOL("#");
+			}
+			fprintf(fp, "\n");
+			//printf("\n");
+			rep(yi, kDotHeightNum)
+			{
+				fprintf(fp, "#");
+				//printfLOL("#");
+
+				rep(xj, kDotWidthNum)
+				{
+					fprintf(fp, "%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
+					//printfLOL("%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
+				}
+				fprintf(fp, "#");
+				//printfLOL("#");
+
+				fprintf(fp, "\n");
+				//printfLOL("\n");
+			}
+			rep(xj, kDotWidthNum + 2)
+			{
+				fprintf(fp, "#");
+				//printfLOL("\n");
+			}
+			fprintf(fp, "\n");
+			//printfLOL("\n");
+			fclose(fp);
+			//cout << "out map end " << pt2.end() << endl;
+		}
 	}
 
 	int distance = 20;
@@ -2504,54 +2577,6 @@ int Game1_Hikaru::goInArea(int x, int y, int wide_decide_x, int wide_decide_y, i
 
 }
 
-void Game1_Hikaru::OutputMap(char* map_data_to_show)
-{
-	//cout << "out map" << endl;
-		ProcessingTime pt2;
-		pt2.start();
-		FILE* fp = fopen("map_out.txt", "w");
-		if (fp == NULL)
-		{
-			ERROR_MESSAGE(FUNCNAME + "(): failed to make map_out.txt", MODE_NORMAL);
-		}
-		else
-		{
-			//cout << "out map start" << endl;
-			rep(xj, kDotWidthNum + 2)
-			{
-				fprintf(fp, "#");
-				//printfLOL("#");
-			}
-			fprintf(fp, "\n");
-			//printf("\n");
-			rep(yi, kDotHeightNum)
-			{
-				fprintf(fp, "#");
-				//printfLOL("#");
-
-				rep(xj, kDotWidthNum)
-				{
-					fprintf(fp, "%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
-					//printfLOL("%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
-				}
-				fprintf(fp, "#");
-				//printfLOL("#");
-
-				fprintf(fp, "\n");
-				//printfLOL("\n");
-			}
-			rep(xj, kDotWidthNum + 2)
-			{
-				fprintf(fp, "#");
-				//printfLOL("\n");
-			}
-			fprintf(fp, "\n");
-			//printfLOL("\n");
-			fclose(fp);
-			//cout << "out map end " << pt2.end() << endl;
-		}
-}
-
 void Game1_Hikaru::GoToArea(int color)
 {
 	int colorID;
@@ -2649,39 +2674,4 @@ void Game1_Hikaru::GoToArea(int color)
 		large_process = 2;
 	}
 
-}
-
-void Game1_Hikaru::CreateMap(char* map_data_to_show)
-{
-	for (int i = 0; i < kMaxDotNum; i++)
-	{
-		if (dot[i].point == POINT_YELLOW)
-		{
-			map_data_to_show[i] = 'Y';
-		}
-		else if (dot[i].point == POINT_WALL)
-		{
-			map_data_to_show[i] = '#';
-		}
-		else if (dot[i].point == POINT_DEPOSIT)
-		{
-			map_data_to_show[i] = 'D';
-		}
-		else if (dot[i].point == POINT_SWAMPLAND || dot[i].point == POINT_MAY_SWAMPLAND)
-		{
-			map_data_to_show[i] = '$';
-		}
-		else if (dot[i].point == POINT_SUPERAREA)
-		{
-			map_data_to_show[i] = 'S';
-		}
-		else if (dot[i].point == POINT_UNKNOWN)
-		{
-			map_data_to_show[i] = '\'';
-		}
-		else
-		{
-			map_data_to_show[i] = ' ';
-		}
-	}
 }

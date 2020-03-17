@@ -114,8 +114,6 @@ private:
 	void saveColorInfo(void);
 	void calculateWallPosition(void);
 
-	void CreateMap(char* map_data_to_show);
-	void OutputMap(char* map_data_to_show);
 	void GoToArea(int color);
 };
 
