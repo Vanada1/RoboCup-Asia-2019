@@ -2563,7 +2563,7 @@ void Game1_Hikaru::GoToArea(int color)
 	int supportCoordColor[2];
 	switch (color)
 	{
-		case POINT_RED:
+		case RED_LOADED_ID:
 			colorID = RED_LOADED_ID;
 			supportCoordColor[X] = toChooseRED[X];
 			supportCoordColor[Y] = toChooseRED[Y];
@@ -2572,7 +2572,7 @@ void Game1_Hikaru::GoToArea(int color)
 			secondArea[X] = SecondcoordAriaRED[X];
 			secondArea[Y] = SecondcoordAriaRED[Y];
 			break;
-		case POINT_BLACK:
+		case BLACK_LOADED_ID:
 			colorID = BLACK_LOADED_ID;
 			supportCoordColor[X] = toChooseBLACK[X];
 			supportCoordColor[Y] = toChooseBLACK[Y];
@@ -2581,7 +2581,7 @@ void Game1_Hikaru::GoToArea(int color)
 			secondArea[X] = SecontCoordAriaBLACK[X];
 			secondArea[Y] = SecontCoordAriaBLACK[Y];
 			break;
-		case POINT_CYAN:
+		case CYAN_LOADED_ID:
 			colorID = CYAN_LOADED_ID;
 			supportCoordColor[X] = toChooseCYACN[X];
 			supportCoordColor[Y] = toChooseCYACN[Y];

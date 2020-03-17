@@ -4,6 +4,7 @@
 int color_width = 10;
 int super_obj_color_width = color_width + 20;
 
+// arrays of colors
 int object_box[3][2] = {{204, 235}, {130, 148}, {0, 0}};
 //int object_box2[3][2] = {{204, 235}, {130, 148}, {0, 0}};
 int object_box2[3][2] = {{204, 235}, {150, 171}, {111, 123}};
