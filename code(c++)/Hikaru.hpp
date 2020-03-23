@@ -18,16 +18,18 @@ private:
 		Settings
 	*/
 // TODO: Naming
+	// чтобы выбрать, в какую зону поехать из двух(может быть одна зона)
 	int toChooseRED[2] = 			{240, 140};
 	int toChooseBLACK[2] = 			{240, 140};
 	int toChooseCYACN[2] = 			{240, 140};
-
-	int FirstCoordAriaRED[2] = 		{240, 140};
-	int SecondcoordAriaRED[2] = 	{240, 140};
+	// координаты центра каждой зоны
+	int FirstCoordAriaRED[2] = 		{180, 230};
+	int SecondcoordAriaRED[2] = 	{50, 70};
 	int FirstCoordAriaBLACK[2] = 	{240, 140};
 	int SecontCoordAriaBLACK[2] = 	{240, 140};
 	int FirstCoordAriaCYAN[2] = 	{240, 140};
 	int SecontCoordAriaCYAN[2] = 	{240, 140};
+	// диапазон зон
 	int scatter[2] = {60, 60};
 
 
