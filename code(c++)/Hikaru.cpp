@@ -311,7 +311,7 @@ void Game1_Hikaru::loop()
 			if (same_time > 7)
 			{
 				log_superobj_num = 0;
-				LOG_MESSAGE("There is no superobj", MODE_NORMAL);
+				//LOG_MESSAGE("There is no superobj", MODE_NORMAL);
 			}
 			GoToPosition(log_superobj_x[0] - 5 + rand() % 10, log_superobj_y[0] - 5 + rand() % 10, 1, 1, 1);
 			same_time++;
@@ -415,8 +415,8 @@ void Game1_Hikaru::loop()
 		super_sameoperate = 0;
 	}
 
-	double seconds = pt.end();
-	LOG_MESSAGE("loop time :" + to_string(seconds) + " ms", MODE_NORMAL);
+	//double seconds = pt.end();
+	//LOG_MESSAGE("loop time :" + to_string(seconds) + " ms", MODE_NORMAL);
 }
 
 long Game1_Hikaru::WhereIsColorSensor(void)
@@ -579,7 +579,7 @@ int Game1_Hikaru::IsNearYellow(int num, int x, int y)
 
 int Game1_Hikaru::GoToPosition(int x, int y, int wide_decide_x, int wide_decide_y, int wide_judge_arrived)
 {
-	LOG_MESSAGE(FUNCNAME + "(" + to_string(x) + ", " + to_string(y) + ", " + to_string(wide_decide_x) + ", " + to_string(wide_decide_y) + ", " + to_string(wide_judge_arrived) + "): start", MODE_DEBUG);
+	//LOG_MESSAGE(FUNCNAME + "(" + to_string(x) + ", " + to_string(y) + ", " + to_string(wide_decide_x) + ", " + to_string(wide_decide_y) + ", " + to_string(wide_judge_arrived) + "): start", MODE_DEBUG);
 	static int absolute_x = -1;
 	static int absolute_y = -1;
 	static int absolute_distance = -1;
@@ -646,7 +646,7 @@ int Game1_Hikaru::GoToPosition(int x, int y, int wide_decide_x, int wide_decide_
 	if (PLUSMINUS(absolute_x, temp_x, wide_judge_arrived) && PLUSMINUS(absolute_y, temp_y, wide_judge_arrived))
 	{
 		//printf("(%d, %d)Arrived at\n", absolute_x, absolute_y);
-		LOG_MESSAGE("(" + to_string(absolute_x) + "," + to_string(absolute_y) + ")Arrived at", MODE_NORMAL);
+		//LOG_MESSAGE("(" + to_string(absolute_x) + "," + to_string(absolute_y) + ")Arrived at", MODE_NORMAL);
 		absolute_x = -1;
 		absolute_y = -1;
 		same_operate = -1;
@@ -654,12 +654,12 @@ int Game1_Hikaru::GoToPosition(int x, int y, int wide_decide_x, int wide_decide_
 		return 1;
 	}
 
-	LOG_MESSAGE("ab(" + to_string(absolute_x) + "," + to_string(absolute_y) + ")", MODE_NORMAL);
+	//LOG_MESSAGE("ab(" + to_string(absolute_x) + "," + to_string(absolute_y) + ")", MODE_NORMAL);
 	x = absolute_x;
 	y = absolute_y;
 	x = x - temp_x;
 	y = y - temp_y;
-	LOG_MESSAGE("x, y = " + to_string(x) + ", " + to_string(y), MODE_NORMAL);
+	//LOG_MESSAGE("x, y = " + to_string(x) + ", " + to_string(y), MODE_NORMAL);
 	double angle = atan2(y, x);
 	angle = angle * 180 / 3.14;
 	int angle_int = static_cast<int>(angle);
@@ -668,7 +668,7 @@ int Game1_Hikaru::GoToPosition(int x, int y, int wide_decide_x, int wide_decide_
 	{
 		angle_int += 360;
 	}
-	LOG_MESSAGE("angle " + to_string(angle_int), MODE_NORMAL);
+	//LOG_MESSAGE("angle " + to_string(angle_int), MODE_NORMAL);
 	GoToAngle(angle_int, static_cast<int>(sqrt(x * x + y * y)));
 
 	if (repeated_num_log + 1 == getRepeatedNum() && objects_num_log != LoadedObjects)
@@ -981,7 +981,7 @@ int Game1_Hikaru::GoToDot(int x, int y)
 	if (PositionX == -1 && (PLUSMINUS(log_x, x * kSize, kSize) && PLUSMINUS(log_y, y * kSize, kSize)))
 	{
 		//fprintfLOL(logfile, " %d End GoToDot() with returning 1 because I am in PLA and it's near target(%d, %d)\n", getRepeatedNum(), x, y);
-		LOG_MESSAGE(FUNC_NAME + "() end returning 1 because I am in PLA and it's near target(" + to_string(x) + ", " + to_string(y) + ")", MODE_NORMAL);
+		//LOG_MESSAGE(FUNC_NAME + "() end returning 1 because I am in PLA and it's near target(" + to_string(x) + ", " + to_string(y) + ")", MODE_NORMAL);
 		GoToPosition(x, y, 10, 10, 5);
 		return 1;
 	}
@@ -1020,7 +1020,7 @@ int Game1_Hikaru::GoToDot(int x, int y)
 	//If the node I want to go will be go out
 	if (x < 1 || x >= kDotWidthNum - 1 || y < 1 || y >= kDotHeightNum - 1)
 	{
-		LOG_MESSAGE(FUNC_NAME + "(): (x, y) is (" + to_string(x) + ", " + to_string(y) + "and strange", MODE_NORMAL);
+		//LOG_MESSAGE(FUNC_NAME + "(): (x, y) is (" + to_string(x) + ", " + to_string(y) + "and strange", MODE_NORMAL);
 	}
 
 	if (prev_now_dot_id != now_dot_id || prev_x != x || prev_y != y)
@@ -1044,7 +1044,7 @@ int Game1_Hikaru::GoToDot(int x, int y)
 
 	if (goal_dot < 0 || goal_dot >= kMaxDotNum)
 	{
-		LOG_MESSAGE("strainge(x, y)", MODE_NORMAL);
+		//LOG_MESSAGE("strainge(x, y)", MODE_NORMAL);
 		return 0;
 	}
 
@@ -1060,7 +1060,7 @@ int Game1_Hikaru::GoToDot(int x, int y)
 		i++;
 		if (temp < 0 || temp >= kMaxDotNum)
 		{
-			LOG_MESSAGE("temp = " + to_string(temp) + "is strange. I will continue", MODE_NORMAL);
+			//LOG_MESSAGE("temp = " + to_string(temp) + "is strange. I will continue", MODE_NORMAL);
 			GoToPosition(x * kSize, y * kSize, 5, 5, 5);
 			return 0;
 		}
@@ -1068,7 +1068,7 @@ int Game1_Hikaru::GoToDot(int x, int y)
 	if (i == 200)
 	{
 		//printf("\n\n\niの値が200ですByGoToNode()\n\n\n\n");
-		LOG_MESSAGE(FUNC_NAME + "(): iの値が200です", MODE_NORMAL);
+		//LOG_MESSAGE(FUNC_NAME + "(): iの値が200です", MODE_NORMAL);
 	}
 
 	map_data_to_show[now_dot_id] = '@';
@@ -1190,7 +1190,7 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 	static int prev_loaded_num = -1;
 	if (x != prev_x || y != prev_y)
 	{
-		LOG_MESSAGE("changed dots", MODE_NORMAL);
+		//LOG_MESSAGE("changed dots", MODE_NORMAL);
 		local_same_target = 0;
 		prev_x = x;
 		prev_y = y;
@@ -1302,7 +1302,7 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 
 int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, int color)
 {
-	LOG_MESSAGE(FUNCNAME + "(): start", MODE_DEBUG);
+	//LOG_MESSAGE(FUNCNAME + "(): start", MODE_DEBUG);
 	//fprintfLOL(logfile, " %d Start GoToDots(%d, %d, %d, %d)\n", getRepeatedNum(), x, y, wide_decide_x, wide_decide_y);
 	//printf("GoToDots(): %d %d %d %d\n", x, y, wide_decide_x, wide_decide_y);
 	static int prev_x = -1;
@@ -1314,7 +1314,7 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 	static int same_target_border = 0;
 	if (x != prev_x || y != prev_y || color != prev_color)
 	{
-		LOG_MESSAGE("changed dots", MODE_NORMAL);
+		//LOG_MESSAGE("changed dots", MODE_NORMAL);
 		local_same_target = 0;
 		prev_x = x;
 		prev_y = y;
@@ -1433,7 +1433,7 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 		{
 			target_y = id / kDotWidthNum;
 			target_x = id - target_y * kDotWidthNum;
-			LOG_MESSAGE("target(" + to_string(target_x) + ", " + to_string(target_y), MODE_NORMAL);
+			//LOG_MESSAGE("target(" + to_string(target_x) + ", " + to_string(target_y), MODE_NORMAL);
 		}
 
 		same_target_border = static_cast<int>(sqrt(pow(log_x - target_x * kSize, 2) + pow(log_y - target_y * kSize, 2)));
@@ -1446,7 +1446,7 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 	prev_color = color;
 
 	local_same_target++;
-	LOG_MESSAGE("target_x, y " + to_string(target_x * kSize) + " " + to_string(target_y * kSize), MODE_NORMAL);
+	//LOG_MESSAGE("target_x, y " + to_string(target_x * kSize) + " " + to_string(target_y * kSize), MODE_NORMAL);
 	if (GoToDot(target_x, target_y) || local_same_target > same_target_border)
 	{
 		prev_x = -1;
@@ -1538,7 +1538,7 @@ int Game1_Hikaru::HowManyCurved(int id)
 
 void Game1_Hikaru::GoToAngle(int angle, int distance)
 {
-	LOG_MESSAGE(FUNCNAME + "(" + to_string(angle) + "," + to_string(distance) + "): start", MODE_VERBOSE);
+	//LOG_MESSAGE(FUNCNAME + "(" + to_string(angle) + "," + to_string(distance) + "): start", MODE_VERBOSE);
 	angle = angle - Compass;
 
 	angle %= 360;
@@ -2247,13 +2247,9 @@ void Game1_Hikaru::calculateWallPosition(void)
 {
 	if (PositionX != -1)
 	{
-		LOG_MESSAGE(FUNCNAME + "():" + "壁の位置の計算を開始", MODE_DEBUG);
-
 		// 0: left & right 1: front
 		int difference_us_position[2] = { 9, 9 };
 		int us_sensors[3] = { US_Left, US_Front, US_Right };
-		LOG_MESSAGE(FUNCNAME + "(): " + "US " + to_string(US_Left) + " " + to_string(US_Front) + " " + to_string(US_Right) + " Compass: " + to_string(Compass), MODE_DEBUG);
-		string us_names[3] = { "Left", "Front", "Right" };
 		int angles[3] = { 40, 0, -40 };
 		int calculated_relative_coordinate[3][2];
 		int calculated_absolute_dot_position[3][2];
@@ -2279,157 +2275,66 @@ void Game1_Hikaru::calculateWallPosition(void)
 				// When there is no wall, there is no need to register MAP_WALL
 				if (us_sensors[i] < kUSLimit + difference_us_position[i % 2])
 				{
+					if(dot[calculated_absolute_dot_position[i][1] * kDotWidthNum + calculated_absolute_dot_position[i][0]].point == POINT_UNKNOWN)
+					{
 						dot[calculated_absolute_dot_position[i][1] * kDotWidthNum + calculated_absolute_dot_position[i][0]].point = POINT_WALL;
+					}
+				}
+				if(dot[calculated_absolute_dot_position[i][1] * kDotWidthNum + calculated_absolute_dot_position[i][0]].point == POINT_WALL)
+				{
+					dot[calculated_absolute_dot_position[i][1] * kDotWidthNum 
+					+ calculated_absolute_dot_position[i][0]].timeWalls += wall_is_there;
 				}
 			}
+		}
+		
+		for(int check_line = us_sensors[1]; check_line > difference_us_position[1]; check_line -= kSize)
+		{
+			ERROR_MESSAGE("Start", MODE_NORMAL);
+			//Wall position and robot relative coordinates
+			int natured_x = static_cast<int>
+			(cos(angles[1] * M_PI / 180) * check_line);
 
-			// x[0], y[0] -> x[1], y[1]までMAP_WALLをcospaceMap.MAP_WHITEに変更する
-			// 壁の位置(壁から多少離れた位置)とロボットそれぞれの絶対座標
-			// 基本的に、実際の壁との距離から0.7倍程度にするが、kSizeが最低2つはあけないといけない
-			// 1cm先に壁がある場合、cospaceMap.MAP_WHITEは登録しない
-			//const int kRange4Wall = 20;
+			int natured_y = static_cast<int>
+			(sin(angles[1] * M_PI / 180) * check_line);
 
-			//if (us_sensors[i] < kRange4Wall + difference_us_position[i % 2])
-			//{
-			//	// cospaceMap.MAP_WHITEは登録しない
-			//	LOG_MESSAGE(FUNCNAME + "(): cospaceMap.MAP_WHITEは、壁との距離が非常に近いため設定しません", MODE_VERBOSE)
-			//		continue;
-			//}
-			//if (us_sensors[i] * 0.3 < kRange4Wall)
-			//{
-			//	LOG_MESSAGE(FUNCNAME + "(): us_sensors[i](" + to_string(us_sensors[i]) + ") * 0.3 < kRange4Wall(" + to_string(kRange4Wall) + ")", MODE_VERBOSE);
-			//	calculated_relative_coordinate[i][0] = static_cast<int>(cos(angles[i] * M_PI / 180) * (us_sensors[i] - kRange4Wall));
-			//	calculated_relative_coordinate[i][1] = static_cast<int>(sin(angles[i] * M_PI / 180) * (us_sensors[i] - kRange4Wall));
-			//}
-			//else
-			//{
-			//	LOG_MESSAGE(FUNCNAME + "(): us_sensors[i](" + to_string(us_sensors[i]) + ") * 0.3 >= kRange4Wall(" + to_string(kRange4Wall) + ")", MODE_VERBOSE);
-			//	calculated_relative_coordinate[i][0] = static_cast<int>(cos(angles[i] * M_PI / 180) * us_sensors[i] * 0.7);
-			//	calculated_relative_coordinate[i][1] = static_cast<int>(sin(angles[i] * M_PI / 180) * us_sensors[i] * 0.7);
-			//}
+			// Absolute coordinates of the wall on the dot
+			int absolute_x = static_cast<int>((log_x + natured_x + kSize / 2) / kSize);
+			if (absolute_x > kDotWidthNum)
+			{
+				absolute_x = kDotWidthNum - 1;
+			}
+			if(absolute_x < 0)
+			{
+				absolute_x = 0;
+			}
 
-			//const int x[2] = { static_cast<int>(log_x / kSize), static_cast<int>((log_x + calculated_relative_coordinate[i][0] + kSize / 2) / kSize) };
-			//const int y[2] = { static_cast<int>(log_y / kSize), static_cast<int>((log_y + calculated_relative_coordinate[i][1] + kSize / 2) / kSize) };
+			int absolute_y = static_cast<int>((log_y + natured_y + kSize / 2) / kSize);
+			if (absolute_y > kDotHeightNum)
+			{
+				absolute_y = kDotHeightNum - 1;
+			}
+			if(absolute_y < 0)
+			{
+				absolute_y = 0;
+			}
 
-			//LOG_MESSAGE(FUNCNAME + "(): Set MAP_UNKNOWN (" + to_string(x[0]) + ", " + to_string(y[0]) + ") -> (" + to_string(x[1]) + ", " + to_string(y[1]) + ")", MODE_VERBOSE);
+			if(dot[absolute_y * kDotWidthNum + absolute_x].point == POINT_WALL)
+			{
+				dot[absolute_y * kDotWidthNum + absolute_x].timeWalls -= wall_is_not_there;
 
-			// (x[0], y[0]) -> (x[1], y[1])まで、MAP_WALLをMAP_UNKNOWN_NOT_WALLに変更する
-			//if (x[0] == x[1]) // 縦方向の直線の場合
-			//{
-			//	if (0 <= x[0] && x[0] < kDotWidthNum)
-			//	{
-			//		int y_start = y[0], y_end = y[1];
-			//		if (y_end == calculated_absolute_dot_position[i][1])
-			//		{
-			//			if (y_start < y_end)
-			//			{
-			//				--y_end;
-			//			}
-			//			else if (y_start > y_end)
-			//			{
-			//				++y_end;
-			//			}
-			//			else
-			//			{
-			//				LOG_MESSAGE(FUNCNAME + "(): 壁近くのドットを保護した結果、MAP_WHITEは設定できません", MODE_VERBOSE);
-			//				continue;
-			//			}
-			//		}
-			//		// 上から変更しようと、下から変更しようと変わらない
-			//		if (y[0] > y[1])
-			//		{
-			//			int temp = y_start;
-			//			y_start = y_end;
-			//			y_end = temp;
-			//		}
-			//		for (int yi = y_start; yi <= y_end; ++yi)
-			//		{
-			//			if (yi < 0)
-			//			{
-			//				yi = -1;
-			//				continue;
-			//			}
-			//			if (yi >= kDotHeightNum)
-			//			{
-			//				break;
-			//			}
-			//			if (dot[yi * kDotWidthNum + x[0]].point == POINT_WALL && map_position_color_data[x[0]][yi] != POINT_WALL)
-			//			{
-			//				dot[yi * kDotWidthNum + x[0]].point = map_position_color_data[x[0]][yi];
-			//			}
-			//		}
-			//	}
-			//}
-			//else
-			//{
-			//	double tilt = static_cast<double>(y[1] - y[0]) / static_cast<double>(x[1] - x[0]);
-			//	int x_start = x[0], x_end = x[1];
-			//	if (x_end == calculated_absolute_dot_position[i][0])
-			//	{
-			//		if (x_start < x_end)
-			//		{
-			//			--x_end;
-			//		}
-			//		else if (x_start > x_end)
-			//		{
-			//			++x_end;
-			//		}
-			//		else
-			//		{
-			//			LOG_MESSAGE(FUNCNAME + "(): 壁近くのドットを保護した結果、MAP_WHITEは設定できません", MODE_VERBOSE);
-			//			continue;
-			//		}
-			//	}
-			//	if (x_start > x_end)
-			//	{
-			//		int temp = x_start;
-			//		x_start = x_end;
-			//		x_end = temp;
-			//		tilt = -tilt;
-			//	}
-			//	LOG_MESSAGE(FUNCNAME + "(): tilt is " + to_string(tilt), MODE_VERBOSE);
-			//	for (int xi = x_start; xi < x_end; ++xi)
-			//	{
-			//		if (xi < 0)
-			//		{
-			//			xi = -1;
-			//			continue;
-			//		}
-			//		if (xi >= kDotWidthNum)
-			//		{
-			//			break;
-			//		}
-			//		int y_start = y[0] + static_cast<int>(tilt * static_cast<double>(xi - x_start));
-			//		int y_end = y[0] + static_cast<int>(floor(tilt * (static_cast<double>(xi + 1 - x_start))));
-			//		if ((y_start - calculated_absolute_dot_position[i][1]) * (y_end - calculated_absolute_dot_position[i][1]) <= 0)
-			//		{
-			//			LOG_MESSAGE(FUNCNAME + "(): 壁近くのドットを保護した結果、MAP_WHITEは設定できません", MODE_VERBOSE);
-			//			continue;
-			//		}
-			//		if (y_start > y_end)
-			//		{
-			//			int temp = y_start;
-			//			y_start = y_end;
-			//			y_end = temp;
-			//		}
-			//		for (int yj = y_start; yj <= y_end; ++yj)
-			//		{
-			//			if (yj < 0)
-			//			{
-			//				yj = -1;
-			//				continue;
-			//			}
-			//			if (yj >= kDotHeightNum)
-			//			{
-			//				break;
-			//			}
-			//			if (dot[yj * kDotWidthNum + xi].point == POINT_WALL && map_position_color_data[xi][yj] != POINT_WALL)
-			//			{
-			//				dot[yj * kDotWidthNum + xi].point = map_position_color_data[xi][yj];
-			//			}
-			//		}
-			//	}
-			//}
+				if(dot[absolute_y * kDotWidthNum + absolute_x].timeWalls < 0)
+				{
+					dot[absolute_y * kDotWidthNum + absolute_x].timeWalls = 0;
+				}
+			}
+			
+			if(dot[absolute_y * kDotWidthNum + absolute_x].timeWalls == 0 
+			&& dot[absolute_y * kDotWidthNum + absolute_x].point == POINT_WALL)
+			{
+				dot[absolute_y * kDotWidthNum + absolute_x].point = POINT_UNKNOWN; 
+			}
+			ERROR_MESSAGE("End", MODE_NORMAL);
 		}
 	}
 }
@@ -2498,9 +2403,9 @@ int Game1_Hikaru::goInArea(int x, int y, int wide_decide_x, int wide_decide_y, i
 
 void Game1_Hikaru::GoToArea(int color)
 {
-	int colorID;
 	const int X = 0;
 	const int Y = 1; 
+	int colorID;
 	int firstArea[2];
 	int secondArea[2];
 	// TODO: Naming

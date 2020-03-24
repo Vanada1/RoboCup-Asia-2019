@@ -31,7 +31,9 @@ private:
 	int SecontCoordAriaCYAN[2] = 	{240, 140};
 	// диапазон зон
 	int scatter[2] = {60, 60};
-
+	//naming
+	const static int wall_is_there = 1;
+	const static int wall_is_not_there = 2;
 
 	const static int kCospaceWidth = 360;
 	const static int kCospaceHeight = 270;
@@ -87,6 +89,8 @@ private:
 		int black;                            //If Black ...
 		int color;
 		int near_swampland;
+		//TODO: naming
+		int timeWalls;
 	};
 	struct Dot dot[kMaxDotNum];
 
