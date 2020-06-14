@@ -45,6 +45,9 @@ void Game1_Hikaru::setup(void)
 	UserGame1::setup();
 	InputDotInformation();
 	InputColorInformation();
+
+	InputAreaColorZone();/////
+
 	resetLoadedObjects();
 	logErrorMessage.delLogFile();
 	logErrorMessage.delErrorFile();
@@ -72,7 +75,6 @@ void Game1_Hikaru::setup(void)
 			next_allowed_go_time[i][j] = 0;
 		}
 	}
-
 	setAction(DEFINED);
 	Duration = 0;
 	SuperDuration = 0;
@@ -276,7 +278,7 @@ void Game1_Hikaru::loop()
 	else if (IsOnDepositArea() && (LoadedObjects >= 6 || (LoadedObjects > 0 && Time > 430)))
 	{
 		process = 0;
-		large_process = -1;
+		large_process = true;
 		process_times = 0;
 		if (IsOnDepositArea() == 3)
 		{
@@ -318,13 +320,13 @@ void Game1_Hikaru::loop()
 	// Movement in zone
 	else //TODO: сделать езду по зонам в отдельной функции (Done, возможны ошибки)
 	{
-		if (loaded_objects[RED_LOADED_ID] < kBorderSameObjNum)
-		{
-			GoToArea(RED_LOADED_ID);
-		}
-		else if (loaded_objects[CYAN_LOADED_ID] < kBorderSameObjNum)
+		if (loaded_objects[CYAN_LOADED_ID] < kBorderSameObjNum)
 		{
 			GoToArea(CYAN_LOADED_ID);
+		}
+		else if (loaded_objects[RED_LOADED_ID] < kBorderSameObjNum)
+		{
+			GoToArea(RED_LOADED_ID);
 		}
 		else
 		{
@@ -932,17 +934,17 @@ void Game1_Hikaru::Dijkstra(int option)
 			int target_curved_times = HowManyCurved(target_id);
 			int target_cost = investigating_node.cost + investigating_node.edge_cost[i];
 
-			target_cost += target_curved_times * 10;
+			target_cost += target_curved_times + 10;
 
 			if (dot[i].point == POINT_SWAMPLAND || dot[i].point == POINT_MAY_SWAMPLAND)
 			{
 				//cout << "s" << endl;
-				target_cost *= 1000;
+				target_cost += 1000;
 			}
 
 			if (dot[i].point == POINT_WALL || dot[i].point == POINT_YELLOW)
 			{
-				target_cost *= 10000;
+				target_cost += 10000;
 			}
 
 			double k = 0.8;
@@ -973,7 +975,7 @@ void Game1_Hikaru::Dijkstra(int option)
 				}
 				if (LoadedObjects < 6)
 				{
-					target_cost += static_cast<int>(dot[target_id].arrived_times * 10);
+					target_cost += static_cast<int>(dot[target_id].arrived_times + 10);
 				}
 			}
 
@@ -2580,98 +2582,203 @@ int Game1_Hikaru::goInArea(int x, int y, int wide_decide_x, int wide_decide_y, i
 void Game1_Hikaru::GoToArea(int color)
 {
 	int colorID;
-	const int X = 0;
-	const int Y = 1; 
-	int firstArea[2];
-	int secondArea[2];
-	// TODO: Naming
-	int supportCoordColor[2];
+	AreaZone areas[areasCount];
 	if  (color  == RED_LOADED_ID)
 	{
 		colorID = RED_LOADED_ID;
-		supportCoordColor[X] = toChooseRED[X];
-		supportCoordColor[Y] = toChooseRED[Y];
-		firstArea[X] = FirstCoordAriaRED[X];
-		firstArea[Y] = FirstCoordAriaRED[Y];
-		secondArea[X] = SecondcoordAriaRED[X];
-		secondArea[Y] = SecondcoordAriaRED[Y];
+		for(int i = 0 ; i < areasCount; i++)
+		{
+			areas[i] = Areas[colorID - 1][i];
+		}
+		
 	}
 	else if(color  == BLACK_LOADED_ID)
 	{
 		colorID = BLACK_LOADED_ID;
-		supportCoordColor[X] = toChooseBLACK[X];
-		supportCoordColor[Y] = toChooseBLACK[Y];
-		firstArea[X] = FirstCoordAriaBLACK[X];
-		firstArea[Y] = FirstCoordAriaBLACK[Y];
-		secondArea[X] = SecontCoordAriaBLACK[X];
-		secondArea[Y] = SecontCoordAriaBLACK[Y];
+		for(int i = 0 ; i < areasCount; i++)
+		{
+			areas[i] = Areas[colorID - 1][i];
+		}
 	}
 	else if(color  == CYAN_LOADED_ID)
 	{
 		colorID = CYAN_LOADED_ID;
-		supportCoordColor[X] = toChooseCYACN[X];
-		supportCoordColor[Y] = toChooseCYACN[Y];
-		firstArea[X] = FirstCoordAriaCYAN[X];
-		firstArea[Y] = FirstCoordAriaCYAN[Y];
-		secondArea[X] = SecontCoordAriaCYAN[X];
-		secondArea[Y] = SecontCoordAriaCYAN[Y];
-	}
-	if (loaded_objects[colorID] < kBorderSameObjNum)
-	{
-		if (large_process != 2 || next_allowed_go_time[colorID][process] > Time)
+		for(int i = 0 ; i < areasCount; i++)
 		{
-			if (PositionX < supportCoordColor[X] && PositionY < supportCoordColor[Y] && next_allowed_go_time[colorID][0] <= Time) 
+			areas[i] = Areas[colorID - 1][i];
+		}
+	}
+
+	// if (loaded_objects[colorID] < kBorderSameObjNum)
+	// {
+	// 	if (large_process || next_allowed_go_time[colorID][process] > Time)
+	// 	{
+	// 		if (PositionX < supportCoordColor[0][X] && PositionY < supportCoordColor[0][Y] && next_allowed_go_time[colorID][0] <= Time) 
+	// 		{
+	// 			process = 1;
+	// 		}
+	// 		else if (!(PositionX < supportCoordColor[0][X] && PositionY < supportCoordColor[0][Y])) 
+	// 		{
+	// 			process = 0;
+	// 		}
+	// 		else 
+	// 		{
+	// 			if (next_allowed_go_time[colorID][1] < next_allowed_go_time[colorID][0]) {
+	// 				process = 1;
+	// 			}
+	// 			else {
+	// 				process = 0;
+	// 			}
+	// 		}
+	// 		process_times = 0;
+	// 	}
+
+
+		if (GoInDots(areas[process].X, areas[process].Y, areas[process].SizeX, areas[process].SizeY, color))
+		{
+			if (process_times >= 4)
 			{
-				process = 1;
-			}
-			else if (!(PositionX < supportCoordColor[X] && PositionY < supportCoordColor[Y])) 
-			{
-				process = 0;
-			}
-			else 
-			{
-				if (next_allowed_go_time[colorID][1] < next_allowed_go_time[colorID][0]) {
-					process = 1;
-				}
-				else {
+				next_allowed_go_time[colorID][process] = Time + skip_time;
+				if(process + 1 >= areasCount)
+				{
 					process = 0;
 				}
-			}
-			process_times = 0;
-		}
-
-		if (process == 0)
-		{
-			if (GoInDots(firstArea[X], firstArea[Y], scatter[X], scatter[Y], color))
-			{
-				if (process_times >= 4)
+				else
 				{
-					next_allowed_go_time[colorID][process] = Time + skip_time;
 					process++;
-					process_times = 0;
 				}
-				process_times++;
+				process_times = 0;
 			}
+			process_times++;
 		}
-		else  if(process == 1)
+		large_process = false;
+
+}
+
+void Game1_Hikaru::InputAreaColorZone(void)
+{
+	const int RED = 0;
+	const int CYAN = 1;
+	const int BLACK = 2;
+	
+	for (int i = 0; i < kDotWidthNum; i++)
+	{
+		for (int j = 0; j < kDotHeightNum; j++)
 		{
-			if (GoInDots(secondArea[X], secondArea[Y], scatter[X], scatter[Y], color))
+			if(IsDotInArea(i, kDotHeightNum - j - 1))
 			{
-				if (process_times >= 3)
-				{
-					next_allowed_go_time[colorID][process] = Time + skip_time;
-					process = 0;
-					process_times = 0;
-				}
-				process_times++;
+				continue;
+			}
+			if (red_data[j][i] == 1)
+			{
+				InstallationColorZone(RED, i, j);
+			}
+
+			if (cyan_data[j][i] == 1)
+			{
+				InstallationColorZone(CYAN, i, j);
+			}
+
+			if (black_data[j][i] == 1)
+			{
+				InstallationColorZone(BLACK, i, j);
 			}
 		}
-		else
+	}
+	
+}
+
+bool Game1_Hikaru::IsDotInArea(int x, int y)
+{
+	for (int i = 0; i < colorsCount; i++)
+	{
+		for(int j = 0; j < AreaCounts[i]; j++)
 		{
-			process = 0;
-			process_times = 0;
+			if(((y <= (kDotHeightNum - Areas[i][j].Y / kSize - 1)) && 
+					(y >= (kDotHeightNum - Areas[i][j].Y / kSize - 1 - (Areas[i][j].SizeY / kSize))))  ||
+					((x >= Areas[i][j].X) && 
+					(x <= Areas[i][j].X + (Areas[i][j].SizeY / kSize))))
+			{
+				return true;
+			}
 		}
-		large_process = 2;
+	}
+	return false;
+}
+
+bool Game1_Hikaru::InstallationColorZone(int color, int x, int y)
+{
+	if(AreaCounts[color] + 1 > areasCount)
+	{
+		return false;
+	}
+	const int RED = 0;
+	const int CYAN = 1;
+	const int BLACK = 2;
+
+	Areas[color][AreaCounts[color]].X = x * kSize;
+	Areas[color][AreaCounts[color]].Y = (kDotHeightNum - y - 1) * kSize;
+	Areas[color][AreaCounts[color]].SizeX = kSize;
+	Areas[color][AreaCounts[color]].SizeY = kSize;
+
+	if(color == RED)
+	{
+		FILE* fp = fopen("RED.txt", "w");
+		for(int i = 0; i < kDotHeightNum; i++)
+		{
+			for(int j = 0; j < kDotWidthNum; j++)
+			{
+				mapColor[i][j] = red_data[i][j];
+				if(mapColor[i][j]  == 1) fprintf(fp, "1");
+				else fprintf(fp, "0");
+			}
+			fprintf(fp, "\n");
+		}
+		fclose(fp);
+	}
+	if(color  == CYAN)
+	{
+		FILE* fp = fopen("CYAN.txt", "w");
+		for(int i = 0; i < kDotHeightNum; i++)
+		{
+			for(int j = 0; j < kDotWidthNum; j++)
+			{
+				mapColor[i][j] = cyan_data[i][j];
+				if(mapColor[i][j]  == 1) fprintf(fp, "1");
+				else fprintf(fp, "0");
+			}
+			fprintf(fp, "\n");
+		}
+		fclose(fp);
+	}
+	if(color ==  BLACK)
+	{
+		FILE* fp = fopen("BLACK.txt", "w");
+		for(int i = 0; i < kDotHeightNum; i++)
+		{
+			for(int j = 0; j < kDotWidthNum; j++)
+			{
+				mapColor[i][j] = black_data[i][j];
+				if(mapColor[i][j]  == 1) fprintf(fp, "1");
+				else fprintf(fp, "0");
+			}
+			fprintf(fp, "\n");
+		}
+		fclose(fp);
+	}
+	int hightArea = y;
+	while((mapColor[kDotHeightNum - hightArea - 1][x] == 1)  && (hightArea < kDotHeightNum))
+	{
+		Areas[color][AreaCounts[color]].SizeY  += kSize;
+		hightArea++;
 	}
 
+	int widthArea = x;
+	while((mapColor[kDotHeightNum - y - 1][widthArea] == 1) && (widthArea < kDotWidthNum))
+	{
+		Areas[color][AreaCounts[color]].SizeX  += kSize;
+		widthArea++;
+	}
+	AreaCounts[color]++;
+	return true;
 }

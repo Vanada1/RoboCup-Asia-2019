@@ -17,19 +17,10 @@ private:
 	/*
 		Settings
 	*/
-// TODO: Naming
-	int toChooseRED[2] = 			{240, 140};
-	int toChooseBLACK[2] = 			{240, 140};
-	int toChooseCYACN[2] = 			{240, 140};
 
-	int FirstCoordAriaRED[2] = 		{240, 140};
-	int SecondcoordAriaRED[2] = 	{240, 140};
-	int FirstCoordAriaBLACK[2] = 	{240, 140};
-	int SecontCoordAriaBLACK[2] = 	{240, 140};
-	int FirstCoordAriaCYAN[2] = 	{240, 140};
-	int SecontCoordAriaCYAN[2] = 	{240, 140};
-	int scatter[2] = {60, 60};
-
+	void InputAreaColorZone(void);
+	bool IsDotInArea(int x, int y);
+	bool InstallationColorZone(int color, int x, int y);
 
 	const static int kCospaceWidth = 360;
 	const static int kCospaceHeight = 270;
@@ -53,12 +44,31 @@ private:
 	int map_position_color_data[36][27];
 	int map_secure[7][kMaxDotNum];
 	int next_allowed_go_time[4][5];
-	int skip_time = 100;
+	int skip_time = 30;
 	LogErrorMessage logErrorMessage;
+
+	// TODO: Naming
+	int toChooseRED[2] = 			{180, 135};
+	int toChooseBLACK[2] = 			{180, 135};
+	int toChooseCYACN[2] = 			{180, 135};
+
+	const static int areasCount = 2;
+
+	struct AreaZone
+	{
+		int X;
+		int Y;
+		int SizeX;
+		int SizeY;
+	};
+	const static int colorsCount = 3;
+	int AreaCounts[colorsCount] = {0,0,0};
+	int mapColor[kDotHeightNum][kDotWidthNum];
+	AreaZone Areas[colorsCount][areasCount];
 
 	int dot_x[3], dot_y[3];
 
-	int large_process = -1;
+	bool large_process = true;
 	int process = 0;
 
 	std::random_device rnd;
