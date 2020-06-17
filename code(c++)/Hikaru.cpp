@@ -2585,61 +2585,66 @@ void Game1_Hikaru::GoToArea(int color)
 	AreaZone areas[areasCount];
 	if  (color  == RED_LOADED_ID)
 	{
-		colorID = RED_LOADED_ID;
+		colorID = POINT_RED;
 		for(int i = 0 ; i < areasCount; i++)
 		{
-			areas[i] = Areas[colorID - 1][i];
+			areas[i] = Areas[RED_LOADED_ID - 1][i];
 		}
 		
 	}
 	else if(color  == BLACK_LOADED_ID)
 	{
-		colorID = BLACK_LOADED_ID;
+		colorID = POINT_BLACK;
 		for(int i = 0 ; i < areasCount; i++)
 		{
-			areas[i] = Areas[colorID - 1][i];
+			areas[i] = Areas[BLACK_LOADED_ID - 1][i];
 		}
 	}
 	else if(color  == CYAN_LOADED_ID)
 	{
-		colorID = CYAN_LOADED_ID;
+		colorID = POINT_CYAN;
 		for(int i = 0 ; i < areasCount; i++)
 		{
-			areas[i] = Areas[colorID - 1][i];
+			areas[i] = Areas[CYAN_LOADED_ID - 1][i];
 		}
 	}
 
-	// if (loaded_objects[colorID] < kBorderSameObjNum)
-	// {
-	// 	if (large_process || next_allowed_go_time[colorID][process] > Time)
-	// 	{
-	// 		if (PositionX < supportCoordColor[0][X] && PositionY < supportCoordColor[0][Y] && next_allowed_go_time[colorID][0] <= Time) 
-	// 		{
-	// 			process = 1;
-	// 		}
-	// 		else if (!(PositionX < supportCoordColor[0][X] && PositionY < supportCoordColor[0][Y])) 
-	// 		{
-	// 			process = 0;
-	// 		}
-	// 		else 
-	// 		{
-	// 			if (next_allowed_go_time[colorID][1] < next_allowed_go_time[colorID][0]) {
-	// 				process = 1;
-	// 			}
-	// 			else {
-	// 				process = 0;
-	// 			}
-	// 		}
-	// 		process_times = 0;
-	// 	}
+	if (loaded_objects[color] < kBorderSameObjNum)
+	{
+		if (large_process || next_allowed_go_time[color][process] > Time)
+		{
+			int positionX = 180;
+			int positionY = 135;
+			if (PositionX < positionX && PositionY < positionY && next_allowed_go_time[color][0] <= Time)
+			{
+				process = 1;
+			}
+			else if (!(PositionX < positionX && PositionY < positionY))
+			{
+				process = 0;
+			}
+			else
+			{
+				if (next_allowed_go_time[color][1] < next_allowed_go_time[color][0]) {
+					process = 1;
+				}
+				else {
+					process = 0;
+				}
+			}
+			process_times = 0;
+		}
 
+		int centerX = (areas[process].X + areas[process].SizeX) / 2;
+		int centerY = (areas[process].Y + areas[process].SizeY) / 2;
 
-		if (GoInDots(areas[process].X, areas[process].Y, areas[process].SizeX, areas[process].SizeY, color))
+		if (GoInDots(centerX, centerY , 
+			areas[process].SizeX/2, areas[process].SizeY/2, colorID))
 		{
 			if (process_times >= 4)
 			{
-				next_allowed_go_time[colorID][process] = Time + skip_time;
-				if(process + 1 >= areasCount)
+				next_allowed_go_time[color][process] = Time + skip_time;
+				if (process + 1 >= areasCount)
 				{
 					process = 0;
 				}
@@ -2652,7 +2657,7 @@ void Game1_Hikaru::GoToArea(int color)
 			process_times++;
 		}
 		large_process = false;
-
+	}
 }
 
 void Game1_Hikaru::InputAreaColorZone(void)
@@ -2660,27 +2665,35 @@ void Game1_Hikaru::InputAreaColorZone(void)
 	const int RED = 0;
 	const int CYAN = 1;
 	const int BLACK = 2;
-	
+
 	for (int i = 0; i < kDotWidthNum; i++)
 	{
 		for (int j = 0; j < kDotHeightNum; j++)
 		{
-			if(IsDotInArea(i, kDotHeightNum - j - 1))
+			if (red_data[kDotHeightNum - j - 1][i] == 1)
 			{
-				continue;
-			}
-			if (red_data[j][i] == 1)
-			{
+				if (IsDotInArea(RED, i, kDotHeightNum - j - 1))
+				{
+					continue;
+				}
 				InstallationColorZone(RED, i, j);
 			}
 
-			if (cyan_data[j][i] == 1)
+			if (cyan_data[kDotHeightNum - j - 1][i] == 1)
 			{
+				if (IsDotInArea(CYAN, i, kDotHeightNum - j - 1))
+				{
+					continue;
+				}
 				InstallationColorZone(CYAN, i, j);
 			}
 
-			if (black_data[j][i] == 1)
+			if (black_data[kDotHeightNum - j - 1][i] == 1)
 			{
+				if (IsDotInArea(BLACK, i, kDotHeightNum - j - 1))
+				{
+					continue;
+				}
 				InstallationColorZone(BLACK, i, j);
 			}
 		}
@@ -2688,19 +2701,18 @@ void Game1_Hikaru::InputAreaColorZone(void)
 	
 }
 
-bool Game1_Hikaru::IsDotInArea(int x, int y)
+bool Game1_Hikaru::IsDotInArea(int color,int x, int y)
 {
-	for (int i = 0; i < colorsCount; i++)
+	for(int j = 0; j < AreaCounts[color]; j++)
 	{
-		for(int j = 0; j < AreaCounts[i]; j++)
+		int startCoord = Areas[color][j].Y / kSize;
+		int endCoord = Areas[color][j].SizeY / kSize;
+		if(((y < (kDotHeightNum - startCoord - 1)) &&
+				(y > (kDotHeightNum - startCoord - 1 - endCoord))) &&
+				((x > Areas[color][j].X) &&
+				(x < Areas[color][j].X + (Areas[color][j].SizeX / kSize))))
 		{
-			if(((y <= (kDotHeightNum - Areas[i][j].Y / kSize - 1)) && 
-					(y >= (kDotHeightNum - Areas[i][j].Y / kSize - 1 - (Areas[i][j].SizeY / kSize))))  ||
-					((x >= Areas[i][j].X) && 
-					(x <= Areas[i][j].X + (Areas[i][j].SizeY / kSize))))
-			{
-				return true;
-			}
+			return true;
 		}
 	}
 	return false;
@@ -2717,7 +2729,7 @@ bool Game1_Hikaru::InstallationColorZone(int color, int x, int y)
 	const int BLACK = 2;
 
 	Areas[color][AreaCounts[color]].X = x * kSize;
-	Areas[color][AreaCounts[color]].Y = (kDotHeightNum - y - 1) * kSize;
+	Areas[color][AreaCounts[color]].Y =  y * kSize;
 	Areas[color][AreaCounts[color]].SizeX = kSize;
 	Areas[color][AreaCounts[color]].SizeY = kSize;
 
@@ -2779,6 +2791,9 @@ bool Game1_Hikaru::InstallationColorZone(int color, int x, int y)
 		Areas[color][AreaCounts[color]].SizeX  += kSize;
 		widthArea++;
 	}
+	printf("RANGE: %d %d %d \t %d %d \n", Areas[color][AreaCounts[color]].SizeX,
+		Areas[color][AreaCounts[color]].SizeY, color, Areas[color][AreaCounts[color]].X, 
+		Areas[color][AreaCounts[color]].Y);
 	AreaCounts[color]++;
 	return true;
 }

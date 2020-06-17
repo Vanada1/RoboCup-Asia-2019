@@ -19,7 +19,7 @@ private:
 	*/
 
 	void InputAreaColorZone(void);
-	bool IsDotInArea(int x, int y);
+	bool IsDotInArea(int color, int x, int y);
 	bool InstallationColorZone(int color, int x, int y);
 
 	const static int kCospaceWidth = 360;
@@ -56,11 +56,12 @@ private:
 
 	struct AreaZone
 	{
-		int X;
-		int Y;
-		int SizeX;
-		int SizeY;
+		int X = -1;
+		int Y = -1;
+		int SizeX = -1;
+		int SizeY = -1;
 	};
+
 	const static int colorsCount = 3;
 	int AreaCounts[colorsCount] = {0,0,0};
 	int mapColor[kDotHeightNum][kDotWidthNum];
