@@ -3,11 +3,7 @@
 #include "Hikaru.hpp"
 #include "Masuda.hpp"
 //#include "Superteam.hpp"
-//#include "Test2.hpp"
 //#include "AutoStrategy2019.hpp"
-//#include "test.hpp"
-//#include "HikaruForFirstTour.hpp"
-#include "TestWorld2AS.hpp"
 #include <bits/stdc++.h>
 
 #define _CRT_SECURE_NO_WARNINGS 1

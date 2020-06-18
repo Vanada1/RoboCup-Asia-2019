@@ -27,7 +27,7 @@ int BothColorJudge(int col[3][2]);
 
 int SameColorCheck(int color1[3][2], int color2[3][2]);
 
-// 別バージョン
+// Another version
 void InputColorInformation(void);
 int IsOnYellowLine(void);
 int IsOnYellowLine2(void);

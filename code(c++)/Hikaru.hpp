@@ -14,6 +14,27 @@ public:
 	void loop(void) override;
 
 private:
+	/*
+		Settings
+	*/
+// TODO: Naming
+	// чтобы выбрать, в какую зону поехать из двух(может быть одна зона)
+	int toChooseRED[2] = 			{240, 140};
+	int toChooseBLACK[2] = 			{240, 140};
+	int toChooseCYACN[2] = 			{240, 140};
+	// координаты центра каждой зоны
+	int FirstCoordAriaRED[2] = 		{180, 230};
+	int SecondcoordAriaRED[2] = 	{50, 70};
+	int FirstCoordAriaBLACK[2] = 	{240, 140};
+	int SecontCoordAriaBLACK[2] = 	{240, 140};
+	int FirstCoordAriaCYAN[2] = 	{240, 140};
+	int SecontCoordAriaCYAN[2] = 	{240, 140};
+	// диапазон зон
+	int scatter[2] = {60, 60};
+	//naming
+	const static int wall_is_there = 1;
+	const static int wall_is_not_there = 2;
+
 	const static int kCospaceWidth = 360;
 	const static int kCospaceHeight = 270;
 	const static int kSize = 10;
@@ -48,7 +69,7 @@ private:
 
 	struct Dot
 	{
-		int x, y;  //dotのx(0<=x<36), y(0<=y<27)座標
+		int x, y;  //x (0 <= x <36), y (0 <= y <27) coordinates of dot
 		int wide;  //一辺の長さ
 		int point; //Dot type(-3:yellow -2:wall etc.)
 		int done;  //Dijkstra()
@@ -59,15 +80,17 @@ private:
 		int score;
 		int distance_from_start;              //Dijkstra()
 		int curved_times;                     //Dijkstra()
-		unsigned long long int arrived_times; //そこにいた回数
-		int edge_num;                         //そのドットに行くことのできるドットの数
+		unsigned long long int arrived_times; //Number of times you have been there
+		int edge_num;                         //The number of dots that can go to that dot
 		int edge_to[kMaxEdgeNum];             //
 		int edge_cost[kMaxEdgeNum];           //
-		int red;                              //もし、Redがとれるなら、1
-		int cyan;                             //もし、Cyanがとれないなら0
-		int black;                            //もし、Blackが...
+		int red;                              //If you can get Red, 1
+		int cyan;                             //0 if Cyan cannot be taken
+		int black;                            //If Black ...
 		int color;
 		int near_swampland;
+		//TODO: naming
+		int timeWalls;
 	};
 	struct Dot dot[kMaxDotNum];
 
@@ -96,6 +119,8 @@ private:
 	int goInArea(int x, int y, int wide_decide_x, int wide_decide_y, int times);
 	void saveColorInfo(void);
 	void calculateWallPosition(void);
+
+	void GoToArea(int color);
 };
 
 #endif // !HIKARU

@@ -1,7 +1,7 @@
 /*
-todo : 回転するときに、カラーセンサが沼地に入ってしまう問題を解決
-オドメトリを用いて、PLAでTrapに入る問題を解決
-360 x 270にすること
+todo : Addressed an issue where color sensors would enter swamps when rotating
+Odometry solves the problem of trapping in PLA
+360 x 270
 */
 #include "Hikaru.hpp"
 #include "MapData.hpp"
@@ -171,8 +171,10 @@ void Game1_Hikaru::loop()
 		}
 	}
 
-	/*saveColorInfo();
-	calculateWallPos1ition();*/
+	calculateWallPosition();
+	saveColorInfo();
+	//InputDotInformation();
+	//InputColorInformation();
 
 	if (SuperDuration > 0)
 	{
@@ -309,155 +311,28 @@ void Game1_Hikaru::loop()
 			if (same_time > 7)
 			{
 				log_superobj_num = 0;
-				//cout << "gave up superobj because of same_times" << endl;
-				LOG_MESSAGE("There is no superobj", MODE_NORMAL);
+				//LOG_MESSAGE("There is no superobj", MODE_NORMAL);
 			}
 			GoToPosition(log_superobj_x[0] - 5 + rand() % 10, log_superobj_y[0] - 5 + rand() % 10, 1, 1, 1);
 			same_time++;
 		}
 	}
-	//Xyiny ne ponyatno/ I dont know what this shit do. DO NOT TOUCH!!!!!!!1
-	else
+	// Movement in zone
+	else //TODO: сделать езду по зонам в отдельной функции (Done, возможны ошибки)
 	{
 		if (loaded_objects[RED_LOADED_ID] < kBorderSameObjNum)
 		{
-			if (large_process != 2 || next_allowed_go_time[RED_LOADED_ID][process] > Time)
-			{
-				if (PositionX < 240 && PositionY < 140 && next_allowed_go_time[RED_LOADED_ID][0] <= Time) {
-					process = 1;
-				}
-				else if (!(PositionX < 240 && PositionY < 140)) {
-					process = 0;
-				}
-				else {
-					if (next_allowed_go_time[RED_LOADED_ID][1] < next_allowed_go_time[RED_LOADED_ID][0]) {
-						process = 1;
-					}
-					else {
-						process = 0;
-					}
-				}
-				process_times = 0;
-			}
-			if (process == 0)
-			{
-				if (GoInDots(180, 230, 60, 60, POINT_RED))
-				{
-					if (process_times >= 4)
-					{
-						next_allowed_go_time[RED_LOADED_ID][process] = Time + skip_time;
-						process++;
-						process_times = 0;
-					}
-					process_times++;
-				}
-			}
-			else if (process == 1)
-			{
-				if (GoInDots(45, 45, 60, 60, POINT_RED))
-				{
-					if (process_times >= 3)
-					{
-						next_allowed_go_time[RED_LOADED_ID][process] = Time + skip_time;
-						process = 0;
-						process_times = 0;
-					}
-					process_times++;
-				}
-			}
-			else {
-				process = 0;
-				process_times = 0;
-			}
-			large_process = 2;
+			GoToArea(RED_LOADED_ID);
 		}
 		else if (loaded_objects[CYAN_LOADED_ID] < kBorderSameObjNum)
 		{
-			if (large_process != 1 || next_allowed_go_time[CYAN_LOADED_ID][process] > Time)
-			{
-				if (PositionY < 180 && next_allowed_go_time[CYAN_LOADED_ID][0] <= Time)
-				{
-					process = 1;
-				}
-				else if (PositionY >= 180 && next_allowed_go_time[CYAN_LOADED_ID][0] <= Time)
-				{
-					process = 0;
-				}
-				else {
-					if (next_allowed_go_time[CYAN_LOADED_ID][1] < next_allowed_go_time[CYAN_LOADED_ID][0]) {
-						process = 1;
-					}
-					else {
-						process = 0;
-					}
-				}
-				process_times = 0;
-				large_process = 1;
-			}
-			if (process == 0)
-			{
-				if (GoInDots(50, 230, 60, 60, POINT_CYAN))
-				{
-					if (process_times >= 4)
-					{
-						next_allowed_go_time[CYAN_LOADED_ID][process] = Time + skip_time;
-						process++;
-						process_times = 0;
-					}
-					process_times++;
-				}
-			}
-			else if (process == 1)
-			{
-				if (GoInDots(45, 45, 60, 60, POINT_CYAN))
-				{
-					if (process_times >= 3)
-					{
-						next_allowed_go_time[CYAN_LOADED_ID][process] = Time + skip_time;
-						process = 0;
-						process_times = 0;
-					}
-					process_times++;
-				}
-			}
-			else
-			{
-				process = 0;
-				process_times = 0;
-			}
+			GoToArea(CYAN_LOADED_ID);
 		}
 		else
 		{
-
-			if (large_process != 0 || next_allowed_go_time[BLACK_LOADED_ID][process] > Time)
-			{
-				process = 0;
-				process_times = 0;
-				large_process = 0;
-			}
-			if (process == 0)
-			{
-				if (GoInDots(180, 135, 180, 135, POINT_BLACK))
-				{
-					if (process_times >= 3)
-					{
-						next_allowed_go_time[BLACK_LOADED_ID][process] = Time + skip_time;
-						process = 0;
-						process_times = 0;
-					}
-					process_times++;
-				}
-				//goInArea(30, 180, 20, 45, 10);
-			}
-			else
-			{
-				process = 0;
-				process_times = 0;
-			}
+			GoToArea(BLACK_LOADED_ID);
 		}
 	}
-
-	
 
 	switch (static_cast<int>(getAction()))
 	{
@@ -523,7 +398,6 @@ void Game1_Hikaru::loop()
 		}
 		break;
 	default:
-		//printf("World2System(): action's value is ubnormal\n");
 		break;
 	}
 
@@ -537,62 +411,40 @@ void Game1_Hikaru::loop()
 	}
 	if (super_sameoperate > 800)
 	{
-		//cout << "gave up because super_sameoperate" << endl;
 		log_superobj_num = 0;
 		super_sameoperate = 0;
 	}
 
-	/*if (getRepeatedNum() % 10 == 0) {
-		rep(yi, kDotHeightNum) {
-			rep(xj, kDotWidthNum) {
-				//printf("%2llu", dot[(kDotHeightNum - yi - 1) * kDotWidthNum + xj].arrived_times);
-			}
-			//printf("\n");
-		}
-		//printf("\n");
-		//printf("\n");
-	}*/
-
-	double seconds = pt.end();
-	LOG_MESSAGE("loop time :" + to_string(seconds) + " ms", MODE_NORMAL);
-	//cout << "passed time : " << seconds << " ms" << endl;
+	//double seconds = pt.end();
+	//LOG_MESSAGE("loop time :" + to_string(seconds) + " ms", MODE_NORMAL);
 }
 
 long Game1_Hikaru::WhereIsColorSensor(void)
 {
-	//fprintfLOL(logfile, "%4d Start WhereIsColorSensor()\n", getRepeatedNum());
 	long x, y;
 	if (log_x < 0 || log_x >= kCospaceWidth || log_y < 0 || log_y >= kCospaceHeight)
 	{
-		//fprintfLOL(errfile, "%4d WhereIsColorSensor(): log_x, log_y = (%d, %d)\n", getRepeatedNum(), log_x, log_y);
-		//fprintfLOL(logfile, "%4d WhereIsColorSensor(): log_x, log_y = (%d, %d)\n", getRepeatedNum(), log_x, log_y);
 		log_x = kCospaceWidth / 2;
 		log_y = kCospaceHeight / 2;
 	}
 	x = log_x + static_cast<long>(cos((Compass + 90) * 3.14 / 180) * 5);
 	y = log_y + static_cast<long>(sin((Compass + 90) * 3.14 / 180) * 5);
-	//fprintfLOL(logfile, "%4d WhereIsColorSensor() (x, y) = (%ld, %ld)\n", getRepeatedNum(), x, y);
 	if (x < 0)
 	{
-		//fprintfLOL(errfile, "%4d WhereIsColorSensor() (x, y) = (%ld, %ld)\n", getRepeatedNum(), x, y);
 		x = 0;
 	}
 	if (y < 0)
 	{
-		//fprintfLOL(errfile, "%4d WhereIsColorSensor() (x, y) = (%ld, %ld)\n", getRepeatedNum(), x, y);
 		y = 0;
 	}
 	if (x >= kCospaceWidth)
 	{
-		//fprintfLOL(errfile, "%4d WhereIsColorSensor() (x, y) = (%ld, %ld)\n", getRepeatedNum(), x, y);
 		x = kCospaceWidth - 1;
 	}
 	if (y >= kCospaceHeight)
 	{
-		//fprintfLOL(errfile, "%4d WhereIsColorSensor() (x, y) = (%ld, %ld)\n", getRepeatedNum(), x, y);
 		y = kCospaceHeight - 1;
 	}
-	//fprintfLOL(logfile, "%4d End WhereIsColorSensor() with returning %ld * 1000 + %ld = %ld\n", getRepeatedNum(), y, x, y * 1000 + x);
 	return y * 1000 + x;
 }
 
@@ -685,7 +537,6 @@ void Game1_Hikaru::CheckNowDot(void)
 
 int Game1_Hikaru::IsNearYellow(int num, int x, int y)
 {
-	//fprintfLOL(logfile, "%4d Start IsNearYellow(%d, %d, %d)\n", getRepeatedNum(), num, x, y);
 	num = num * 2 + 1;
 	if (x < 0)
 	{
@@ -728,7 +579,7 @@ int Game1_Hikaru::IsNearYellow(int num, int x, int y)
 
 int Game1_Hikaru::GoToPosition(int x, int y, int wide_decide_x, int wide_decide_y, int wide_judge_arrived)
 {
-	LOG_MESSAGE(FUNCNAME + "(" + to_string(x) + ", " + to_string(y) + ", " + to_string(wide_decide_x) + ", " + to_string(wide_decide_y) + ", " + to_string(wide_judge_arrived) + "): start", MODE_DEBUG);
+	//LOG_MESSAGE(FUNCNAME + "(" + to_string(x) + ", " + to_string(y) + ", " + to_string(wide_decide_x) + ", " + to_string(wide_decide_y) + ", " + to_string(wide_judge_arrived) + "): start", MODE_DEBUG);
 	static int absolute_x = -1;
 	static int absolute_y = -1;
 	static int absolute_distance = -1;
@@ -745,7 +596,7 @@ int Game1_Hikaru::GoToPosition(int x, int y, int wide_decide_x, int wide_decide_
 	// If the argument value is strange
 	if (x < 0 || y < 0 || x > kCospaceWidth || y > kCospaceHeight || wide_decide_x < 0 || wide_decide_y < 0 || wide_judge_arrived < 0)
 	{
-		//printf("GoToPosition(): 引数が(%d, %d, %d, %d, %d)\n", x, y, wide_decide_x, wide_decide_y, wide_judge_arrived);
+		//printf("GoToPosition(): Argument is (%d, %d, %d, %d, %d)\n", x, y, wide_decide_x, wide_decide_y, wide_judge_arrived);
 		return 0;
 	}
 
@@ -794,8 +645,8 @@ int Game1_Hikaru::GoToPosition(int x, int y, int wide_decide_x, int wide_decide_
 	temp_x -= temp_y * 1000;
 	if (PLUSMINUS(absolute_x, temp_x, wide_judge_arrived) && PLUSMINUS(absolute_y, temp_y, wide_judge_arrived))
 	{
-		//printf("(%d, %d)に到着しました\n", absolute_x, absolute_y);
-		LOG_MESSAGE("(" + to_string(absolute_x) + "," + to_string(absolute_y) + ")に到着しました", MODE_NORMAL);
+		//printf("(%d, %d)Arrived at\n", absolute_x, absolute_y);
+		//LOG_MESSAGE("(" + to_string(absolute_x) + "," + to_string(absolute_y) + ")Arrived at", MODE_NORMAL);
 		absolute_x = -1;
 		absolute_y = -1;
 		same_operate = -1;
@@ -803,12 +654,12 @@ int Game1_Hikaru::GoToPosition(int x, int y, int wide_decide_x, int wide_decide_
 		return 1;
 	}
 
-	LOG_MESSAGE("ab(" + to_string(absolute_x) + "," + to_string(absolute_y) + ")", MODE_NORMAL);
+	//LOG_MESSAGE("ab(" + to_string(absolute_x) + "," + to_string(absolute_y) + ")", MODE_NORMAL);
 	x = absolute_x;
 	y = absolute_y;
 	x = x - temp_x;
 	y = y - temp_y;
-	LOG_MESSAGE("x, y = " + to_string(x) + ", " + to_string(y), MODE_NORMAL);
+	//LOG_MESSAGE("x, y = " + to_string(x) + ", " + to_string(y), MODE_NORMAL);
 	double angle = atan2(y, x);
 	angle = angle * 180 / 3.14;
 	int angle_int = static_cast<int>(angle);
@@ -817,7 +668,7 @@ int Game1_Hikaru::GoToPosition(int x, int y, int wide_decide_x, int wide_decide_
 	{
 		angle_int += 360;
 	}
-	LOG_MESSAGE("angle " + to_string(angle_int), MODE_NORMAL);
+	//LOG_MESSAGE("angle " + to_string(angle_int), MODE_NORMAL);
 	GoToAngle(angle_int, static_cast<int>(sqrt(x * x + y * y)));
 
 	if (repeated_num_log + 1 == getRepeatedNum() && objects_num_log != LoadedObjects)
@@ -841,9 +692,9 @@ void Game1_Hikaru::InputDotInformation(void)
 		{
 			switch (map_output_data[kDotHeightNum - j - 1][i])
 			{
-			case 0: //white
-				//map_position_color_data[i][j] = POINT_UNKNOWN;
-				map_position_color_data[i][j] = POINT_WHITE;
+			case 0: //white or unlown
+				map_position_color_data[i][j] = POINT_UNKNOWN;
+				//map_position_color_data[i][j] = POINT_WHITE;
 				break;
 			case 1: //yellow
 				map_position_color_data[i][j] = POINT_YELLOW;
@@ -867,58 +718,6 @@ void Game1_Hikaru::InputDotInformation(void)
 		}
 	}
 
-	/*rep(kind, 7)
-	{
-		rep(ysi, 5)
-		{
-			rep(xsj, 6)
-			{
-				for (int yi = ysi * kDotHeightNum / 5; yi < (ysi + 1) * kDotHeightNum / 5; ++yi)
-				{
-					for (int xj = xsj * kDotWidthNum / 6; xj < (xsj + 1) * kDotWidthNum / 6; ++xj)
-					{
-						map_secure[kind][yi * kDotWidthNum + xj] = map_secure_lite_data[kind][4 - ysi][xsj];
-					}
-				}
-			}
-		}
-	}*/
-
-	/*//printf("map\n");
-	for (int yi = kDotHeightNum - 1; yi >= 0; --yi)
-	{
-		for (int xj = 0; xj < kDotWidthNum; ++xj)
-		{
-			switch (map_position_color_data[xj][yi])
-			{
-			case POINT_WHITE:
-				//printf(" ");
-				break;
-			case POINT_YELLOW:
-				//printf("Y");
-				break;
-			case POINT_WALL:
-				//printf("#");
-				break;
-			case POINT_SWAMPLAND:
-				//printf("$");
-				break;
-			case POINT_DEPOSIT:
-				//printf("D");
-				break;
-			case POINT_SUPERAREA:
-				//printf("S");
-				break;
-			default:
-				//printf(" ");
-				break;
-			}
-		}
-		//printf("\n");
-	}
-	//printf("\n");
-	//printf("\n");*/
-
 	for (long i = 0; i < kMaxDotNum; i++)
 	{
 		//I use id of dot
@@ -937,8 +736,6 @@ void Game1_Hikaru::InputDotInformation(void)
 		dot[i].y = y * kSize + kSize / 2;
 		//the wide of dot
 		dot[i].wide = kSize;
-		//printfLOL("(%d, %d, %d, %d)\n", x, y, dot[i].x, dot[i].y);
-
 		//point means what's this dot belongs?
 		//For example, this dot belongs yellow.
 		//this map_position_color_data is defined at 60 lines upper(may be)
@@ -946,18 +743,8 @@ void Game1_Hikaru::InputDotInformation(void)
 		// dot[i].point = 1;
 		dot[i].color = map_position_color_data[x][y];
 		dot[i].red = red_data[kDotHeightNum - y - 1][x];
-		// if (dot[i].red == 0 && dot[i].color == POINT_WHITE)
-		// {
-		// 	dot[i].cyan = 1;
-		// 	dot[i].black = 1;
-		// }
 		dot[i].cyan = cyan_data[kDotHeightNum - y - 1][x];
 		dot[i].black = black_data[kDotHeightNum - y - 1][x];
-
-		//these are for dijkstra
-		// dot[i].done = -1;
-		// dot[i].from = -1;
-		// dot[i].cost = -1;
 	}
 
 	//set values of cost
@@ -968,9 +755,6 @@ void Game1_Hikaru::InputDotInformation(void)
 		dot[i].edge_num = 0;
 		for (int j = 0; j < 9; j++)
 		{
-			// if (j % 2 == 0) {
-			// 	continue;
-			// }
 			if (j == 4)
 			{
 				continue;
@@ -997,7 +781,7 @@ void Game1_Hikaru::InputDotInformation(void)
 			{
 				dot[i].edge_cost[dot[i].edge_num] = (dot[i].wide + dot[target_id].wide) * 1000 * 1000;
 			}
-			//マップの端
+			//Map edge
 			else if (x == 0 || y == 0 || x == kDotWidthNum - 1 || y == kDotHeightNum - 1 || temp_x == 0 || temp_y == 0 || temp_x == kDotWidthNum - 1 || temp_y == kDotHeightNum - 1)
 			{
 				dot[i].edge_cost[dot[i].edge_num] = (dot[i].wide + dot[target_id].wide) * 1000 * 1000;
@@ -1014,50 +798,6 @@ void Game1_Hikaru::InputDotInformation(void)
 			dot[i].edge_num++;
 		}
 	}
-	// for (int hi = kDotHeightNum - 1; hi >= 0; hi--)
-	// {
-	// 	rep(wj, kDotWidthNum)
-	// 	{
-	// 		switch (dot[hi * kDotWidthNum + wj].point)
-	// 		{
-	// 		case POINT_YELLOW:
-	// 			//cout << "$";
-	// 			break;
-	// 		case POINT_WALL:
-	// 			//cout << "#";
-	// 			break;
-	// 		case POINT_DEPOSIT:
-	// 			//cout << "@";
-	// 			break;
-	// 		case POINT_SUPERAREA:
-	// 			//cout << "^";
-	// 			break;
-	// 		case POINT_SWAMPLAND:
-	// 			//cout << "|";
-	// 			break;
-	// 		default:
-	// 			if (dot[hi * kDotWidthNum + wj].black == 1)
-	// 			{
-	// 				//cout << "B";
-	// 			}
-	// 			else if (dot[hi * kDotWidthNum + wj].cyan == 1)
-	// 			{
-	// 				//cout << "C";
-	// 			}
-	// 			else if (dot[hi * kDotWidthNum + wj].red == 1)
-	// 			{
-	// 				//cout << "R";
-	// 			}
-	// 			else
-	// 			{
-	// 				//cout << " ";
-	// 			}
-	// 			break;
-	// 		}
-	// 	}
-	// 	//cout << endl;
-	// }
-	// //cout << endl;
 }
 
 void Game1_Hikaru::Dijkstra(int option)
@@ -1111,30 +851,28 @@ void Game1_Hikaru::Dijkstra(int option)
 			// }
 
 			//If the dot is yellow or wall
-
 			if (option != 2 && (dot[i].point == POINT_WALL || dot[i].point == POINT_YELLOW))
 			{
 				continue;
 			}
 
-			if (option == 0 && (dot[i].point == POINT_SWAMPLAND || dot[i].point == POINT_MAY_SWAMPLAND)) {
+			if (option == 0 && (dot[i].point == POINT_SWAMPLAND 
+								|| dot[i].point == POINT_MAY_SWAMPLAND)) 
+			{
 				continue;
 			}
-
 			//If not assigned
 			if (investigating_node.done == 0)
 			{
 				investigating_node = dot[i];
 				continue;
 			}
-
 			//If the cost of the new dot is small
 			if (dot[i].cost < investigating_node.cost)
 			{
 				investigating_node = dot[i];
 			}
 		}
-
 		//For a new node
 		if (investigating_node.done == 0)
 		{
@@ -1142,7 +880,6 @@ void Game1_Hikaru::Dijkstra(int option)
 		}
 
 		dot[investigating_node.id].done = 0;
-
 		for (int i = 0; i < investigating_node.edge_num; i++)
 		{
 			int target_id = investigating_node.edge_to[i];
@@ -1173,24 +910,17 @@ void Game1_Hikaru::Dijkstra(int option)
 
 			target_cost += target_curved_times * 10;
 
-
 			if (dot[i].point == POINT_SWAMPLAND || dot[i].point == POINT_MAY_SWAMPLAND)
 			{
 				//cout << "s" << endl;
 				target_cost *= 1000;
 			}
 
-
 			if (dot[i].point == POINT_WALL || dot[i].point == POINT_YELLOW)
 			{
-				target_cost *= 10000000;
+				target_cost *= 10000;
 			}
 
-			// if (dot[target_id].point < -1) {
-			// 	// if (option == 0) {
-			// 		continue;
-			// 	// }
-			// }
 			double k = 0.8;
 			if (Time < 450) {
 				if (dot[investigating_node.id].black == 1 && loaded_objects[BLACK_LOADED_ID] < kBorderSameObjNum)
@@ -1217,10 +947,7 @@ void Game1_Hikaru::Dijkstra(int option)
 					}
 					target_cost = static_cast<int>(k * target_cost);
 				}
-				if (LoadedObjects >= 6)
-				{
-				}
-				else
+				if (LoadedObjects < 6)
 				{
 					target_cost += static_cast<int>(dot[target_id].arrived_times * 10);
 				}
@@ -1247,62 +974,63 @@ void Game1_Hikaru::Dijkstra(int option)
 
 int Game1_Hikaru::GoToDot(int x, int y)
 {
-	// //printf("%d %d\n", x * kSize, y * kSize);
+	//printf("%d %d\n", x * kSize, y * kSize);
 	static int prev_x = -1, prev_y = -1, prev_now_dot_id = -1;
 
 	//fprintfLOL(logfile, " %d Start GoToDot(%d, %d)\n", getRepeatedNum(), x, y);
 	if (PositionX == -1 && (PLUSMINUS(log_x, x * kSize, kSize) && PLUSMINUS(log_y, y * kSize, kSize)))
 	{
 		//fprintfLOL(logfile, " %d End GoToDot() with returning 1 because I am in PLA and it's near target(%d, %d)\n", getRepeatedNum(), x, y);
-		LOG_MESSAGE(FUNC_NAME + "() end returning 1 because I am in PLA and it's near target(" + to_string(x) + ", " + to_string(y) + ")", MODE_NORMAL);
+		//LOG_MESSAGE(FUNC_NAME + "() end returning 1 because I am in PLA and it's near target(" + to_string(x) + ", " + to_string(y) + ")", MODE_NORMAL);
 		GoToPosition(x, y, 10, 10, 5);
 		return 1;
 	}
-	// char map_data_to_show[kMaxDotNum];
-	// for (int i = 0; i < kMaxDotNum; i++)
-	// {
-	// 	if (dot[i].point == POINT_YELLOW)
-	// 	{
-	// 		map_data_to_show[i] = 'Y';
-	// 	}
-	// 	else if (dot[i].point == POINT_WALL)
-	// 	{
-	// 		map_data_to_show[i] = '#';
-	// 	}
-	// 	else if (dot[i].point == POINT_DEPOSIT)
-	// 	{
-	// 		map_data_to_show[i] = 'D';
-	// 	}
-	// 	else if (dot[i].point == POINT_SWAMPLAND || dot[i].point == POINT_MAY_SWAMPLAND)
-	// 	{
-	// 		map_data_to_show[i] = '$';
-	// 	}
-	// 	else if (dot[i].point == POINT_SUPERAREA)
-	// 	{
-	// 		map_data_to_show[i] = 'S';
-	// 	}
-	// 	else if (dot[i].point == POINT_UNKNOWN)
-	// 	{
-	// 		map_data_to_show[i] = '\'';
-	// 	}
-	// 	else
-	// 	{
-	// 		map_data_to_show[i] = ' ';
-	// 	}
-	// }
-
+	char map_data_to_show[kMaxDotNum]; 
+	for (int i = 0; i < kMaxDotNum; i++)
+	{
+		if (dot[i].point == POINT_YELLOW)
+		{
+			map_data_to_show[i] = 'Y';
+		}
+		else if (dot[i].point == POINT_WALL)
+		{
+			map_data_to_show[i] = '#';
+		}
+		else if (dot[i].point == POINT_DEPOSIT)
+		{
+			map_data_to_show[i] = 'D';
+		}
+		else if (dot[i].point == POINT_SWAMPLAND || dot[i].point == POINT_MAY_SWAMPLAND)
+		{
+			map_data_to_show[i] = '$';
+		}
+		else if (dot[i].point == POINT_SUPERAREA)
+		{
+			map_data_to_show[i] = 'S';
+		}
+		else if (dot[i].point == POINT_UNKNOWN)
+		{
+			map_data_to_show[i] = '\'';
+		}
+		else
+		{
+			map_data_to_show[i] = ' ';
+		}
+	}
 	//If the node I want to go will be go out
 	if (x < 1 || x >= kDotWidthNum - 1 || y < 1 || y >= kDotHeightNum - 1)
 	{
-		LOG_MESSAGE(FUNC_NAME + "(): (x, y) is (" + to_string(x) + ", " + to_string(y) + "and strange", MODE_NORMAL);
+		//LOG_MESSAGE(FUNC_NAME + "(): (x, y) is (" + to_string(x) + ", " + to_string(y) + "and strange", MODE_NORMAL);
 	}
 
 	if (prev_now_dot_id != now_dot_id || prev_x != x || prev_y != y)
 	{
-		if (dot[y * kDotWidthNum + x].point == POINT_SWAMPLAND || dot[y * kDotWidthNum + x].point == POINT_MAY_SWAMPLAND) {
+		if (dot[y * kDotWidthNum + x].point == POINT_SWAMPLAND || dot[y * kDotWidthNum + x].point == POINT_MAY_SWAMPLAND)
+		{
 			Dijkstra(1);
 		}
-		else {
+		else 
+		{
 			Dijkstra(0);
 		}
 	}
@@ -1316,26 +1044,23 @@ int Game1_Hikaru::GoToDot(int x, int y)
 
 	if (goal_dot < 0 || goal_dot >= kMaxDotNum)
 	{
-		LOG_MESSAGE("strainge(x, y)", MODE_NORMAL);
+		//LOG_MESSAGE("strainge(x, y)", MODE_NORMAL);
 		return 0;
 	}
 
 	int temp = goal_dot;
-	//map_data_to_show[goal_dot] = 'T';
+	map_data_to_show[goal_dot] = 'T';
 	int i = 0;
 
 	while (dot[temp].from != now_dot_id && i < 200)
 	{
-		// int go_x, go_y;
-		// go_y = temp / kDotWidthNum;
-		// go_x = temp - (int)go_y * kDotWidthNum;
 		temp = dot[temp].from;
-		//map_data_to_show[temp] = '+';
-		// //printf("%d\n", dot[temp].point);
+		map_data_to_show[temp] = '+';
+		//printf("%d\n", dot[temp].point);
 		i++;
 		if (temp < 0 || temp >= kMaxDotNum)
 		{
-			LOG_MESSAGE("temp = " + to_string(temp) + "is strange. I will continue", MODE_NORMAL);
+			//LOG_MESSAGE("temp = " + to_string(temp) + "is strange. I will continue", MODE_NORMAL);
 			GoToPosition(x * kSize, y * kSize, 5, 5, 5);
 			return 0;
 		}
@@ -1343,10 +1068,10 @@ int Game1_Hikaru::GoToDot(int x, int y)
 	if (i == 200)
 	{
 		//printf("\n\n\niの値が200ですByGoToNode()\n\n\n\n");
-		LOG_MESSAGE(FUNC_NAME + "(): iの値が200です", MODE_NORMAL);
+		//LOG_MESSAGE(FUNC_NAME + "(): iの値が200です", MODE_NORMAL);
 	}
 
-	//map_data_to_show[now_dot_id] = '@';
+	map_data_to_show[now_dot_id] = '@';
 
 	int next_x, next_y;
 	next_y = temp / kDotWidthNum;
@@ -1354,54 +1079,54 @@ int Game1_Hikaru::GoToDot(int x, int y)
 
 	int now_y = now_dot_id / kDotWidthNum;
 	int now_x = now_dot_id - now_y * kDotWidthNum;
+	// Output map in file
+	if (getRepeatedNum() % 3 == 0)
+	{
+		//cout << "out map" << endl;
+		ProcessingTime pt2;
+		pt2.start();
+		FILE* fp = fopen("map_out.txt", "w");
+		if (fp == NULL)
+		{
+			ERROR_MESSAGE(FUNCNAME + "(): failed to make map_out.txt", MODE_NORMAL);
+		}
+		else
+		{
+			//cout << "out map start" << endl;
+			rep(xj, kDotWidthNum + 2)
+			{
+				fprintf(fp, "#");
+				//printfLOL("#");
+			}
+			fprintf(fp, "\n");
+			//printf("\n");
+			rep(yi, kDotHeightNum)
+			{
+				fprintf(fp, "#");
+				//printfLOL("#");
 
-	// if (getRepeatedNum() % 3 == 0)
-	// {
-	// 	//cout << "out map" << endl;
-	// 	ProcessingTime pt2;
-	// 	pt2.start();
-	// 	FILE* fp = fopen("map_out.txt", "w");
-	// 	if (fp == NULL)
-	// 	{
-	// 		ERROR_MESSAGE(FUNCNAME + "(): failed to make map_out.txt", MODE_NORMAL);
-	// 	}
-	// 	else
-	// 	{
-	// 		//cout << "out map start" << endl;
-	// 		rep(xj, kDotWidthNum + 2)
-	// 		{
-	// 			//fprintf(fp, "#");
-	// 			//printfLOL("#");
-	// 		}
-	// 		//fprintf(fp, "\n");
-	// 		//printf("\n");
-	// 		rep(yi, kDotHeightNum)
-	// 		{
-	// 			//fprintf(fp, "#");
-	// 			//printfLOL("#");
+				rep(xj, kDotWidthNum)
+				{
+					fprintf(fp, "%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
+					//printfLOL("%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
+				}
+				fprintf(fp, "#");
+				//printfLOL("#");
 
-	// 			rep(xj, kDotWidthNum)
-	// 			{
-	// 				//fprintf(fp, "%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
-	// 				//printfLOL("%c", map_data_to_show[(kDotHeightNum - 1 - yi) * kDotWidthNum + xj]);
-	// 			}
-	// 			//fprintf(fp, "#");
-	// 			//printfLOL("#");
-
-	// 			//fprintf(fp, "\n");
-	// 			//printfLOL("\n");
-	// 		}
-	// 		rep(xj, kDotWidthNum + 2)
-	// 		{
-	// 			//printfLOL("\n");
-	// 			//fprintf(fp, "#");
-	// 		}
-	// 		//printfLOL("\n");
-	// 		//fprintf(fp, "\n");
-	// 		fclose(fp);
-	// 		//cout << "out map end " << pt2.end() << endl;
-	// 	}
-	// }
+				fprintf(fp, "\n");
+				//printfLOL("\n");
+			}
+			rep(xj, kDotWidthNum + 2)
+			{
+				fprintf(fp, "#");
+				//printfLOL("\n");
+			}
+			fprintf(fp, "\n");
+			//printfLOL("\n");
+			fclose(fp);
+			//cout << "out map end " << pt2.end() << endl;
+		}
+	}
 
 	int distance = 20;
 	if (next_x < now_x)
@@ -1455,9 +1180,7 @@ int Game1_Hikaru::GoToDot(int x, int y)
 
 int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 {
-	//fprintfLOL(logfile, " %d Start GoToDots(%d, %d, %d, %d)\n", getRepeatedNum(), x, y, wide_decide_x, wide_decide_y);
-	// //printf("GoToDots(): %d %d %d %d\n", x, y, wide_decide_x, wide_decide_y);
-
+	
 	static int prev_x = -1;
 	static int prev_y = -1;
 	static int target_x = -1;
@@ -1467,7 +1190,7 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 	static int prev_loaded_num = -1;
 	if (x != prev_x || y != prev_y)
 	{
-		LOG_MESSAGE("changed dots", MODE_NORMAL);
+		//LOG_MESSAGE("changed dots", MODE_NORMAL);
 		local_same_target = 0;
 		prev_x = x;
 		prev_y = y;
@@ -1482,33 +1205,30 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 		{
 			if (corner_x[i] < 0)
 			{
-				//fprintfLOL(errfile, " %d GoToDots() corner_x[%d] is %d < 0\n", getRepeatedNum(), i, corner_x[i]);
 				//fprintfLOL(logfile, " %d GoToDots() corner_x[%d] is %d < 0\n", getRepeatedNum(), i, corner_x[i]);
 				corner_x[i] = 0;
 			}
 			if (corner_x[i] >= kDotWidthNum)
 			{
-				//fprintfLOL(errfile, " %d GoToDots() corner_x[%d] is %d >= %d\n", getRepeatedNum(), i, corner_x[i], kDotWidthNum);
 				//fprintfLOL(logfile, " %d GoToDots() corner_x[%d] is %d >= %d\n", getRepeatedNum(), i, corner_x[i], kDotWidthNum);
 				corner_x[i] = kDotWidthNum - 1;
 			}
 			if (corner_y[i] < 0)
 			{
-				//fprintfLOL(errfile, " %d GoToDots() corner_y[%d] is %d < 0\n", getRepeatedNum(), i, corner_y[i]);
 				//fprintfLOL(logfile, " %d GoToDots() corner_y[%d] is %d < 0\n", getRepeatedNum(), i, corner_y[i]);
 				corner_y[i] = 0;
 			}
 			if (corner_y[i] >= kDotHeightNum)
 			{
-				//fprintfLOL(errfile, " %d GoToDots() corner_y[%d] is %d >= %d\n", getRepeatedNum(), i, corner_y[i], kDotHeightNum);
 				//fprintfLOL(logfile, " %d GoToDots() corner_y[%d] is %d >= %d\n", getRepeatedNum(), i, corner_y[i], kDotHeightNum);
 				corner_y[i] = kDotHeightNum - 1;
 			}
 		}
 
 		int min = 100000, id = -1;
-		// n回に1回移動する
-		int option = rnd() % 5;
+		const int N = 5;
+		// Move once every N times
+		int option = rnd() % N;
 		for (int i = corner_x[0]; i <= corner_x[1]; i++)
 		{
 			for (int j = corner_y[0]; j <= corner_y[1]; j++)
@@ -1518,7 +1238,6 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 				{
 					continue;
 				}
-
 				//yellow or wall or deposit
 				if (dot[investigating_dot_id].point < POINT_DEPOSIT)
 				{
@@ -1528,21 +1247,16 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 				int costs = static_cast<int>(dot[investigating_dot_id].arrived_times * 100 + rnd() % 10);
 				if (option)
 				{
-					// 移動しないとき
+					// When not moving
 					int k = 30;
 					costs += static_cast<int>(pow(abs(i * kSize - log_x) - k, 2) * 100 - pow(abs(j * kSize - log_y) - k, 2) * 100);
 				}
 				else
 				{
-					// 移動するとき
+					// When to moving
 					costs -= static_cast<int>(pow(i * kSize - log_x, 2) / 100 - pow(j * kSize - log_y, 2) / 100);
 				}
-				// for (int i = 0; i < 100000; i++) {
-				// 	// for (int j = 0; j < 1000000; j++) {
-				// 		// for (int k = 0; k < 100000; k++) {
-				// 		// }
-				// 	// }
-				// }
+
 				if (costs < min)
 				{
 					min = costs;
@@ -1552,9 +1266,7 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 		}
 		if (id == -1)
 		{
-			//fprintfLOL(stdout, "%d GoToDots(): There is no dot that can go target(%d %d) log(%d %d) eme %d\n", getRepeatedNum(), target_x, target_y, log_x, log_y, now_dot_id);
-			// //fprintfLOL(logfile, " %d GoToDots(): There is no dot that can go log(%d %d) eme %d\n", getRepeatedNum());
-			// //fprintfLOL(stdout, "%d GoToDots(): There is no dot that can go log(%d %d) eme %d\n", getRepeatedNum());
+			//fprintfLOL(logfile, " %d GoToDots(): There is no dot that can go log(%d %d) eme %d\n", getRepeatedNum());
 			target_x = x / kSize;
 			target_y = y / kSize;
 		}
@@ -1562,47 +1274,13 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 		{
 			target_y = id / kDotWidthNum;
 			target_x = id - target_y * kDotWidthNum;
-			//fprintfLOL(logfile, " %d decide target as (%d, %d)\n", getRepeatedNum(), target_x, target_y);
 		}
 
 		same_target_border = static_cast<int>(sqrt(pow(log_x - target_x * kSize, 2) + pow(log_y - target_y * kSize, 2)));
 		same_target_border *= 3;
 		same_target_border += 40;
-
-		// int i = 0;
-		// do {
-		// 	i++;
-		// 	if(i > 20) {
-		// 		//printf("%d GoToDots(): can not decide target\n", getRepeatedNum());
-		// 		//fprintfLOL(errfile, "%d GoToDots(): Can not decide target\n", getRepeatedNum());
-		// 		//fprintfLOL(logfile, " %d GoToDots(): Can not decide target\n", getRepeatedNum());
-		// 		target_x = x;
-		// 		target_y = y;
-		// 		target_x /= kSize;
-		// 		target_y /= kSize;
-		// 		break;
-		// 	}
-		// 	target_x = x - wide_decide_x + rand() % (wide_decide_x * 2 + 1);
-		// 	target_y = y - wide_decide_y + rand() % (wide_decide_y * 2 + 1);
-		// 	target_x /= kSize;
-		// 	target_y /= kSize;
-		// 	if(target_x <= 0) {
-		// 		target_x = 1;
-		// 	}
-		// 	if(target_x >= kDotWidthNum - 1) {
-		// 		target_x = kDotWidthNum - 2;
-		// 	}
-		// 	if(target_y <= 0) {
-		// 		target_y = 1;
-		// 	}
-		// 	if(target_y >= kDotHeightNum - 1) {
-		// 		target_y = kDotHeightNum - 2;
-		// 	}
-		// } while(dot[target_y * kDotWidthNum + target_x].point <= POINT_WALL);
 	}
 	local_same_target++;
-	//cout << "target " << target_x * kSize << " " << target_y * kSize << endl;
-	// //printf("%d %d\n", local_same_target, same_target_border);
 	if (prev_loaded_num != LoadedObjects) {
 		prev_loaded_num = LoadedObjects;
 		local_same_target -= 100;
@@ -1624,9 +1302,9 @@ int Game1_Hikaru::GoToDots(int x, int y, int wide_decide_x, int wide_decide_y)
 
 int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, int color)
 {
-	LOG_MESSAGE(FUNCNAME + "(): start", MODE_DEBUG);
+	//LOG_MESSAGE(FUNCNAME + "(): start", MODE_DEBUG);
 	//fprintfLOL(logfile, " %d Start GoToDots(%d, %d, %d, %d)\n", getRepeatedNum(), x, y, wide_decide_x, wide_decide_y);
-	// //printf("GoToDots(): %d %d %d %d\n", x, y, wide_decide_x, wide_decide_y);
+	//printf("GoToDots(): %d %d %d %d\n", x, y, wide_decide_x, wide_decide_y);
 	static int prev_x = -1;
 	static int prev_y = -1;
 	static int prev_color = -1000;
@@ -1636,7 +1314,7 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 	static int same_target_border = 0;
 	if (x != prev_x || y != prev_y || color != prev_color)
 	{
-		LOG_MESSAGE("changed dots", MODE_NORMAL);
+		//LOG_MESSAGE("changed dots", MODE_NORMAL);
 		local_same_target = 0;
 		prev_x = x;
 		prev_y = y;
@@ -1651,34 +1329,28 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 		{
 			if (corner_x[i] < 0)
 			{
-				//fprintfLOL(errfile, " %d GoToDots() corner_x[%d] is %d < 0\n", getRepeatedNum(), i, corner_x[i]);
-				//fprintfLOL(logfile, " %d GoToDots() corner_x[%d] is %d < 0\n", getRepeatedNum(), i, corner_x[i]);
 				corner_x[i] = 0;
 			}
 			if (corner_x[i] >= kDotWidthNum)
 			{
-				//fprintfLOL(errfile, " %d GoToDots() corner_x[%d] is %d >= %d\n", getRepeatedNum(), i, corner_x[i], kDotWidthNum);
-				//fprintfLOL(logfile, " %d GoToDots() corner_x[%d] is %d >= %d\n", getRepeatedNum(), i, corner_x[i], kDotWidthNum);
 				corner_x[i] = kDotWidthNum - 1;
 			}
 			if (corner_y[i] < 0)
 			{
-				//fprintfLOL(errfile, " %d GoToDots() corner_y[%d] is %d < 0\n", getRepeatedNum(), i, corner_y[i]);
-				//fprintfLOL(logfile, " %d GoToDots() corner_y[%d] is %d < 0\n", getRepeatedNum(), i, corner_y[i]);
 				corner_y[i] = 0;
 			}
 			if (corner_y[i] >= kDotHeightNum)
 			{
-				//fprintfLOL(errfile, " %d GoToDots() corner_y[%d] is %d >= %d\n", getRepeatedNum(), i, corner_y[i], kDotHeightNum);
-				//fprintfLOL(logfile, " %d GoToDots() corner_y[%d] is %d >= %d\n", getRepeatedNum(), i, corner_y[i], kDotHeightNum);
 				corner_y[i] = kDotHeightNum - 1;
 			}
 		}
 
 		int min = 100000, id = -1;
-		// Move once every n times
-		int option = rnd() % 3;
-		if (color == POINT_DEPOSIT) {
+		const int N = 3;
+		// Move once every N times
+		int option = rnd() % N;
+		if (color == POINT_DEPOSIT) 
+		{
 			Dijkstra(0);
 		}
 		for (int i = corner_x[0]; i <= corner_x[1]; i++)
@@ -1691,7 +1363,10 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 					continue;
 				}
 				//yellow or wall or deposit
-				if (dot[investigating_dot_id].point == POINT_YELLOW || dot[investigating_dot_id].point == POINT_MAY_SWAMPLAND || dot[investigating_dot_id].point == POINT_SWAMPLAND || dot[investigating_dot_id].point == POINT_WALL)
+				if (dot[investigating_dot_id].point == POINT_YELLOW 
+					|| dot[investigating_dot_id].point == POINT_MAY_SWAMPLAND 
+					|| dot[investigating_dot_id].point == POINT_SWAMPLAND 
+					|| dot[investigating_dot_id].point == POINT_WALL)
 				{
 					continue;
 				}
@@ -1728,26 +1403,20 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 
 				if (option)
 				{
-					// 移動しないとき
+					// When not moving
 					int k = 30;
-					costs += static_cast<int>(sqrt(pow(abs(i * kSize - log_x) - k, 2) + pow(abs(j * kSize - log_y) - k, 2)));
+					costs += static_cast<int>(sqrt(pow(abs(i * kSize - log_x) - k, 2) 
+												+ pow(abs(j * kSize - log_y) - k, 2)));
 				}
 				else
 				{
-					// 移動するとき
+					// When to move
 					costs -= static_cast<int>(pow(i * kSize - log_x, 2) / 100 - pow(j * kSize - log_y, 2) / 100);
 				}
 				if (color == POINT_DEPOSIT)
 				{
 					costs = dot[j * kDotWidthNum + i].cost;
 				}
-				// //cout << "position cost " << pow(i * kSize - log_x, 2) / 100 + pow(j * kSize - log_y, 2) / 100 << " arrived cost " << dot[investigating_dot_id].arrived_times * 100 << endl;
-				// for (int i = 0; i < 100000; i++) {
-				// 	// for (int j = 0; j < 1000000; j++) {
-				// 		// for (int k = 0; k < 100000; k++) {
-				// 		// }
-				// 	// }
-				// }
 				if (costs < min)
 				{
 					min = costs;
@@ -1757,9 +1426,6 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 		}
 		if (id == -1)
 		{
-			//fprintfLOL(errfile, "%d GoInDots(): There is no dot that can go\n", getRepeatedNum());
-			//fprintfLOL(logfile, " %d GoToDots(): There is no dot that can go\n", getRepeatedNum());
-			//fprintfLOL(stdout, "%d GoInDots(): There is no dot that can go\n", getRepeatedNum());
 			target_x = x / kSize;
 			target_y = y / kSize;
 		}
@@ -1767,44 +1433,12 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 		{
 			target_y = id / kDotWidthNum;
 			target_x = id - target_y * kDotWidthNum;
-			LOG_MESSAGE("target(" + to_string(target_x) + ", " + to_string(target_y), MODE_NORMAL);
-			//fprintfLOL(logfile, " %d decide target as (%d, %d)\n", getRepeatedNum(), target_x, target_y);
+			//LOG_MESSAGE("target(" + to_string(target_x) + ", " + to_string(target_y), MODE_NORMAL);
 		}
 
 		same_target_border = static_cast<int>(sqrt(pow(log_x - target_x * kSize, 2) + pow(log_y - target_y * kSize, 2)));
 		same_target_border *= 2;
 		same_target_border += 30;
-
-		// int i = 0;
-		// do {
-		// 	i++;
-		// 	if(i > 20) {
-		// 		//printf("%d GoToDots(): can not decide target\n", getRepeatedNum());
-		// 		//fprintfLOL(errfile, "%d GoToDots(): Can not decide target\n", getRepeatedNum());
-		// 		//fprintfLOL(logfile, " %d GoToDots(): Can not decide target\n", getRepeatedNum());
-		// 		target_x = x;
-		// 		target_y = y;
-		// 		target_x /= kSize;
-		// 		target_y /= kSize;
-		// 		break;
-		// 	}
-		// 	target_x = x - wide_decide_x + rand() % (wide_decide_x * 2 + 1);
-		// 	target_y = y - wide_decide_y + rand() % (wide_decide_y * 2 + 1);
-		// 	target_x /= kSize;
-		// 	target_y /= kSize;
-		// 	if(target_x <= 0) {
-		// 		target_x = 1;
-		// 	}
-		// 	if(target_x >= kDotWidthNum - 1) {
-		// 		target_x = kDotWidthNum - 2;
-		// 	}
-		// 	if(target_y <= 0) {
-		// 		target_y = 1;
-		// 	}
-		// 	if(target_y >= kDotHeightNum - 1) {
-		// 		target_y = kDotHeightNum - 2;
-		// 	}
-		// } while(dot[target_y * kDotWidthNum + target_x].point <= POINT_WALL);
 	}
 
 	prev_x = x;
@@ -1812,19 +1446,15 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 	prev_color = color;
 
 	local_same_target++;
-	// //printf("%d\n", local_same_target);
-	// //printf("%d %d\n", local_same_target, same_target_border);
-	LOG_MESSAGE("target_x, y " + to_string(target_x * kSize) + " " + to_string(target_y * kSize), MODE_NORMAL);
+	//LOG_MESSAGE("target_x, y " + to_string(target_x * kSize) + " " + to_string(target_y * kSize), MODE_NORMAL);
 	if (GoToDot(target_x, target_y) || local_same_target > same_target_border)
 	{
 		prev_x = -1;
 		local_same_target = 0;
-		//fprintfLOL(logfile, " %d End GoToDots() with returning 1\n", getRepeatedNum());
 		return 1;
 	}
 	else
 	{
-		//fprintfLOL(logfile, " %d End GoToDots() with returning 0\n", getRepeatedNum());
 		return 0;
 	}
 }
@@ -1832,48 +1462,40 @@ int Game1_Hikaru::GoInDots(int x, int y, int wide_decide_x, int wide_decide_y, i
 int Game1_Hikaru::HowManyCurved(int id)
 {
 	/*
-	道の長さ * 10 + 曲がった回数 * 20 + (Object < 6 のとき) Objectのとれる試算
+		Path length * 10 + number of turns * 20 + (when Object <6) Estimated calculation of Object
 	*/
 	int route[kMaxDotNum];
-	//曲がった回数
+	//Number of revolutions
 	int curved_times = 0;
-	//道の長さ
+	//Path length
 	int distance_way = -1;
 	route[0] = id;
-	// //printf("id is %d now is %d \n", id, now_dot_id);
 	for (int i = 1; i < kMaxDotNum; i++)
 	{
 		if (route[i - 1] < 0 || route[i - 1] > kMaxDotNum)
 		{
-			//fprintfLOL(errfile, " %d HowManyCurved() route[%d - 1] = %d is strange\n", getRepeatedNum(), i, route[i - 1]);
 			distance_way = i + 1;
 			break;
 		}
 		route[i] = dot[route[i - 1]].from;
-		// //printf("%d route[%d] = dot[route[%d - 1] = %d] = %d %d\n", distance_way, i, i, route[i - 1], dot[route[i - 1]].from, route[i]);
-		//routeの最後の2つには-1を入れることにしている <- 嘘
+		//We decide to put -1 in the last two of the route <-lie
 		if (route[i] == now_dot_id)
 		{
 			distance_way = i + 1;
 			break;
 		}
 
-		//dotの数を超えた場合
+		//When the number of dots is exceeded
 		if (route[i] >= kMaxDotNum || route[i] < 0)
 		{
-			//fprintfLOL(errfile, "%d HowManyCurved(): route[%d]の値が%dでおかしい\n", getRepeatedNum(), i, route[i]);
-			//fprintfLOL(logfile, "%d HowManyCurved(): route[%d]の値が%dでおかしい\n", getRepeatedNum(), i, route[i]);
 			distance_way = i;
 			break;
 		}
 	}
-	// //printf("distance_way = %d\n", distance_way);
 	int x[kMaxDotNum], y[kMaxDotNum], direction[kMaxDotNum];
-	//directionは、左上=0で、右に行くごとに+1、下に行くごとに+3される
+	//direction Is Top left = 0, +1 on the right, +3 on the bottom
 	if (distance_way >= kMaxDotNum)
 	{
-		//fprintfLOL(logfile, " %d Warming HowManyCurved(): routeの要素数が%dで kMaxDotNum を超えている\n", getRepeatedNum(), distance_way);
-		//fprintfLOL(errfile, "%d Warming HowManyCurved(): routeの要素数が%dで kMaxDotNum を超えている\n", getRepeatedNum(), distance_way);
 		distance_way = kMaxDotNum - 2;
 	}
 	y[0] = route[0] / kDotWidthNum;
@@ -1895,8 +1517,6 @@ int Game1_Hikaru::HowManyCurved(int id)
 			direction[i] = 2;
 			break;
 		default:
-			//fprintfLOL(errfile, "%d HowManyCurved(): x[%d] = %d - x[%d - 1] = %dの値が%dでおかしい\n", getRepeatedNum(), i, x[i], i, x[i] - x[i - 1], x[i - 1]);
-			//fprintfLOL(logfile, " %d HowManyCurved(): x[%d] = %d - x[%d - 1] = %dの値が%dでおかしい\n", getRepeatedNum(), i, x[i], i, x[i] - x[i - 1], x[i - 1]);
 			direction[i] = 5;
 			break;
 		}
@@ -1904,11 +1524,7 @@ int Game1_Hikaru::HowManyCurved(int id)
 		{
 			direction[i] += 3;
 		}
-		else if (y[i] - y[i - 1] > 0)
-		{
-			//nothing
-		}
-		else
+		else if (y[i] - y[i - 1] <= 0)
 		{
 			direction[i] += 6;
 		}
@@ -1922,7 +1538,7 @@ int Game1_Hikaru::HowManyCurved(int id)
 
 void Game1_Hikaru::GoToAngle(int angle, int distance)
 {
-	LOG_MESSAGE(FUNCNAME + "(" + to_string(angle) + "," + to_string(distance) + "): start", MODE_VERBOSE);
+	//LOG_MESSAGE(FUNCNAME + "(" + to_string(angle) + "," + to_string(distance) + "): start", MODE_VERBOSE);
 	angle = angle - Compass;
 
 	angle %= 360;
@@ -1937,14 +1553,16 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 	}
 
 	int classification = obstacle(8, 10, 8);
-	if (abs(WheelLeft) + abs(WheelRight) < 6) {
+	if (abs(WheelLeft) + abs(WheelRight) < 6) 
+	{
 		classification = obstacle(8, 10, 8);
 	}
 	if (log_superobj_num > 0)
 	{
 		classification = obstacle(5, 7, 5);
 	}
-	if (LoadedObjects >= 6 || (Time > 460 && LoadedObjects > 1)) {
+	if (LoadedObjects >= 6 || (Time > 460 && LoadedObjects > 1)) 
+	{
 		classification = obstacle(5, 7, 4);
 	}
 
@@ -1973,30 +1591,25 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 		}
 		if (classification == 1 && angle > 0 && angle < 90)
 		{ //left
-			// motor(5, short_left);
 			motor(big_motor, short_motor);
 		}
 		else if (classification == 2 && abs(angle) < 30)
 		{ //front
 			if (angle < 0)
 			{
-				// motor(5, short_front);
 				motor(big_motor, short_motor);
 			}
 			else
 			{
-				// motor(short_front, 5);
 				motor(short_motor, big_motor);
 			}
 		}
 		else if (classification == 3 && angle > -30 && angle < 90)
 		{ //left & front
-			//motor(5, (short_left < short_front) ? (short_left) : (short_right));
 			motor(big_motor, short_motor);
 		}
 		else if (classification == 4 && angle < 0 && angle > -90)
 		{ //right
-			//motor(short_right, 5);
 			motor(short_motor, big_motor);
 		}
 		else if (classification == 5 && abs(angle) > 30)
@@ -2004,7 +1617,6 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 			if (abs(angle) < 150)
 			{
 				motor(big_motor, big_motor);
-				//motor(5, 5);
 			}
 			else
 			{
@@ -2016,24 +1628,20 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 				{
 					motor(-big_motor, big_motor);
 				}
-				// Duration = 5;
 			}
 		}
 		else if (classification == 6 && angle < 30 && angle > -90)
 		{ //front & right
-			//motor((short_right < short_front) ? (short_right) : (short_right), 5);
 			motor(short_motor, big_motor);
 		}
 		else if (classification == 7)
 		{ //all
 			if (angle < 0)
 			{
-				//motor(5, short_front);
 				motor(big_motor, short_motor);
 			}
 			else
 			{
-				//motor(short_front, 5);
 				motor(short_motor, big_motor);
 			}
 		}
@@ -2041,7 +1649,6 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 		{
 			if (log_superobj_num > 0 && pow(log_y - log_superobj_y[0], 2) + pow(log_x - log_superobj_x[0], 2) < 400)
 			{
-				//cout << "near super" << endl;
 				if (abs(angle) < 30)
 				{
 					if (distance < 3 + static_cast<int>(rnd() % 5))
@@ -2092,7 +1699,6 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 			}
 			else if (IsOnSwampland())
 			{
-				//cout << "in swampland" << endl;
 				if (IsOnSwampland() == 1 && angle > 0 && angle < 90)
 				{
 					// left
@@ -2137,7 +1743,6 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 			}
 			else if (IsNearYellow(2, -1, -1) && LoadedObjects != 0)
 			{
-				//cout << "near yellow" << endl;
 				if (abs(angle) < 10)
 				{
 					motor(3, 3);
@@ -2192,13 +1797,6 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 			{
 				if (abs(angle) < 10)
 				{
-					/*if (angle < 0) {
-						motor(4, 1);
-
-					}
-					else {
-						motor(1, 4);
-					}*/
 					motor(4, 4);
 				}
 				else if (abs(angle) < 80)
@@ -2424,28 +2022,26 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 void Game1_Hikaru::saveColorInfo(void)
 {
 	/*
-	最上位
+	Top
 	POINT_DEPOSIT
 	POINT_YELLOW
 	POINT_SWAMPLAND
 
-	中位
+	Medium
 	POINT_SUPERAREA
 	POINT_WHITE
 
-	下位
+	Lower rank
 	POINT_MAY_SWAMPLAND
 	POINT_UNKNWON
 
-	その他
+	Other
 	POINT_WALL
 	 */
 	if (ColorJudgeLeft(object_box2))
 	{
-		if (map_secure[SECURE_DEPOSIT][dot_y[0] * kDotWidthNum + dot_x[0]] == 1)
-		{
-			dot[dot_y[0] * kDotWidthNum + dot_x[0]].point = POINT_DEPOSIT;
-		}
+		dot[dot_y[0] * kDotWidthNum + dot_x[0]].point = POINT_DEPOSIT;
+		dot[dot_y[0] * kDotWidthNum + dot_x[0]].color = POINT_DEPOSIT;
 	}
 	else if (ColorJudgeLeft(trap_line))
 	{
@@ -2487,24 +2083,21 @@ void Game1_Hikaru::saveColorInfo(void)
 				if (PositionX == -1)
 				{
 					dot[yi * kDotWidthNum + xj].point = POINT_MAY_SWAMPLAND;
+					dot[yi * kDotWidthNum + xj].color = POINT_MAY_SWAMPLAND;
 				}
 				else
 				{
 					if (yi != dot_y[0] && xj != dot_x[0])
 					{
 						continue;
-					}
-					if (map_secure[SECURE_YELLOW][yi * kDotWidthNum + xj] == 1)
-					{
-						dot[yi * kDotWidthNum + xj].point = POINT_YELLOW;
-					}
+					}					
+					dot[yi * kDotWidthNum + xj].point = POINT_YELLOW;
+					dot[yi * kDotWidthNum + xj].color = POINT_YELLOW;
 				}
 			}
 		}
-		if (map_secure[SECURE_YELLOW][dot_y[0] * kDotWidthNum + dot_x[0]] == 1)
-		{
-			dot[dot_y[0] * kDotWidthNum + dot_x[0]].point = POINT_YELLOW;
-		}
+		dot[dot_y[0] * kDotWidthNum + dot_x[0]].point = POINT_YELLOW;
+		dot[dot_y[0] * kDotWidthNum + dot_x[0]].color = POINT_YELLOW;
 	}
 	else if (ColorJudgeLeft(gray_zone))
 	{
@@ -2522,45 +2115,35 @@ void Game1_Hikaru::saveColorInfo(void)
 				}
 				if (dot[yi * kDotWidthNum + xj].point == POINT_UNKNOWN)
 				{
-					if (map_secure[SECURE_SWAMPLAND][yi * kDotWidthNum + xj] == 1)
-					{
-						dot[yi * kDotWidthNum + xj].point = POINT_MAY_SWAMPLAND;
-					}
+					dot[yi * kDotWidthNum + xj].point = POINT_MAY_SWAMPLAND;
+					dot[yi * kDotWidthNum + xj].color = POINT_MAY_SWAMPLAND;
 				}
 			}
 		}
-		if (map_secure[SECURE_SWAMPLAND][dot_y[0] * kDotWidthNum + dot_x[0]] == 1)
-		{
 			dot[dot_y[0] * kDotWidthNum + dot_x[0]].point = POINT_SWAMPLAND;
-		}
+			dot[dot_y[0] * kDotWidthNum + dot_x[0]].color = POINT_SWAMPLAND;
 	}
 	else if (ColorJudgeLeft(blue_zone))
 	{
 		if (dot[dot_y[0] * kDotWidthNum + dot_x[0]].point != POINT_DEPOSIT && dot[dot_y[0] * kDotWidthNum + dot_x[0]].point != POINT_YELLOW && dot[dot_y[0] * kDotWidthNum + dot_x[0]].point != POINT_SWAMPLAND)
 		{
-			if (map_secure[SECURE_SUPERAREA][dot_y[0] * kDotWidthNum + dot_x[0]] == 1)
-			{
-				dot[dot_y[0] * kDotWidthNum + dot_x[0]].point = POINT_SUPERAREA;
-			}
+			dot[dot_y[0] * kDotWidthNum + dot_x[0]].point = POINT_SUPERAREA;
+			dot[dot_y[0] * kDotWidthNum + dot_x[0]].color = POINT_SUPERAREA;
 		}
 	}
 	else
 	{
 		if (PositionX >= 180 || (dot[dot_y[0] * kDotWidthNum + dot_x[0]].point != POINT_DEPOSIT && map_position_color_data[dot_x[0]][dot_y[0]] != POINT_SWAMPLAND))
 		{
-			if (map_secure[SECURE_WHITE][dot_y[0] * kDotWidthNum + dot_x[0]] == 1)
-			{
-				dot[dot_y[0] * kDotWidthNum + dot_x[0]].point = POINT_WHITE;
-			}
+			dot[dot_y[0] * kDotWidthNum + dot_x[0]].point = POINT_WHITE;
+			dot[dot_y[0] * kDotWidthNum + dot_x[0]].color = POINT_WHITE;
 		}
 	}
 
 	if (ColorJudgeRight(object_box2))
 	{
-		if (map_secure[SECURE_DEPOSIT][dot_y[2] * kDotWidthNum + dot_x[2]] == 1)
-		{
-			dot[dot_y[2] * kDotWidthNum + dot_x[2]].point = POINT_DEPOSIT;
-		}
+		dot[dot_y[2] * kDotWidthNum + dot_x[2]].point = POINT_DEPOSIT;
+		dot[dot_y[2] * kDotWidthNum + dot_x[2]].color = POINT_DEPOSIT;
 	}
 	else if (ColorJudgeRight(trap_line))
 	{
@@ -2602,6 +2185,7 @@ void Game1_Hikaru::saveColorInfo(void)
 				if (PositionX == -1)
 				{
 					dot[yi * kDotWidthNum + xj].point = POINT_MAY_SWAMPLAND;
+					dot[yi * kDotWidthNum + xj].color = POINT_MAY_SWAMPLAND;
 				}
 				else
 				{
@@ -2609,17 +2193,13 @@ void Game1_Hikaru::saveColorInfo(void)
 					{
 						continue;
 					}
-					if (map_secure[SECURE_YELLOW][yi * kDotWidthNum + xj] == 1)
-					{
-						dot[yi * kDotWidthNum + xj].point = POINT_YELLOW;
-					}
+					dot[yi * kDotWidthNum + xj].point = POINT_YELLOW;
+					dot[yi * kDotWidthNum + xj].color = POINT_YELLOW;
 				}
 			}
 		}
-		if (map_secure[SECURE_YELLOW][dot_y[2] * kDotWidthNum + dot_x[2]] == 1)
-		{
-			dot[dot_y[2] * kDotWidthNum + dot_x[2]].point = POINT_YELLOW;
-		}
+		dot[dot_y[2] * kDotWidthNum + dot_x[2]].point = POINT_YELLOW;
+		dot[dot_y[2] * kDotWidthNum + dot_x[2]].color = POINT_YELLOW;
 	}
 	else if (ColorJudgeRight(gray_zone))
 	{
@@ -2637,36 +2217,28 @@ void Game1_Hikaru::saveColorInfo(void)
 				}
 				if (dot[yi * kDotWidthNum + xj].point == POINT_UNKNOWN)
 				{
-					if (map_secure[SECURE_SWAMPLAND][yi * kDotWidthNum + xj] == 1)
-					{
-						dot[yi * kDotWidthNum + xj].point = POINT_MAY_SWAMPLAND;
-					}
+					dot[yi * kDotWidthNum + xj].point = POINT_MAY_SWAMPLAND;
+					dot[yi * kDotWidthNum + xj].color = POINT_MAY_SWAMPLAND;
 				}
 			}
 		}
-		if (map_secure[SECURE_SWAMPLAND][dot_y[2] * kDotWidthNum + dot_x[2]] == 1)
-		{
-			dot[dot_y[2] * kDotWidthNum + dot_x[2]].point = POINT_SWAMPLAND;
-		}
+		dot[dot_y[2] * kDotWidthNum + dot_x[2]].point = POINT_SWAMPLAND;
+		dot[dot_y[2] * kDotWidthNum + dot_x[2]].color = POINT_SWAMPLAND;
 	}
 	else if (ColorJudgeRight(blue_zone))
 	{
 		if (dot[dot_y[2] * kDotWidthNum + dot_x[2]].point != POINT_DEPOSIT && dot[dot_y[2] * kDotWidthNum + dot_x[2]].point != POINT_YELLOW && dot[dot_y[2] * kDotWidthNum + dot_x[2]].point != POINT_SWAMPLAND)
 		{
-			if (map_secure[SECURE_SUPERAREA][dot_y[2] * kDotWidthNum + dot_x[2]] == 1)
-			{
-				dot[dot_y[2] * kDotWidthNum + dot_x[2]].point = POINT_SUPERAREA;
-			}
+			dot[dot_y[2] * kDotWidthNum + dot_x[2]].point = POINT_SUPERAREA;
+			dot[dot_y[2] * kDotWidthNum + dot_x[2]].color = POINT_SUPERAREA;
 		}
 	}
 	else
 	{
 		if (PositionX >= 180 || (dot[dot_y[2] * kDotWidthNum + dot_x[2]].point != POINT_DEPOSIT && map_position_color_data[dot_x[2]][dot_y[2]] != POINT_SWAMPLAND))
 		{
-			if (map_secure[SECURE_WHITE][dot_y[2] * kDotWidthNum + dot_x[2]] == 1)
-			{
-				dot[dot_y[2] * kDotWidthNum + dot_x[2]].point = POINT_WHITE;
-			}
+			dot[dot_y[2] * kDotWidthNum + dot_x[2]].point = POINT_WHITE;
+			dot[dot_y[2] * kDotWidthNum + dot_x[2]].color = POINT_WHITE;
 		}
 	}
 }
@@ -2675,13 +2247,9 @@ void Game1_Hikaru::calculateWallPosition(void)
 {
 	if (PositionX != -1)
 	{
-		LOG_MESSAGE(FUNCNAME + "():" + "壁の位置の計算を開始", MODE_DEBUG);
-
 		// 0: left & right 1: front
 		int difference_us_position[2] = { 9, 9 };
 		int us_sensors[3] = { US_Left, US_Front, US_Right };
-		LOG_MESSAGE(FUNCNAME + "(): " + "US " + to_string(US_Left) + " " + to_string(US_Front) + " " + to_string(US_Right) + " Compass: " + to_string(Compass), MODE_DEBUG);
-		string us_names[3] = { "Left", "Front", "Right" };
 		int angles[3] = { 40, 0, -40 };
 		int calculated_relative_coordinate[3][2];
 		int calculated_absolute_dot_position[3][2];
@@ -2695,179 +2263,81 @@ void Game1_Hikaru::calculateWallPosition(void)
 				us_sensors[i] = kUSLimit;
 			}
 			us_sensors[i] += difference_us_position[i % 2];
-			// 壁の位置とロボットの相対座標
+			//Wall position and robot relative coordinates
 			calculated_relative_coordinate[i][0] = static_cast<int>(cos(angles[i] * M_PI / 180) * us_sensors[i]);
 			calculated_relative_coordinate[i][1] = static_cast<int>(sin(angles[i] * M_PI / 180) * us_sensors[i]);
 
-			// ドット上での壁の絶対座標
+			// Absolute coordinates of the wall on the dot
 			calculated_absolute_dot_position[i][0] = static_cast<int>((log_x + calculated_relative_coordinate[i][0] + kSize / 2) / kSize);
 			calculated_absolute_dot_position[i][1] = static_cast<int>((log_y + calculated_relative_coordinate[i][1] + kSize / 2) / kSize);
 			if (0 <= calculated_absolute_dot_position[i][0] && calculated_absolute_dot_position[i][0] < kDotWidthNum && 0 <= calculated_absolute_dot_position[i][1] && calculated_absolute_dot_position[i][1] < kDotHeightNum)
 			{
-				// 壁はないときは、MAP_WALLを登録する必要がない
+				// When there is no wall, there is no need to register MAP_WALL
 				if (us_sensors[i] < kUSLimit + difference_us_position[i % 2])
 				{
-					// if (map[0][calculated_absolute_dot_position[i][1]][calculated_absolute_dot_position[i][0]] == cospaceMap.MAP_UNKNOWN || map[0][calculated_absolute_dot_position[i][1]][calculated_absolute_dot_position[i][0]] == MAP_UNKNOWN_NOT_WALL)
+					if(dot[calculated_absolute_dot_position[i][1] * kDotWidthNum + calculated_absolute_dot_position[i][0]].point == POINT_UNKNOWN)
 					{
-						if (map_secure[SECURE_WALL][calculated_absolute_dot_position[i][1] * kDotWidthNum + calculated_absolute_dot_position[i][0]] == 1)
-						{
-							dot[calculated_absolute_dot_position[i][1] * kDotWidthNum + calculated_absolute_dot_position[i][0]].point = POINT_WALL;
-						}
+						dot[calculated_absolute_dot_position[i][1] * kDotWidthNum + calculated_absolute_dot_position[i][0]].point = POINT_WALL;
 					}
 				}
-			}
-
-			// x[0], y[0] -> x[1], y[1]までMAP_WALLをcospaceMap.MAP_WHITEに変更する
-			// 壁の位置(壁から多少離れた位置)とロボットそれぞれの絶対座標
-			// 基本的に、実際の壁との距離から0.7倍程度にするが、kSizeが最低2つはあけないといけない
-			// 1cm先に壁がある場合、cospaceMap.MAP_WHITEは登録しない
-			const int kRange4Wall = 20;
-
-			if (us_sensors[i] < kRange4Wall + difference_us_position[i % 2])
-			{
-				// cospaceMap.MAP_WHITEは登録しない
-				LOG_MESSAGE(FUNCNAME + "(): cospaceMap.MAP_WHITEは、壁との距離が非常に近いため設定しません", MODE_VERBOSE)
-					continue;
-			}
-			if (us_sensors[i] * 0.3 < kRange4Wall)
-			{
-				LOG_MESSAGE(FUNCNAME + "(): us_sensors[i](" + to_string(us_sensors[i]) + ") * 0.3 < kRange4Wall(" + to_string(kRange4Wall) + ")", MODE_VERBOSE);
-				calculated_relative_coordinate[i][0] = static_cast<int>(cos(angles[i] * M_PI / 180) * (us_sensors[i] - kRange4Wall));
-				calculated_relative_coordinate[i][1] = static_cast<int>(sin(angles[i] * M_PI / 180) * (us_sensors[i] - kRange4Wall));
-			}
-			else
-			{
-				LOG_MESSAGE(FUNCNAME + "(): us_sensors[i](" + to_string(us_sensors[i]) + ") * 0.3 >= kRange4Wall(" + to_string(kRange4Wall) + ")", MODE_VERBOSE);
-				calculated_relative_coordinate[i][0] = static_cast<int>(cos(angles[i] * M_PI / 180) * us_sensors[i] * 0.7);
-				calculated_relative_coordinate[i][1] = static_cast<int>(sin(angles[i] * M_PI / 180) * us_sensors[i] * 0.7);
-			}
-
-			const int x[2] = { static_cast<int>(log_x / kSize), static_cast<int>((log_x + calculated_relative_coordinate[i][0] + kSize / 2) / kSize) };
-			const int y[2] = { static_cast<int>(log_y / kSize), static_cast<int>((log_y + calculated_relative_coordinate[i][1] + kSize / 2) / kSize) };
-
-			LOG_MESSAGE(FUNCNAME + "(): Set MAP_UNKNOWN (" + to_string(x[0]) + ", " + to_string(y[0]) + ") -> (" + to_string(x[1]) + ", " + to_string(y[1]) + ")", MODE_VERBOSE);
-
-			// (x[0], y[0]) -> (x[1], y[1])まで、MAP_WALLをMAP_UNKNOWN_NOT_WALLに変更する
-			if (x[0] == x[1]) // 縦方向の直線の場合
-			{
-				if (0 <= x[0] && x[0] < kDotWidthNum)
+				if(dot[calculated_absolute_dot_position[i][1] * kDotWidthNum + calculated_absolute_dot_position[i][0]].point == POINT_WALL)
 				{
-					int y_start = y[0], y_end = y[1];
-					if (y_end == calculated_absolute_dot_position[i][1])
-					{
-						if (y_start < y_end)
-						{
-							--y_end;
-						}
-						else if (y_start > y_end)
-						{
-							++y_end;
-						}
-						else
-						{
-							LOG_MESSAGE(FUNCNAME + "(): 壁近くのドットを保護した結果、MAP_WHITEは設定できません", MODE_VERBOSE);
-							continue;
-						}
-					}
-					// 上から変更しようと、下から変更しようと変わらない
-					if (y[0] > y[1])
-					{
-						int temp = y_start;
-						y_start = y_end;
-						y_end = temp;
-					}
-					for (int yi = y_start; yi <= y_end; ++yi)
-					{
-						if (yi < 0)
-						{
-							yi = -1;
-							continue;
-						}
-						if (yi >= kDotHeightNum)
-						{
-							break;
-						}
-						if (dot[yi * kDotWidthNum + x[0]].point == POINT_WALL && map_position_color_data[x[0]][yi] != POINT_WALL)
-						{
-							dot[yi * kDotWidthNum + x[0]].point = map_position_color_data[x[0]][yi];
-						}
-					}
-				}
-			}
-			else
-			{
-				double tilt = static_cast<double>(y[1] - y[0]) / static_cast<double>(x[1] - x[0]);
-				int x_start = x[0], x_end = x[1];
-				if (x_end == calculated_absolute_dot_position[i][0])
-				{
-					if (x_start < x_end)
-					{
-						--x_end;
-					}
-					else if (x_start > x_end)
-					{
-						++x_end;
-					}
-					else
-					{
-						LOG_MESSAGE(FUNCNAME + "(): 壁近くのドットを保護した結果、MAP_WHITEは設定できません", MODE_VERBOSE);
-						continue;
-					}
-				}
-				if (x_start > x_end)
-				{
-					int temp = x_start;
-					x_start = x_end;
-					x_end = temp;
-					tilt = -tilt;
-				}
-				LOG_MESSAGE(FUNCNAME + "(): tilt is " + to_string(tilt), MODE_VERBOSE);
-				for (int xi = x_start; xi < x_end; ++xi)
-				{
-					if (xi < 0)
-					{
-						xi = -1;
-						continue;
-					}
-					if (xi >= kDotWidthNum)
-					{
-						break;
-					}
-					int y_start = y[0] + static_cast<int>(tilt * static_cast<double>(xi - x_start));
-					int y_end = y[0] + static_cast<int>(floor(tilt * (static_cast<double>(xi + 1 - x_start))));
-					if ((y_start - calculated_absolute_dot_position[i][1]) * (y_end - calculated_absolute_dot_position[i][1]) <= 0)
-					{
-						LOG_MESSAGE(FUNCNAME + "(): 壁近くのドットを保護した結果、MAP_WHITEは設定できません", MODE_VERBOSE);
-						continue;
-					}
-					if (y_start > y_end)
-					{
-						int temp = y_start;
-						y_start = y_end;
-						y_end = temp;
-					}
-					for (int yj = y_start; yj <= y_end; ++yj)
-					{
-						if (yj < 0)
-						{
-							yj = -1;
-							continue;
-						}
-						if (yj >= kDotHeightNum)
-						{
-							break;
-						}
-						if (dot[yj * kDotWidthNum + xi].point == POINT_WALL && map_position_color_data[xi][yj] != POINT_WALL)
-						{
-							dot[yj * kDotWidthNum + xi].point = map_position_color_data[xi][yj];
-						}
-					}
+					dot[calculated_absolute_dot_position[i][1] * kDotWidthNum 
+					+ calculated_absolute_dot_position[i][0]].timeWalls += wall_is_there;
 				}
 			}
 		}
+		
+		for(int check_line = us_sensors[1]; check_line > difference_us_position[1]; check_line -= kSize)
+		{
+			ERROR_MESSAGE("Start", MODE_NORMAL);
+			//Wall position and robot relative coordinates
+			int natured_x = static_cast<int>
+			(cos(angles[1] * M_PI / 180) * check_line);
+
+			int natured_y = static_cast<int>
+			(sin(angles[1] * M_PI / 180) * check_line);
+
+			// Absolute coordinates of the wall on the dot
+			int absolute_x = static_cast<int>((log_x + natured_x + kSize / 2) / kSize);
+			if (absolute_x > kDotWidthNum)
+			{
+				absolute_x = kDotWidthNum - 1;
+			}
+			if(absolute_x < 0)
+			{
+				absolute_x = 0;
+			}
+
+			int absolute_y = static_cast<int>((log_y + natured_y + kSize / 2) / kSize);
+			if (absolute_y > kDotHeightNum)
+			{
+				absolute_y = kDotHeightNum - 1;
+			}
+			if(absolute_y < 0)
+			{
+				absolute_y = 0;
+			}
+
+			if(dot[absolute_y * kDotWidthNum + absolute_x].point == POINT_WALL)
+			{
+				dot[absolute_y * kDotWidthNum + absolute_x].timeWalls -= wall_is_not_there;
+
+				if(dot[absolute_y * kDotWidthNum + absolute_x].timeWalls < 0)
+				{
+					dot[absolute_y * kDotWidthNum + absolute_x].timeWalls = 0;
+				}
+			}
+			
+			if(dot[absolute_y * kDotWidthNum + absolute_x].timeWalls == 0 
+			&& dot[absolute_y * kDotWidthNum + absolute_x].point == POINT_WALL)
+			{
+				dot[absolute_y * kDotWidthNum + absolute_x].point = POINT_UNKNOWN; 
+			}
+			ERROR_MESSAGE("End", MODE_NORMAL);
+		}
 	}
 }
-
 
 int Game1_Hikaru::goInArea(int x, int y, int wide_decide_x, int wide_decide_y, int times) {
 	static int prev_x = -1, prev_y = -1, prev_wide_x = -1, prev_wide_y = -1;
@@ -2928,5 +2398,104 @@ int Game1_Hikaru::goInArea(int x, int y, int wide_decide_x, int wide_decide_y, i
 		return 1;
 	}
 	return 0;
+
+}
+
+void Game1_Hikaru::GoToArea(int color)
+{
+	const int X = 0;
+	const int Y = 1; 
+	int colorID;
+	int firstArea[2];
+	int secondArea[2];
+	// TODO: Naming
+	int supportCoordColor[2];
+	if  (color  == RED_LOADED_ID)
+	{
+		colorID = RED_LOADED_ID;
+		supportCoordColor[X] = toChooseRED[X];
+		supportCoordColor[Y] = toChooseRED[Y];
+		firstArea[X] = FirstCoordAriaRED[X];
+		firstArea[Y] = FirstCoordAriaRED[Y];
+		secondArea[X] = SecondcoordAriaRED[X];
+		secondArea[Y] = SecondcoordAriaRED[Y];
+	}
+	else if(color  == BLACK_LOADED_ID)
+	{
+		colorID = BLACK_LOADED_ID;
+		supportCoordColor[X] = toChooseBLACK[X];
+		supportCoordColor[Y] = toChooseBLACK[Y];
+		firstArea[X] = FirstCoordAriaBLACK[X];
+		firstArea[Y] = FirstCoordAriaBLACK[Y];
+		secondArea[X] = SecontCoordAriaBLACK[X];
+		secondArea[Y] = SecontCoordAriaBLACK[Y];
+	}
+	else if(color  == CYAN_LOADED_ID)
+	{
+		colorID = CYAN_LOADED_ID;
+		supportCoordColor[X] = toChooseCYACN[X];
+		supportCoordColor[Y] = toChooseCYACN[Y];
+		firstArea[X] = FirstCoordAriaCYAN[X];
+		firstArea[Y] = FirstCoordAriaCYAN[Y];
+		secondArea[X] = SecontCoordAriaCYAN[X];
+		secondArea[Y] = SecontCoordAriaCYAN[Y];
+	}
+	if (loaded_objects[colorID] < kBorderSameObjNum)
+	{
+		if (large_process != 2 || next_allowed_go_time[colorID][process] > Time)
+		{
+			if (PositionX < supportCoordColor[X] && PositionY < supportCoordColor[Y] && next_allowed_go_time[colorID][0] <= Time) 
+			{
+				process = 1;
+			}
+			else if (!(PositionX < supportCoordColor[X] && PositionY < supportCoordColor[Y])) 
+			{
+				process = 0;
+			}
+			else 
+			{
+				if (next_allowed_go_time[colorID][1] < next_allowed_go_time[colorID][0]) {
+					process = 1;
+				}
+				else {
+					process = 0;
+				}
+			}
+			process_times = 0;
+		}
+
+		if (process == 0)
+		{
+			if (GoInDots(firstArea[X], firstArea[Y], scatter[X], scatter[Y], color))
+			{
+				if (process_times >= 4)
+				{
+					next_allowed_go_time[colorID][process] = Time + skip_time;
+					process++;
+					process_times = 0;
+				}
+				process_times++;
+			}
+		}
+		else  if(process == 1)
+		{
+			if (GoInDots(secondArea[X], secondArea[Y], scatter[X], scatter[Y], color))
+			{
+				if (process_times >= 3)
+				{
+					next_allowed_go_time[colorID][process] = Time + skip_time;
+					process = 0;
+					process_times = 0;
+				}
+				process_times++;
+			}
+		}
+		else
+		{
+			process = 0;
+			process_times = 0;
+		}
+		large_process = 2;
+	}
 
 }
