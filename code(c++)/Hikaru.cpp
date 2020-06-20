@@ -882,8 +882,8 @@ void Game1_Hikaru::Dijkstra(int option)
 				continue;
 			}
 
-			if (option == 0 && (dot[i].point == POINT_SWAMPLAND
-				|| dot[i].point == POINT_MAY_SWAMPLAND))
+			if (option == 0 && (dot[i].point == POINT_SWAMPLAND 
+								|| dot[i].point == POINT_MAY_SWAMPLAND)) 
 			{
 				continue;
 			}
@@ -934,17 +934,17 @@ void Game1_Hikaru::Dijkstra(int option)
 			int target_curved_times = HowManyCurved(target_id);
 			int target_cost = investigating_node.cost + investigating_node.edge_cost[i];
 
-			target_cost += target_curved_times * 10;
+			target_cost += target_curved_times + 10;
 
 			if (dot[i].point == POINT_SWAMPLAND || dot[i].point == POINT_MAY_SWAMPLAND)
 			{
 				//cout << "s" << endl;
-				target_cost *= 1000;
+				target_cost += 1000;
 			}
 
 			if (dot[i].point == POINT_WALL || dot[i].point == POINT_YELLOW)
 			{
-				target_cost *= 10000;
+				target_cost += 10000;
 			}
 
 			double k = 0.8;
@@ -975,7 +975,7 @@ void Game1_Hikaru::Dijkstra(int option)
 				}
 				if (LoadedObjects < 6)
 				{
-					target_cost += static_cast<int>(dot[target_id].arrived_times * 10);
+					target_cost += static_cast<int>(dot[target_id].arrived_times + 10);
 				}
 			}
 
@@ -2635,16 +2635,9 @@ void Game1_Hikaru::GoToArea(int color)
 			process_times = 0;
 		}
 
-
-		if (areas[process].X == -1 || areas[process].Y == -1 || 
-			areas[process].SizeX == -1 || areas[process].SizeY == -1)
-		{
-			process = 0;
-		}
-
 		int centerX = (areas[process].X + areas[process].SizeX) / 2;
 		int centerY = (areas[process].Y + areas[process].SizeY) / 2;
-		
+
 		if (GoInDots(centerX, centerY , 
 			areas[process].SizeX/2, areas[process].SizeY/2, colorID))
 		{
@@ -2673,13 +2666,13 @@ void Game1_Hikaru::InputAreaColorZone(void)
 	const int CYAN = 1;
 	const int BLACK = 2;
 
-	for (int j = 0; j < kDotHeightNum; j++)
+	for (int i = 0; i < kDotWidthNum; i++)
 	{
-		for (int i = 0; i < kDotWidthNum; i++)
+		for (int j = 0; j < kDotHeightNum; j++)
 		{
 			if (red_data[kDotHeightNum - j - 1][i] == 1)
 			{
-				if (IsDotInArea(RED, i,j))
+				if (IsDotInArea(RED, i, kDotHeightNum - j - 1))
 				{
 					continue;
 				}
@@ -2688,7 +2681,7 @@ void Game1_Hikaru::InputAreaColorZone(void)
 
 			if (cyan_data[kDotHeightNum - j - 1][i] == 1)
 			{
-				if (IsDotInArea(CYAN, i,j))
+				if (IsDotInArea(CYAN, i, kDotHeightNum - j - 1))
 				{
 					continue;
 				}
@@ -2697,7 +2690,7 @@ void Game1_Hikaru::InputAreaColorZone(void)
 
 			if (black_data[kDotHeightNum - j - 1][i] == 1)
 			{
-				if (IsDotInArea(BLACK, i,j))
+				if (IsDotInArea(BLACK, i, kDotHeightNum - j - 1))
 				{
 					continue;
 				}
@@ -2710,13 +2703,14 @@ void Game1_Hikaru::InputAreaColorZone(void)
 
 bool Game1_Hikaru::IsDotInArea(int color,int x, int y)
 {
-	for (int j = 0; j < AreaCounts[color]; j++)
+	for(int j = 0; j < AreaCounts[color]; j++)
 	{
 		int startCoord = Areas[color][j].Y / kSize;
 		int endCoord = Areas[color][j].SizeY / kSize;
-		if (((y >=startCoord) && (y <= (startCoord + endCoord))) &&
-			((x >= Areas[color][j].X /kSize) &&
-				(x <= Areas[color][j].X/kSize + (Areas[color][j].SizeX / kSize))))
+		if(((y < (kDotHeightNum - startCoord - 1)) &&
+				(y > (kDotHeightNum - startCoord - 1 - endCoord))) &&
+				((x > Areas[color][j].X) &&
+				(x < Areas[color][j].X + (Areas[color][j].SizeX / kSize))))
 		{
 			return true;
 		}
@@ -2726,7 +2720,7 @@ bool Game1_Hikaru::IsDotInArea(int color,int x, int y)
 
 bool Game1_Hikaru::InstallationColorZone(int color, int x, int y)
 {
-	if (AreaCounts[color] >= 3)
+	if(AreaCounts[color] + 1 > areasCount)
 	{
 		return false;
 	}
@@ -2735,9 +2729,9 @@ bool Game1_Hikaru::InstallationColorZone(int color, int x, int y)
 	const int BLACK = 2;
 
 	Areas[color][AreaCounts[color]].X = x * kSize;
-	Areas[color][AreaCounts[color]].Y = y * kSize;
-	Areas[color][AreaCounts[color]].SizeX = 0;
-	Areas[color][AreaCounts[color]].SizeY = 0;
+	Areas[color][AreaCounts[color]].Y =  y * kSize;
+	Areas[color][AreaCounts[color]].SizeX = kSize;
+	Areas[color][AreaCounts[color]].SizeY = kSize;
 
 	if(color == RED)
 	{
@@ -2784,17 +2778,17 @@ bool Game1_Hikaru::InstallationColorZone(int color, int x, int y)
 		}
 		fclose(fp);
 	}
-	int hightArea = y+1;
-	while ((mapColor[kDotHeightNum - hightArea - 1][x] == 1) && (hightArea < kDotHeightNum))
+	int hightArea = y;
+	while((mapColor[kDotHeightNum - hightArea - 1][x] == 1)  && (hightArea < kDotHeightNum))
 	{
-		Areas[color][AreaCounts[color]].SizeY += kSize;
+		Areas[color][AreaCounts[color]].SizeY  += kSize;
 		hightArea++;
 	}
 
-	int widthArea = x+1;
-	while ((mapColor[kDotHeightNum - y - 1][widthArea] == 1) && (widthArea < kDotWidthNum))
+	int widthArea = x;
+	while((mapColor[kDotHeightNum - y - 1][widthArea] == 1) && (widthArea < kDotWidthNum))
 	{
-		Areas[color][AreaCounts[color]].SizeX += kSize;
+		Areas[color][AreaCounts[color]].SizeX  += kSize;
 		widthArea++;
 	}
 	printf("RANGE: %d %d %d \t %d %d \n", Areas[color][AreaCounts[color]].SizeX,

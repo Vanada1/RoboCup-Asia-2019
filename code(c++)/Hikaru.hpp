@@ -52,7 +52,7 @@ private:
 	int toChooseBLACK[2] = 			{180, 135};
 	int toChooseCYACN[2] = 			{180, 135};
 
-	const static int areasCount = 3;
+	const static int areasCount = 2;
 
 	struct AreaZone
 	{
