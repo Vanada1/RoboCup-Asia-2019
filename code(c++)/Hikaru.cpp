@@ -184,19 +184,19 @@ void Game1_Hikaru::loop()
 	{
 		resetLoadedObjects();
 	}
-	else if (IsOnRedObj() && LoadedObjects < 6 && (loaded_objects[RED_LOADED_ID] < kBorderSameObjNum || Time > 450) && !(LoadedObjects == 5 && log_superobj_num >= 1))
+	else if (IsOnRedObj() && LoadedObjects < 6 && (loaded_objects[RED_LOADED_ID] < kBorderSameObjNum || Time > 330) && !(LoadedObjects == 5 && log_superobj_num >= 1))
 	{
 		setAction(FIND_OBJ);
 		loaded_objects[RED_LOADED_ID]++;
 		SuperDuration = kFindObjDuration;
 	}
-	else if (IsOnCyanObj() && LoadedObjects < 6 && (loaded_objects[CYAN_LOADED_ID] < kBorderSameObjNum || Time > 450) && !(LoadedObjects == 5 && log_superobj_num >= 1))
+	else if (IsOnCyanObj() && LoadedObjects < 6 && (loaded_objects[CYAN_LOADED_ID] < kBorderSameObjNum || Time > 330) && !(LoadedObjects == 5 && log_superobj_num >= 1))
 	{
 		setAction(FIND_OBJ);
 		loaded_objects[CYAN_LOADED_ID]++;
 		SuperDuration = kFindObjDuration;
 	}
-	else if (IsOnBlackObj() && LoadedObjects < 6 && (loaded_objects[BLACK_LOADED_ID] < kBorderSameObjNum || Time > 450) && !(LoadedObjects == 5 && log_superobj_num >= 1))
+	else if (IsOnBlackObj() && LoadedObjects < 6 && (loaded_objects[BLACK_LOADED_ID] < kBorderSameObjNum || Time > 330) && !(LoadedObjects == 5 && log_superobj_num >= 1))
 	{
 		setAction(FIND_OBJ);
 		loaded_objects[BLACK_LOADED_ID]++;
@@ -262,7 +262,7 @@ void Game1_Hikaru::loop()
 		{
 			if (IsOnYellowLine() == LEFT)
 			{
-				motor(-60, -1000);
+				motor(-60, -100);
 			}
 			else if (IsOnYellowLine() == RIGHT)
 			{
