@@ -184,19 +184,19 @@ void Game1_Hikaru::loop()
 	{
 		resetLoadedObjects();
 	}
-	else if (IsOnRedObj() && LoadedObjects < 6 && (loaded_objects[RED_LOADED_ID] < kBorderSameObjNum || Time > 450) && !(LoadedObjects == 5 && log_superobj_num >= 1))
+	else if (IsOnRedObj() && LoadedObjects < 6 && (loaded_objects[RED_LOADED_ID] < kBorderSameObjNum || Time > 330) && !(LoadedObjects == 5 && log_superobj_num >= 1))
 	{
 		setAction(FIND_OBJ);
 		loaded_objects[RED_LOADED_ID]++;
 		SuperDuration = kFindObjDuration;
 	}
-	else if (IsOnCyanObj() && LoadedObjects < 6 && (loaded_objects[CYAN_LOADED_ID] < kBorderSameObjNum || Time > 450) && !(LoadedObjects == 5 && log_superobj_num >= 1))
+	else if (IsOnCyanObj() && LoadedObjects < 6 && (loaded_objects[CYAN_LOADED_ID] < kBorderSameObjNum || Time > 330) && !(LoadedObjects == 5 && log_superobj_num >= 1))
 	{
 		setAction(FIND_OBJ);
 		loaded_objects[CYAN_LOADED_ID]++;
 		SuperDuration = kFindObjDuration;
 	}
-	else if (IsOnBlackObj() && LoadedObjects < 6 && (loaded_objects[BLACK_LOADED_ID] < kBorderSameObjNum || Time > 450) && !(LoadedObjects == 5 && log_superobj_num >= 1))
+	else if (IsOnBlackObj() && LoadedObjects < 6 && (loaded_objects[BLACK_LOADED_ID] < kBorderSameObjNum || Time > 330) && !(LoadedObjects == 5 && log_superobj_num >= 1))
 	{
 		setAction(FIND_OBJ);
 		loaded_objects[BLACK_LOADED_ID]++;
@@ -240,21 +240,21 @@ void Game1_Hikaru::loop()
 	{
 		Duration--;
 	}
-	else if (IsOnYellowLine() && LoadedObjects > 0) 
+	else if (IsOnYellowLine() && LoadedObjects > 0)
 	{
 		if (IsOnSwampland())
 		{
 			if (IsOnYellowLine() == LEFT)
 			{
-				motor(-1, -5);
+				motor(-20, -100);
 			}
 			else if (IsOnYellowLine() == RIGHT)
 			{
-				motor(-5, -1);
+				motor(-100, -20);
 			}
 			else
 			{
-				motor(-5, -5);
+				motor(-100, -20);
 			}
 			Duration = 15;
 		}
@@ -262,20 +262,20 @@ void Game1_Hikaru::loop()
 		{
 			if (IsOnYellowLine() == LEFT)
 			{
-				motor(-3, -5);
+				motor(-60, -100);
 			}
 			else if (IsOnYellowLine() == RIGHT)
 			{
-				motor(-5, -3);
+				motor(-100, -60);
 			}
 			else
 			{
-				motor(-5, -5);
+				motor(-100, -100);
 			}
 			Duration = 3;
 		}
 	}
-	else if (IsOnDepositArea() && (LoadedObjects >= 6 || (LoadedObjects > 0 && Time > 430)))
+	else if (IsOnDepositArea() && (LoadedObjects >= 6 || (LoadedObjects > 0 && Time > 310)))
 	{
 		process = 0;
 		large_process = true;
@@ -294,7 +294,7 @@ void Game1_Hikaru::loop()
 			motor(3, 0);
 		}
 	}
-	else if (LoadedObjects >= 6 || (Time > 450 && log_superobj_num == 0 && (LoadedObjects > 2 || loaded_objects[SUPER_LOADED_ID] > 0)))
+	else if (LoadedObjects >= 6 || (Time > 330 && log_superobj_num == 0 && (LoadedObjects > 2 || loaded_objects[SUPER_LOADED_ID] > 0)))
 	{
 		searching_object = -1;
 		GoInDots(180, 135, 180, 135, POINT_DEPOSIT);
@@ -365,7 +365,7 @@ void Game1_Hikaru::loop()
 			LED_1 = 0;
 		}
 		if (Duration < 4 && SuperDuration < 4) {
-			motor(3, 3);
+			motor(60, 60);
 		}
 		break;
 	case DEPOSIT_OBJ:
@@ -382,7 +382,7 @@ void Game1_Hikaru::loop()
 		if (Duration <= 6 && SuperDuration <= 6)
 		{
 			LED_1 = 0;
-			motor(-5, -5);
+			motor(-100, -100);
 		}
 		else
 		{
@@ -948,7 +948,7 @@ void Game1_Hikaru::Dijkstra(int option)
 			}
 
 			double k = 0.8;
-			if (Time < 450) {
+			if (Time < 330) {
 				if (dot[investigating_node.id].black == 1 && loaded_objects[BLACK_LOADED_ID] < kBorderSameObjNum)
 				{
 					if (searching_object == BLACK_LOADED_ID)
@@ -1611,21 +1611,21 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 	{
 		classification = obstacle(5, 7, 5);
 	}
-	if (LoadedObjects >= 6 || (Time > 460 && LoadedObjects > 1)) 
+	if (LoadedObjects >= 6 || (Time > 340 && LoadedObjects > 1)) 
 	{
 		classification = obstacle(5, 7, 4);
 	}
 
-	int big_motor = 5;
-	int short_motor = 2;
+	int big_motor = 100;
+	int short_motor = 40;
 	if (IsNearYellow(1, -1, -1))
 	{
-		big_motor = 3;
-		short_motor = 1;
+		big_motor = 60;
+		short_motor = 20;
 	}
 	if (IsOnSwampland())
 	{
-		big_motor = 5;
+		big_motor = 100;
 		if (!IsOnRedObj() && !IsOnCyanObj() && !IsOnBlackObj() && !IsOnSuperObj() && log_superobj_num == 0)
 		{
 			Duration += 20;
@@ -1752,39 +1752,39 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 				if (IsOnSwampland() == 1 && angle > 0 && angle < 90)
 				{
 					// left
-					motor(5, 1);
+					motor(100, 20);
 				}
 				else if (IsOnSwampland() == 2 && angle < 0 && angle > -90)
 				{
-					motor(1, 5);
+					motor(20, 100);
 				}
 				else
 				{
 
 					if (abs(angle) < 30)
 					{
-						motor(5, 5);
+						motor(100, 100);
 					}
 					else if (abs(angle) < 90)
 					{
 						if (angle < 0)
 						{
-							motor(5, 0);
+							motor(100, 0);
 						}
 						else
 						{
-							motor(0, 5);
+							motor(0, 100);
 						}
 					}
 					else
 					{
 						if (angle < 0)
 						{
-							motor(5, -5);
+							motor(100, -100);
 						}
 						else
 						{
-							motor(-5, 5);
+							motor(-100, 100);
 						}
 					}
 				}
@@ -1793,53 +1793,52 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 			}
 			else if (IsNearYellow(2, -1, -1) && LoadedObjects != 0)
 			{
-				//cout << "near yellow" << endl;
 				if (abs(angle) < 10)
 				{
-					motor(3, 3);
+					motor(60, 60);
 				}
 				else if (abs(angle) < 30)
 				{
 					if (angle < 0)
 					{
-						motor(4, 3);
+						motor(80, 60);
 					}
 					else
 					{
-						motor(3, 4);
+						motor(60, 80);
 					}
 				}
 				else if (abs(angle) < 80 && LoadedObjects != 6)
 				{
 					if (angle < 0)
 					{
-						motor(4, 2);
+						motor(80, 40);
 					}
 					else
 					{
-						motor(2, 4);
+						motor(40, 80);
 					}
 				}
 				else if (abs(angle) < 120)
 				{
 					if (angle < 0)
 					{
-						motor(4, 1);
+						motor(80, 20);
 					}
 					else
 					{
-						motor(1, 4);
+						motor(20, 80);
 					}
 				}
 				else
 				{
 					if (angle < 0)
 					{
-						motor(3, -3);
+						motor(60, -60);
 					}
 					else
 					{
-						motor(-3, 3);
+						motor(-60, 60);
 					}
 				}
 			}
@@ -1848,39 +1847,39 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 			{
 				if (abs(angle) < 10)
 				{
-					motor(4, 4);
+					motor(80, 80);
 				}
 				else if (abs(angle) < 80)
 				{
 					if (angle < 0)
 					{
-						motor(4, 2);
+						motor(80, 40);
 					}
 					else
 					{
-						motor(2, 4);
+						motor(40, 80);
 					}
 				}
 				else if (abs(angle) < 120)
 				{
 					if (angle < 0)
 					{
-						motor(4, 0);
+						motor(80, 0);
 					}
 					else
 					{
-						motor(0, 4);
+						motor(0, 80);
 					}
 				}
 				else
 				{
 					if (angle < 0)
 					{
-						motor(3, -3);
+						motor(60, -60);
 					}
 					else
 					{
-						motor(-3, 3);
+						motor(-60, 60);
 					}
 				}
 			}
@@ -1892,11 +1891,11 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 					{
 						if (angle < 0)
 						{
-							motor(5, 3);
+							motor(100, 60);
 						}
 						else
 						{
-							motor(3, 5);
+							motor(60, 100);
 						}
 					}
 					else
@@ -1905,23 +1904,23 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 						{
 							if (IsOnSwampland() == 1)
 							{
-								motor(5, 1);
+								motor(100, 20);
 							}
 							else if (IsOnSwampland() == 2)
 							{
-								motor(1, 5);
+								motor(20, 100);
 							}
 						}
 						else
 						{
 							if (abs(angle) < 10) {
-								motor(5, 5);
+								motor(100, 100);
 							}
 							else if (angle < 0) {
-								motor(5, 4);
+								motor(100, 80);
 							}
 							else {
-								motor(4, 5);
+								motor(80, 100);
 							}
 						}
 					}
@@ -1930,43 +1929,43 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 				{
 					if (angle < 0)
 					{
-						motor(5, 3);
+						motor(100, 60);
 					}
 					else
 					{
-						motor(3, 5);
+						motor(60, 100);
 					}
 				}
 				else if (abs(angle) < 120)
 				{
 					if (angle < 0)
 					{
-						motor(5, 1);
+						motor(100, 20);
 					}
 					else
 					{
-						motor(1, 5);
+						motor(20, 100);
 					}
 				}
 				else if (abs(angle) < 180) {
 					if (angle < 0)
 					{
-						motor(2, -2);
+						motor(40, -40);
 					}
 					else
 					{
-						motor(-2, 2);
+						motor(-40, 40);
 					}
 				}
 				else
 				{
 					if (angle < 0)
 					{
-						motor(5, -5);
+						motor(100, -100);
 					}
 					else
 					{
-						motor(-5, 5);
+						motor(-100, 100);
 					}
 				}
 			}
@@ -1975,12 +1974,12 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 	case 1: //left
 		if (IsOnSwampland())
 		{
-			motor(-1, -5);
+			motor(-20, -100);
 		}
 		else
 		{
 
-			motor(-2, -4);
+			motor(-40, -80);
 		}
 		break;
 	case 2: //front
@@ -1988,11 +1987,11 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 		{
 			if (US_Left < US_Right)
 			{
-				motor(-1, -5);
+				motor(-20, -100);
 			}
 			else
 			{
-				motor(-5, -1);
+				motor(-100, -20);
 			}
 		}
 		else
@@ -2000,69 +1999,69 @@ void Game1_Hikaru::GoToAngle(int angle, int distance)
 
 			if (US_Left < US_Right)
 			{
-				motor(-1, -3);
+				motor(-20, -60);
 			}
 			else
 			{
-				motor(-3, -1);
+				motor(-60, -20);
 			}
 		}
 		break;
 	case 3: //left front
 		if (IsOnSwampland())
 		{
-			motor(-1, -5);
+			motor(-20, -100);
 		}
 		else
 		{
-			motor(-2, -4);
+			motor(-40, -80);
 		}
 		break;
 	case 4: //right
 		if (IsOnSwampland())
 		{
-			motor(-5, -1);
+			motor(-100, -20);
 		}
 		else
 		{
-			motor(-4, -2);
+			motor(-80, -40);
 		}
 		break;
 	case 5: //left right
 		if (IsOnSwampland())
 		{
-			motor(-5, -5);
+			motor(-100, -100);
 		}
 		else
 		{
-			motor(-3, -3);
+			motor(-60, -60);
 		}
 		break;
 	case 6: //front right
 		if (CurGame == 0)
 		{
-			motor(3, 3);
+			motor(60, 60);
 		}
 		else
 		{
 			if (IsOnSwampland())
 			{
-				motor(-1, -5);
+				motor(-20, -100);
 			}
 			else
 			{
-				motor(-2, -3);
+				motor(-40, -60);
 			}
 		}
 		break;
 	case 7: //left front right
 		if (IsOnSwampland())
 		{
-			motor(-5, -5);
+			motor(-100, -100);
 		}
 		else
 		{
-			motor(-3, -3);
+			motor(-60, -60);
 		}
 		break;
 	default:
