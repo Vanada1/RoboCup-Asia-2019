@@ -17,6 +17,11 @@ private:
 	/*
 		Settings
 	*/
+	int kWheel = 20;
+	int stopWheel = 0;
+	int lowWheel = 10;
+	int middleWheel = 40;
+	int highWheel = 80;
 
 	void InputAreaColorZone(void);
 	bool IsDotInArea(int color, int x, int y);
@@ -29,8 +34,8 @@ private:
 	const static int kDotHeightNum = kCospaceHeight / kSize;
 	const static int kMaxDotNum = kCospaceWidth * kCospaceHeight / kSize / kSize;
 	const static int kMaxEdgeNum = 25;
-	const static int kBorderSameObjNum = 2;
-	const static int kFindObjDuration = 48;
+	const static int kBorderSameObjNum = 3;
+	const static int kFindObjDuration = 50;
 	int process_times = 0;
 	int log_superobj_num, log_superobj_x[10], log_superobj_y[10];
 	int now_dot_id;

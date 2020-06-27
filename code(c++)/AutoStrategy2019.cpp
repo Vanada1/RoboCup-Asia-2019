@@ -403,7 +403,7 @@ void AutoStrategy::loop()
 	else if (IsOnYellowLine() && LoadedObjects != 0)
 	{
 		setAction(YELLOW_AVOIDANCE);
-		Duration = 5;
+		Duration = 2;
 	}
 	else if (log_superobj_num > 0)
 	{
